@@ -86,7 +86,6 @@ function App() {
                   {/* Route which is accessed if no other route is matched */}
                   <Route path="*" element={<NotFoundPage />} />
                   {/* TODO: delete */}
-                  <Route path="/cardtest" element={<CardTest />} />
                 </Routes>
               </CssBaseline>
             {/* </ThemeProvider> */}
