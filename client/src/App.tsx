@@ -10,6 +10,7 @@ import NotFoundPage from './NotFound/NotFoundPage.tsx';
 import HomePage from './Home/HomePage.tsx';
 import SearchSpeakerPage from './SearchSpeaker.tsx';
 import AdminDashboardPage from './AdminDashboard/AdminDashboardPage.tsx';
+import AdminTeacherPage from './AdminDashboard/adminTeacherPage.tsx';
 import {
   UnauthenticatedRoutesWrapper,
   ProtectedRoutesWrapper,
@@ -86,10 +87,12 @@ function App() {
                 {/* <Route path="/search" element={<SearchSpeakerPage />} /> */}
                 {/* Routes accessed only if user is authenticated */}
                 <Route element={<ProtectedRoutesWrapper />}>
+                  <Route path="/admin-teacher" element={<AdminTeacherPage />} />
                   <Route path="/home" element={<HomePage />} />
                 </Route>
                 <Route element={<AdminRoutesWrapper />}>
                   <Route path="/users" element={<AdminDashboardPage />} />
+                  {/* <Route path="/teachers" element={<AdminTeacherPage />} /> */}
                 </Route>
 
                 <Route

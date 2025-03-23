@@ -14,7 +14,7 @@ router.get('/all', getAllUsersHandler);
 
 router.get('/:userId', getUser);
 
-router.get('/:userId', updateUserProfile);
+router.put('/update/:userId', updateUserProfile);
 
 router.delete('/:userId', deleteUserProfile);
 

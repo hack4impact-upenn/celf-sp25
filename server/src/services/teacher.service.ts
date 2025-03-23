@@ -50,7 +50,7 @@ const getAllTeachers = async () => {
  * @returns The updated teacher
  */
 const updateTeacher = async (userId: string, updateData: Partial<ITeacher>) => {
-  const teacher = await Teacher.findOneAndUpdate({ userId }, updateData, {
+  const teacher = await Teacher.findByIdAndUpdate(userId, updateData, {
     new: true,
   }).exec();
   return teacher;

@@ -90,6 +90,7 @@ const updateTeacherProfile = async (
   next: express.NextFunction,
 ) => {
   const { userId } = req.params;
+  console.log(userId);
   const updateData = req.body;
 
   if (!userId) {
