@@ -2,7 +2,7 @@
  * Defines the Invite model for the database and also the interface to
  * access the model in TypeScript.
  */
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const InviteSchema = new mongoose.Schema({
   email: {
@@ -24,6 +24,6 @@ interface IInvite extends mongoose.Document {
   verificationToken: string;
 }
 
-const Invite = mongoose.model<IInvite>('Invite', InviteSchema);
+const Invite = mongoose.model<IInvite>("Invite", InviteSchema);
 
 export { IInvite, Invite };

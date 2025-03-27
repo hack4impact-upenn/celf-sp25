@@ -23,7 +23,7 @@ const Sidebar = () => {
 
       {/* Buttons Section */}
       <div className="sidebar-card">
-        <button 
+        <button
           className="sidebar-button"
           onClick={() => handleNavigation('/teacher-search-speaker')}
         >
@@ -32,14 +32,13 @@ const Sidebar = () => {
       </div>
 
       <div className="sidebar-card">
-        <button 
+        <button
           className="sidebar-button"
           onClick={() => handleNavigation('/teacher-speaker-requests')}
         >
           <span>Speaker Requests</span>
         </button>
       </div>
-
     </div>
   );
 };

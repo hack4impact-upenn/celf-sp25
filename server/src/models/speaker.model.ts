@@ -1,9 +1,9 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const SpeakerSchema = new mongoose.Schema({
   userId: {
     type: String,
-    ref: 'User',
+    ref: "User",
     required: true,
   },
   organization: {
@@ -33,6 +33,6 @@ interface ISpeaker extends mongoose.Document {
   inperson: boolean;
 }
 
-const Speaker = mongoose.model<ISpeaker>('Speaker', SpeakerSchema);
+const Speaker = mongoose.model<ISpeaker>("Speaker", SpeakerSchema);
 
 export { ISpeaker, Speaker };

@@ -1,4 +1,4 @@
-import StatusCode from './statusCode.ts';
+import StatusCode from "./statusCode.ts";
 
 /**
  * A custom class extending {@link Error} for defining and handling errors
@@ -42,7 +42,7 @@ class ApiError extends Error {
   static missingFields(requiredFields: string[]) {
     return new ApiError(
       StatusCode.BAD_REQUEST,
-      `Request body needs the following fields: ${requiredFields.join(', ')}.`,
+      `Request body needs the following fields: ${requiredFields.join(", ")}.`
     );
   }
 

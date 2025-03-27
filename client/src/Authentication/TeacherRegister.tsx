@@ -29,7 +29,7 @@ function TeacherRegisterPage() {
     email: '',
     password: '',
     confirmPassword: '',
-    subject: ''
+    subject: '',
   };
   const defaultShowErrors = {
     firstName: false,
@@ -38,7 +38,7 @@ function TeacherRegisterPage() {
     password: false,
     confirmPassword: false,
     alert: false,
-    subject: false
+    subject: false,
   };
   const defaultErrorMessages = {
     firstName: '',
@@ -47,7 +47,7 @@ function TeacherRegisterPage() {
     password: '',
     confirmPassword: '',
     alert: '',
-    subject: ''
+    subject: '',
   };
   type ValueType = keyof typeof values;
 
@@ -136,7 +136,7 @@ function TeacherRegisterPage() {
   async function handleSubmit() {
     if (validateInputs()) {
       //TODO: turn to teacher specific register call
-      register(values.firstName, values.lastName, values.email, values.password) 
+      register(values.firstName, values.lastName, values.email, values.password)
         .then(() => {
           setShowError('alert', true);
           setAlertTitle('');
@@ -150,7 +150,7 @@ function TeacherRegisterPage() {
     }
   }
 
-  const title = "Welcome teacher!";
+  const title = 'Welcome teacher!';
   return (
     <ScreenGrid>
       <FormGrid>

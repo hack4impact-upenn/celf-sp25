@@ -1,5 +1,5 @@
-import { ISpeaker, Speaker } from '../models/speaker.model.ts';
-import { User } from '../models/user.model.ts';
+import { ISpeaker, Speaker } from "../models/speaker.model.ts";
+import { User } from "../models/user.model.ts";
 
 /**
  * Creates a new speaker profile in the database.
@@ -15,7 +15,7 @@ const createSpeaker = async (
   organization: string,
   bio: string,
   location: string,
-  inperson: boolean,
+  inperson: boolean
 ) => {
   const newSpeaker = new Speaker({
     userId,
@@ -44,7 +44,7 @@ const getSpeakerByUserId = async (userId: string) => {
  */
 const getAllSpeakers = async () => {
   const speakers = await Speaker.find({})
-    .populate('userId', 'firstName lastName email')
+    .populate("userId", "firstName lastName email")
     .exec();
   return speakers;
 };
@@ -74,7 +74,7 @@ const deleteSpeaker = async (userId: string) => {
 
 const getfilterSpeakeredList = async (filteredParams: Record<string, any>) => {
   const speakers = await Speaker.find(filteredParams)
-    .populate('userId', 'firstName lastName email')
+    .populate("userId", "firstName lastName email")
     .exec();
   console.log(speakers);
   return speakers;

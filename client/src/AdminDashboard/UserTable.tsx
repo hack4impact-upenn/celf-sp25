@@ -10,7 +10,7 @@ import PromoteUserButton from './PromoteUserButton.tsx';
 import { useData } from '../util/api.tsx';
 import { useAppSelector } from '../util/redux/hooks.ts';
 import { selectUser } from '../util/redux/userSlice.ts';
-import IUser from '../util/types/user.ts';
+import { IUser } from '../util/types/user.ts';
 
 interface AdminDashboardRow {
   key: string;
@@ -100,15 +100,15 @@ function UserTable() {
       rows={userList.map((user: IUser) =>
         createAdminDashboardRow(
           user,
-          <DeleteUserButton
-            admin={user.admin}
-            email={user.email}
-            removeRow={() => removeUser(user)}
-          />,
           <PromoteUserButton
             admin={user.admin}
             email={user.email}
             updateAdmin={updateAdmin}
+          />,
+          <DeleteUserButton
+            admin={user.admin}
+            email={user.email}
+            removeRow={() => removeUser(user)}
           />,
         ),
       )}

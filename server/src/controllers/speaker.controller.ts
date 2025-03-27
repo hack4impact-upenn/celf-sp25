@@ -1,7 +1,7 @@
-import express from 'express';
-import ApiError from '../util/apiError.ts';
-import StatusCode from '../util/statusCode.ts';
-import { ISpeaker } from '../models/speaker.model.ts';
+import express from "express";
+import ApiError from "../util/apiError.ts";
+import StatusCode from "../util/statusCode.ts";
+import { ISpeaker } from "../models/speaker.model.ts";
 import {
   createSpeaker,
   getSpeakerByUserId,
@@ -9,7 +9,7 @@ import {
   updateSpeaker,
   deleteSpeaker,
   getfilterSpeakeredList,
-} from '../services/speaker.service.ts';
+} from "../services/speaker.service.ts";
 
 /**
  * Get all speakers from the database
@@ -17,13 +17,13 @@ import {
 const getAllSpeakersHandler = async (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction,
+  next: express.NextFunction
 ) => {
   try {
     const speakers = await getAllSpeakers();
     res.status(StatusCode.OK).json(speakers);
   } catch (error) {
-    next(ApiError.internal('Unable to retrieve speakers'));
+    next(ApiError.internal("Unable to retrieve speakers"));
   }
 };
 
@@ -33,24 +33,24 @@ const getAllSpeakersHandler = async (
 const getSpeaker = async (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction,
+  next: express.NextFunction
 ) => {
   const { userId } = req.params;
   console.log(userId);
   if (!userId) {
-    next(ApiError.missingFields(['userId']));
+    next(ApiError.missingFields(["userId"]));
     return;
   }
 
   try {
     const speaker = await getSpeakerByUserId(userId);
     if (!speaker) {
-      next(ApiError.notFound('Speaker not found'));
+      next(ApiError.notFound("Speaker not found"));
       return;
     }
     res.status(StatusCode.OK).json(speaker);
   } catch (error) {
-    next(ApiError.internal('Unable to retrieve speaker'));
+    next(ApiError.internal("Unable to retrieve speaker"));
   }
 };
 
@@ -60,19 +60,19 @@ const getSpeaker = async (
 const createSpeakerProfile = async (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction,
+  next: express.NextFunction
 ) => {
   const { userId, organization, bio, location, inperson } = req.body;
 
   if (!userId || !organization || !bio || !location || inperson === undefined) {
     next(
       ApiError.missingFields([
-        'userId',
-        'organization',
-        'bio',
-        'location',
-        'inperson',
-      ]),
+        "userId",
+        "organization",
+        "bio",
+        "location",
+        "inperson",
+      ])
     );
     return;
   }
@@ -80,7 +80,7 @@ const createSpeakerProfile = async (
   try {
     const existingSpeaker = await getSpeakerByUserId(userId);
     if (existingSpeaker) {
-      next(ApiError.badRequest('Speaker profile already exists'));
+      next(ApiError.badRequest("Speaker profile already exists"));
       return;
     }
 
@@ -89,11 +89,11 @@ const createSpeakerProfile = async (
       organization,
       bio,
       location,
-      inperson,
+      inperson
     );
     res.status(StatusCode.CREATED).json(speaker);
   } catch (error) {
-    next(ApiError.internal('Unable to create speaker profile'));
+    next(ApiError.internal("Unable to create speaker profile"));
   }
 };
 
@@ -103,25 +103,25 @@ const createSpeakerProfile = async (
 const updateSpeakerProfile = async (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction,
+  next: express.NextFunction
 ) => {
   const { userId } = req.params;
   const updateData = req.body;
 
   if (!userId) {
-    next(ApiError.missingFields(['userId']));
+    next(ApiError.missingFields(["userId"]));
     return;
   }
 
   try {
     const speaker = await updateSpeaker(userId, updateData);
     if (!speaker) {
-      next(ApiError.notFound('Speaker not found'));
+      next(ApiError.notFound("Speaker not found"));
       return;
     }
     res.status(StatusCode.OK).json(speaker);
   } catch (error) {
-    next(ApiError.internal('Unable to update speaker profile'));
+    next(ApiError.internal("Unable to update speaker profile"));
   }
 };
 
@@ -131,50 +131,50 @@ const updateSpeakerProfile = async (
 const deleteSpeakerProfile = async (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction,
+  next: express.NextFunction
 ) => {
   const { userId } = req.params;
 
   if (!userId) {
-    next(ApiError.missingFields(['userId']));
+    next(ApiError.missingFields(["userId"]));
     return;
   }
 
   try {
     const speaker = await deleteSpeaker(userId);
     if (!speaker) {
-      next(ApiError.notFound('Speaker not found'));
+      next(ApiError.notFound("Speaker not found"));
       return;
     }
     res.status(StatusCode.OK).json(speaker);
   } catch (error) {
-    next(ApiError.internal('Unable to delete speaker profile'));
+    next(ApiError.internal("Unable to delete speaker profile"));
   }
 };
 
 const filterSpeaker = async (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction,
+  next: express.NextFunction
 ) => {
   const { location, organization, inperson } = req.query;
-  
+
   const filterParams: Record<string, any> = {};
-  
+
   if (location) filterParams.location = location;
   if (organization) filterParams.organization = organization;
-  if (inperson !== undefined) filterParams.inperson = inperson === 'true';
+  if (inperson !== undefined) filterParams.inperson = inperson === "true";
 
   try {
     const speakerList = await getfilterSpeakeredList(filterParams);
     if (!speakerList || speakerList.length === 0) {
-      next(ApiError.notFound('No speakers found matching the criteria'));
+      next(ApiError.notFound("No speakers found matching the criteria"));
       return;
     }
     res.status(StatusCode.OK).json(speakerList);
   } catch (error) {
     console.log(error);
-    next(ApiError.internal('Unable to fetch speakers'));
+    next(ApiError.internal("Unable to fetch speakers"));
   }
 };
 
@@ -185,4 +185,4 @@ export {
   updateSpeakerProfile,
   deleteSpeakerProfile,
   filterSpeaker,
-}; 
+};

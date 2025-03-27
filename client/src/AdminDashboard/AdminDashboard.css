@@ -1,13 +1,13 @@
 .main-window {
-    margin-top: 60px;   /* Height of top bar */
-    margin-left: 17%; /* percnegtage like sidebar */
-    width: 83%; /* 100% - margin left */
-    padding-top: 20px;
-    padding-bottom: 50px;
-    padding-right: 20px;
-  }
+  margin-top: 60px; /* Height of top bar */
+  margin-left: 17%; /* percnegtage like sidebar */
+  width: 83%; /* 100% - margin left */
+  padding-top: 20px;
+  padding-bottom: 50px;
+  padding-right: 20px;
+}
 
-  /* Flex container for the entire page layout */
+/* Flex container for the entire page layout */
 .flex-div {
   display: flex;
 }
@@ -30,6 +30,6 @@
   width: 100%; /* fill the entire width of .admin-container */
   height: 40%;
   border: 1px solid #ccc; /* optional styling */
-  border-radius: 8px;     /* optional rounded corners */
-  padding: 1rem;          /* optional padding */
+  border-radius: 8px; /* optional rounded corners */
+  padding: 1rem; /* optional padding */
 }

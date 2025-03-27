@@ -1,5 +1,5 @@
-import { ITeacher, Teacher } from '../models/teacher.model.ts';
-import { User } from '../models/user.model.ts';
+import { ITeacher, Teacher } from "../models/teacher.model.ts";
+import { User } from "../models/user.model.ts";
 
 /**
  * Creates a new teacher profile in the database.
@@ -11,7 +11,7 @@ import { User } from '../models/user.model.ts';
 const createTeacher = async (
   userId: string,
   school: string,
-  location: string,
+  location: string
 ) => {
   const newTeacher = new Teacher({
     userId,
@@ -38,7 +38,7 @@ const getTeacherByUserId = async (userId: string) => {
  */
 const getAllTeachers = async () => {
   const teachers = await Teacher.find({})
-    .populate('userId', 'firstName lastName email')
+    .populate("userId", "firstName lastName email")
     .exec();
   return teachers;
 };
@@ -72,4 +72,4 @@ export {
   getAllTeachers,
   updateTeacher,
   deleteTeacher,
-}; 
+};

@@ -1,23 +1,23 @@
 /**
  * All the functions for interacting with user data in the MongoDB database
  */
-import { hash } from 'bcrypt';
-import { IUser, User } from '../models/user.model.ts';
-import { getSpeakerByUserId } from './speaker.service.ts';
-import { getTeacherByUserId } from './teacher.service.ts';
+import { hash } from "bcrypt";
+import { IUser, User } from "../models/user.model.ts";
+import { getSpeakerByUserId } from "./speaker.service.ts";
+import { getTeacherByUserId } from "./teacher.service.ts";
 
 const passwordHashSaltRounds = 10;
 const removeSensitiveDataQuery = [
-  '-password',
-  '-verificationToken',
-  '-resetPasswordToken',
-  '-resetPasswordTokenExpiryDate',
+  "-password",
+  "-verificationToken",
+  "-resetPasswordToken",
+  "-resetPasswordTokenExpiryDate",
 ];
 
 const removeSensitiveDataQueryKeepPassword = [
-  '-verificationToken',
-  '-resetPasswordToken',
-  '-resetPasswordTokenExpiryDate',
+  "-verificationToken",
+  "-resetPasswordToken",
+  "-resetPasswordTokenExpiryDate",
 ];
 
 /**
@@ -128,7 +128,7 @@ const getAllUsersFromDB = async () => {
  */
 const upgradeUserToAdmin = async (id: string) => {
   const user = await User.findByIdAndUpdate(id, [
-    { $set: { admin: { $eq: [false, '$admin'] } } },
+    { $set: { admin: { $eq: [false, "$admin"] } } },
   ]).exec();
   return user;
 };
@@ -169,11 +169,11 @@ const getUserRoleProfile = async (userId: string) => {
   }
 
   switch (user.role) {
-    case 'speaker':
+    case "speaker":
       return getSpeakerByUserId(userId);
-    case 'teacher':
+    case "teacher":
       return getTeacherByUserId(userId);
-    case 'admin':
+    case "admin":
       return null; // Admin role doesn't have additional profile data
     default:
       return null;

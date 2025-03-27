@@ -11,18 +11,18 @@ const ItemButton = styled(ButtonBase)(({ theme }) => ({
   width: 250,
   height: 100,
   borderRadius: '20px',
-  transition: "transform 0.2s ease, box-shadow 0.2s ease",
+  transition: 'transform 0.2s ease, box-shadow 0.2s ease',
   display: 'flex',
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
   padding: theme.spacing(2),
   fontSize: '2rem',
   color: 'white',
   boxShadow: theme.shadows[3], // Default shadow
 
-  "&:hover": {
-    transform: "translateY(-5px)", // Moves up slightly on hover
+  '&:hover': {
+    transform: 'translateY(-5px)', // Moves up slightly on hover
     boxShadow: theme.shadows[6], // Increases shadow depth
   },
 
@@ -31,61 +31,53 @@ const ItemButton = styled(ButtonBase)(({ theme }) => ({
   }),
 }));
 
-const Image = styled("img")(({ theme }) => ({
-  width: "80%",
-  maxHeight: "60%",
-  objectFit: "cover",
-  borderRadius: "10px",
+const Image = styled('img')(({ theme }) => ({
+  width: '80%',
+  maxHeight: '60%',
+  objectFit: 'cover',
+  borderRadius: '10px',
   marginBottom: theme.spacing(2), // Adds space between image and text
 }));
 
 function LoginSelectPage() {
   const navigate = useNavigate();
   const handleClick = (role: string) => {
-    if (role == "Teacher"){
-      navigate("/teacher-register");
-    }
-    else if (role == "Speaker"){
-      navigate("/speaker-register");
-    }
-    else if (role == "Admin"){
-      navigate("/admin-register")
+    if (role == 'Teacher') {
+      navigate('/teacher-register');
+    } else if (role == 'Speaker') {
+      navigate('/speaker-register');
+    } else if (role == 'Admin') {
+      navigate('/admin-register');
     }
   };
 
   return (
     <Grid
-        container
-        spacing={7}
-        justifyContent="center"
-        alignItems="center"
-        flexDirection="column"
-        sx={{ height: "100vh", margin: 0}}
+      container
+      spacing={7}
+      justifyContent="center"
+      alignItems="center"
+      flexDirection="column"
+      sx={{ height: '100vh', margin: 0 }}
     >
-
       <Grid>
         <Typography variant="h5" component="h1">
           I am a...
         </Typography>
       </Grid>
-      <Grid
-        container
-        spacing={7}
-        justifyContent="center"
-        alignItems="center"
-      >
+      <Grid container spacing={7} justifyContent="center" alignItems="center">
         <Grid>
-          <ItemButton onClick={() => handleClick("Teacher")}>
+          <ItemButton onClick={() => handleClick('Teacher')}>
             <span>Teacher</span>
           </ItemButton>
         </Grid>
         <Grid>
-          <ItemButton onClick={() => handleClick("Speaker")}>
+          <ItemButton onClick={() => handleClick('Speaker')}>
             <span>Speaker</span>
           </ItemButton>
         </Grid>
         <Grid>
-          <ItemButton onClick={() => handleClick("Admin")}>
+          <ItemButton onClick={() => handleClick('Admin')}>
             <span>Admin</span>
           </ItemButton>
         </Grid>
