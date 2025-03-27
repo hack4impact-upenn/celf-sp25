@@ -10,6 +10,9 @@ interface Speaker {
   id: number;
   name: string;
   bio: string;
+  organization: string;
+  location: string;
+  imageUrl: string;
 }
 
 const CardContainer = styled('div')({
@@ -21,9 +24,33 @@ const CardContainer = styled('div')({
 
 // TODO: REMOVE THIS TEST DATA
 const speakers = [
-  { id: "1", name: 'Alice Johnson', bio: 'Expert in AI and ML' },
-  { id: "2", name: 'Khoi', bio: 'hi pmtls' },
-  { id: "3", name: 'Edward', bio: 'hello pmtls' },
+  {
+    id: '1',
+    name: 'David Vexler',
+    bio: 'PER biggest fan',
+    organization: 'Buffalo State University',
+    location: 'Buffalo, NY',
+    imageUrl:
+      'https://t3.ftcdn.net/jpg/02/99/04/20/360_F_299042079_vGBD7wIlSeNl7vOevWHiL93G4koMM967.jpg',
+  },
+  {
+    id: '2',
+    name: 'Khoi',
+    bio: 'hi pmtls',
+    organization: 'Environmental Institute',
+    location: 'Boston, MA',
+    imageUrl:
+      'https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg',
+  },
+  {
+    id: '3',
+    name: 'Edward',
+    bio: 'hello pmtls',
+    organization: 'Green Solutions',
+    location: 'New York, NY',
+    imageUrl:
+      'https://media.istockphoto.com/id/1389348844/photo/studio-shot-of-a-beautiful-young-woman-smiling-while-standing-against-a-grey-background.jpg?s=612x612&w=0&k=20&c=anRTfD_CkOxRdyFtvsiPopOluzKbhBNEQdh4okZImQc=',
+  },
 ];
 
 function TeacherSearchSpeakerPage() {
@@ -46,6 +73,9 @@ function TeacherSearchSpeakerPage() {
                   id={speaker.id}
                   name={speaker.name}
                   bio={speaker.bio}
+                  organization={speaker.organization}
+                  location={speaker.location}
+                  imageUrl={speaker.imageUrl}
                 />
               ))
             ) : (
