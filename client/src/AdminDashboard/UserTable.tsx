@@ -100,15 +100,15 @@ function UserTable() {
       rows={userList.map((user: IUser) =>
         createAdminDashboardRow(
           user,
-          <DeleteUserButton
-            admin={user.admin}
-            email={user.email}
-            removeRow={() => removeUser(user)}
-          />,
           <PromoteUserButton
             admin={user.admin}
             email={user.email}
             updateAdmin={updateAdmin}
+          />,
+          <DeleteUserButton
+            admin={user.admin}
+            email={user.email}
+            removeRow={() => removeUser(user)}
           />,
         ),
       )}
