@@ -31,7 +31,7 @@ function SpeakerCard({
     <MuiCard
       sx={{
         width: 300,
-        height: 500,
+        height: 400,
         display: 'flex',
         flexDirection: 'column',
         borderRadius: '16px',

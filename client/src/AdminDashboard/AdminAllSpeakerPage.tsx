@@ -16,10 +16,15 @@ import {
   RadioGroup,
   FormControl,
   Radio,
+  CardMedia,
+  Chip,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import DownloadIcon from '@mui/icons-material/Download';
+import CloseIcon from '@mui/icons-material/Close';
+import EmailIcon from '@mui/icons-material/Email';
+import PersonIcon from '@mui/icons-material/Person';
+import VideocamIcon from '@mui/icons-material/Videocam';
 import SearchBar from '../components/search_bar/SearchBar';
 import SpeakerCard from '../components/cards/SpeakerCard';
 import AdminSidebar from '../components/admin_sidebar/AdminSidebar';
@@ -43,57 +48,6 @@ interface Speaker {
   };
 }
 
-const TEST_SPEAKERS: Speaker[] = [
-  {
-    _id: '1',
-    userId: 'user1',
-    organization: 'XXX Foundation',
-    bio: 'Expert in environmental education',
-    location: 'Virginia, VA',
-    inperson: true,
-    virtual: false,
-    imageUrl:
-      'https://plus.unsplash.com/premium_photo-1689530775582-83b8abdb5020?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8cmFuZG9tJTIwcGVyc29ufGVufDB8fDB8fHww',
-    user: {
-      firstName: 'Khoi',
-      lastName: 'Dinh',
-      email: 'khoidinh@example.com',
-    },
-  },
-  {
-    _id: '2',
-    userId: 'user2',
-    organization: 'YYY Foundation',
-    bio: 'Expert in ',
-    location: 'Hong Kong, Hong Kong',
-    inperson: true,
-    virtual: false,
-    imageUrl:
-      'https://media.istockphoto.com/id/1466995518/photo/business-woman-and-worker-portrait-at-office-desk-as-administration-executive-company-manager.jpg?s=612x612&w=0&k=20&c=NvKeG6Fh0_VVfH_N0Ka-5j8284XJhL2VTJfe6IwDkWQ=',
-    user: {
-      firstName: 'Edward',
-      lastName: 'Zhang',
-      email: 'edwardzhang@example.com',
-    },
-  },
-  {
-    _id: '3',
-    userId: 'user3',
-    organization: 'Climate Action Network',
-    bio: 'Climate change educator',
-    location: 'Boston, MA',
-    inperson: false,
-    virtual: false,
-    imageUrl:
-      'https://t4.ftcdn.net/jpg/02/42/52/27/360_F_242522709_ZhoDmO1L1PHkL6yvVVNutSBGsk1Ob7m0.jpg',
-    user: {
-      firstName: 'Carol',
-      lastName: 'Davis',
-      email: 'carol@example.com',
-    },
-  },
-];
-
 const CardContainer = styled('div')({
   display: 'flex',
   flexWrap: 'wrap',
@@ -106,162 +60,201 @@ const ActionButton = styled(Button)({
   margin: '10px',
 });
 
+// Styled components for the dialog
+const StyledDialogTitle = styled(DialogTitle)({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  padding: '16px 24px',
+  backgroundColor: '#f5f5f5',
+});
+
+const Section = styled('div')({
+  marginBottom: '40px',
+});
+
+const SectionTitle = styled('h2')({
+  textAlign: 'left',
+  color: '#2c3e50',
+  borderBottom: '2px solid #3498db',
+  paddingBottom: '10px',
+  marginBottom: '20px',
+});
+
+const TEST_SPEAKERS: Speaker[] = [
+  {
+    _id: '1',
+    userId: 'user1',
+    organization: 'Environmental Education Center',
+    bio: 'Expert in environmental education',
+    location: 'New York, NY',
+    inperson: true,
+    virtual: false,
+    imageUrl:
+      'https://t3.ftcdn.net/jpg/02/99/04/20/360_F_299042079_vGBD7wIlSeNl7vOevWHiL93G4koMM967.jpg',
+    user: {
+      firstName: 'Edward',
+      lastName: 'Zhang',
+      email: 'edward@xxx.org',
+    },
+  },
+  {
+    _id: '2',
+    userId: 'user2',
+    organization: 'Climate Research Institute',
+    bio: 'Climate change researcher',
+    location: 'Boston, MA',
+    inperson: true,
+    virtual: true,
+    imageUrl:
+      'https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg',
+    user: {
+      firstName: 'Khoi',
+      lastName: 'Dinh',
+      email: 'khoi@xxx.org',
+    },
+  },
+  {
+    _id: '3',
+    userId: 'user3',
+    organization: 'Sustainability Foundation',
+    bio: 'Sustainability consultant',
+    location: 'San Francisco, CA',
+    inperson: false,
+    virtual: true,
+    imageUrl:
+      'https://media.istockphoto.com/id/1389348844/photo/studio-shot-of-a-beautiful-young-woman-smiling-while-standing-against-a-grey-background.jpg?s=612x612&w=0&k=20&c=anRTfD_CkOxRdyFtvsiPopOluzKbhBNEQdh4okZImQc=',
+    user: {
+      firstName: 'Evelyn',
+      lastName: 'Li',
+      email: 'evelyn@xxx.org',
+    },
+  },
+];
+
 function AdminAllSpeakerPage() {
   const [speakers, setSpeakers] = useState<Speaker[]>([]);
-  const [filteredSpeakers, setFilteredSpeakers] = useState<Speaker[]>([]);
+  const [open, setOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editForm, setEditForm] = useState({
+  const [editFormState, setEditFormState] = useState({
     firstName: '',
     lastName: '',
     email: '',
     organization: '',
     bio: '',
     location: '',
+    inperson: false,
+    virtual: false,
     imageUrl: '',
-    speakingFormat: 'in-person' as 'in-person' | 'virtual' | 'both',
   });
 
-  // Fetch speakers on component mount
   useEffect(() => {
-    fetchSpeakers();
+    // In a real app, fetch speakers from API
+    setSpeakers(TEST_SPEAKERS);
   }, []);
 
-  const fetchSpeakers = async () => {
-    try {
-      // Comment out the API call temporarily
-      // const response = await fetch('/api/speaker/all');
-      // if (!response.ok) throw new Error('Failed to fetch speakers');
-      // const data = await response.json();
-
-      // Use test data instead
-      setSpeakers(TEST_SPEAKERS);
-      setFilteredSpeakers(TEST_SPEAKERS);
-    } catch (error) {
-      console.error('Error fetching speakers:', error);
-    }
+  const handleSearch = (query: string) => {
+    console.log('Searching speakers for:', query);
+    // Filter speakers based on query
   };
 
-  const handleSearch = (query: string) => {
-    const filtered = speakers.filter(
-      (speaker) =>
-        speaker.user?.firstName.toLowerCase().includes(query.toLowerCase()) ||
-        speaker.user?.lastName.toLowerCase().includes(query.toLowerCase()) ||
-        speaker.organization.toLowerCase().includes(query.toLowerCase()) ||
-        speaker.location.toLowerCase().includes(query.toLowerCase()),
-    );
-    setFilteredSpeakers(filtered);
+  const handleCardClick = (speaker: Speaker) => {
+    setSelectedSpeaker(speaker);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
   };
 
   const handleEdit = (speaker: Speaker) => {
     setSelectedSpeaker(speaker);
-    setEditForm({
+    setEditFormState({
       firstName: speaker.user?.firstName || '',
       lastName: speaker.user?.lastName || '',
       email: speaker.user?.email || '',
       organization: speaker.organization,
       bio: speaker.bio,
       location: speaker.location,
+      inperson: speaker.inperson,
+      virtual: speaker.virtual || false,
       imageUrl: speaker.imageUrl || '',
-      speakingFormat: speaker.inperson ? 'in-person' : 'virtual',
     });
-    setIsEditDialogOpen(true);
+    setEditOpen(true);
   };
 
-  const handleDelete = async (speakerId: string) => {
-    if (window.confirm('Are you sure you want to delete this speaker?')) {
-      try {
-        const response = await fetch(`/api/speaker/${speakerId}`, {
-          method: 'DELETE',
-          credentials: 'include',
-        });
-        if (!response.ok) throw new Error('Failed to delete speaker');
-        fetchSpeakers(); // Refresh the list
-      } catch (error) {
-        console.error('Error deleting speaker:', error);
-      }
-    }
+  const handleDelete = (speaker: Speaker) => {
+    setSelectedSpeaker(speaker);
+    setDeleteOpen(true);
+  };
+
+  const handleEditClose = () => {
+    setEditOpen(false);
+  };
+
+  const handleDeleteClose = () => {
+    setDeleteOpen(false);
+  };
+
+  const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setEditFormState({
+      ...editFormState,
+      [name]: type === 'checkbox' ? checked : value,
+    });
   };
 
   const handleSaveEdit = async () => {
-    if (!selectedSpeaker) return;
-
     try {
-      // Update user information
-      const userResponse = await fetch(`/api/user/${selectedSpeaker.userId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          firstName: editForm.firstName,
-          lastName: editForm.lastName,
-          email: editForm.email,
-        }),
-      });
+      if (selectedSpeaker) {
+        // In a real app, make API call to update speaker
+        console.log('Updating speaker:', selectedSpeaker._id, editFormState);
 
-      if (!userResponse.ok)
-        throw new Error('Failed to update user information');
-
-      // Update speaker information
-      const speakerResponse = await fetch(
-        `/api/speaker/${selectedSpeaker._id}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            organization: editForm.organization,
-            bio: editForm.bio,
-            location: editForm.location,
-            imageUrl: editForm.imageUrl,
-            inperson:
-              editForm.speakingFormat === 'in-person' ||
-              editForm.speakingFormat === 'both',
-            virtual:
-              editForm.speakingFormat === 'virtual' ||
-              editForm.speakingFormat === 'both',
-          }),
-        },
-      );
-
-      if (!speakerResponse.ok)
-        throw new Error('Failed to update speaker profile');
-
-      setIsEditDialogOpen(false);
-      fetchSpeakers(); // Refresh the list
+        // Update the speakers state
+        setSpeakers(
+          speakers.map((speaker) =>
+            speaker._id === selectedSpeaker._id
+              ? {
+                  ...speaker,
+                  organization: editFormState.organization,
+                  bio: editFormState.bio,
+                  location: editFormState.location,
+                  inperson: editFormState.inperson,
+                  virtual: editFormState.virtual,
+                  imageUrl: editFormState.imageUrl,
+                  user: {
+                    firstName: editFormState.firstName,
+                    lastName: editFormState.lastName,
+                    email: editFormState.email,
+                  },
+                }
+              : speaker,
+          ),
+        );
+      }
+      setEditOpen(false);
     } catch (error) {
       console.error('Error updating speaker:', error);
-      // You might want to add error handling UI here
     }
   };
 
-  const downloadXML = () => {
-    // Create XML string
-    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<speakers>\n';
-    speakers.forEach((speaker) => {
-      xml += `  <speaker>\n`;
-      xml += `    <name>${speaker.user?.firstName} ${speaker.user?.lastName}</name>\n`;
-      xml += `    <email>${speaker.user?.email}</email>\n`;
-      xml += `    <organization>${speaker.organization}</organization>\n`;
-      xml += `    <bio>${speaker.bio}</bio>\n`;
-      xml += `    <location>${speaker.location}</location>\n`;
-      xml += `    <inperson>${speaker.inperson}</inperson>\n`;
-      xml += `  </speaker>\n`;
-    });
-    xml += '</speakers>';
+  const handleConfirmDelete = async () => {
+    try {
+      if (selectedSpeaker) {
+        // In a real app, make API call to delete speaker
+        console.log('Deleting speaker:', selectedSpeaker._id);
 
-    //  download XML
-    const blob = new Blob([xml], { type: 'application/xml' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'speakers.xml';
-    a.click();
-    window.URL.revokeObjectURL(url);
+        // Update the speakers state
+        setSpeakers(
+          speakers.filter((speaker) => speaker._id !== selectedSpeaker._id),
+        );
+      }
+      setDeleteOpen(false);
+    } catch (error) {
+      console.error('Error deleting speaker:', error);
+    }
   };
 
   return (
@@ -269,149 +262,114 @@ function AdminAllSpeakerPage() {
       <TopBar />
       <AdminSidebar />
       <div className="main-window">
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            p: 2,
-          }}
-        >
-          <Typography variant="h4">All Speakers</Typography>
-          <Button
-            variant="contained"
-            startIcon={<DownloadIcon />}
-            onClick={downloadXML}
-          >
-            Download XML
-          </Button>
-        </Box>
-
-        <SearchBar onSearch={handleSearch} placeholder="Search speakers..." />
-
-        <CardContainer>
-          {filteredSpeakers.map((speaker) => (
-            <Box key={speaker._id} sx={{ position: 'relative' }}>
-              <SpeakerCard
-                id={speaker._id}
-                name={`${speaker.user?.firstName} ${speaker.user?.lastName}`}
-                bio={speaker.bio}
-                organization={speaker.organization}
-                location={speaker.location}
-                imageUrl={speaker.imageUrl}
-              />
-              <Box
-                sx={{ position: 'absolute', top: 5, right: 5, display: 'flex' }}
-              >
-                <IconButton onClick={() => handleEdit(speaker)} size="small">
-                  <EditIcon />
-                </IconButton>
-                <IconButton
-                  onClick={() => handleDelete(speaker._id)}
-                  size="small"
+        <Section>
+          <SectionTitle>All Speakers</SectionTitle>
+          <SearchBar onSearch={handleSearch} placeholder="Search speakers..." />
+          <CardContainer>
+            {speakers.map((speaker) => (
+              <div key={speaker._id} style={{ position: 'relative' }}>
+                <div
+                  onClick={() => handleCardClick(speaker)}
+                  style={{ cursor: 'pointer' }}
                 >
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
-            </Box>
-          ))}
-        </CardContainer>
-
-        {/* Edit Dialog */}
-        <Dialog
-          open={isEditDialogOpen}
-          onClose={() => setIsEditDialogOpen(false)}
-          maxWidth="md"
-          fullWidth
-        >
-          <DialogTitle>Edit Speaker</DialogTitle>
-          <DialogContent>
-            <Box sx={{ display: 'flex', gap: 2, mb: 2, mt: 1 }}>
-              <TextField
-                fullWidth
-                label="First Name"
-                value={editForm.firstName}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, firstName: e.target.value })
-                }
-              />
-              <TextField
-                fullWidth
-                label="Last Name"
-                value={editForm.lastName}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, lastName: e.target.value })
-                }
-              />
-            </Box>
-
-            <TextField
-              fullWidth
-              margin="normal"
-              label="Email"
-              type="email"
-              value={editForm.email}
-              onChange={(e) =>
-                setEditForm({ ...editForm, email: e.target.value })
-              }
-            />
-
-            <TextField
-              fullWidth
-              margin="normal"
-              label="Organization"
-              value={editForm.organization}
-              onChange={(e) =>
-                setEditForm({ ...editForm, organization: e.target.value })
-              }
-            />
-
-            <TextField
-              fullWidth
-              margin="normal"
-              label="Bio"
-              multiline
-              rows={4}
-              value={editForm.bio}
-              onChange={(e) =>
-                setEditForm({ ...editForm, bio: e.target.value })
-              }
-            />
-
-            <TextField
-              fullWidth
-              margin="normal"
-              label="Location"
-              value={editForm.location}
-              onChange={(e) =>
-                setEditForm({ ...editForm, location: e.target.value })
-              }
-            />
-
-            <TextField
-              fullWidth
-              margin="normal"
-              label="Image URL"
-              value={editForm.imageUrl}
-              onChange={(e) =>
-                setEditForm({ ...editForm, imageUrl: e.target.value })
-              }
-              helperText="Enter URL for speaker's profile image"
-            />
-
-            {/* Preview the image if URL is provided */}
-            {editForm.imageUrl && (
-              <Box
-                sx={{ mt: 2, mb: 2, display: 'flex', justifyContent: 'center' }}
-              >
-                <img
-                  src={editForm.imageUrl}
-                  alt="Profile preview"
+                  <SpeakerCard
+                    id={speaker._id}
+                    name={`${speaker.user?.firstName} ${speaker.user?.lastName}`}
+                    bio={speaker.bio}
+                    organization={speaker.organization}
+                    location={speaker.location}
+                    imageUrl={speaker.imageUrl}
+                  />
+                </div>
+                <div
                   style={{
-                    maxWidth: '200px',
-                    maxHeight: '200px',
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                    zIndex: 10,
+                  }}
+                >
+                  <IconButton
+                    size="small"
+                    sx={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      },
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEdit(speaker);
+                    }}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    sx={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      },
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(speaker);
+                    }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </div>
+              </div>
+            ))}
+          </CardContainer>
+        </Section>
+      </div>
+
+      {/* Details Dialog */}
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        maxWidth="md"
+        PaperProps={{
+          sx: {
+            borderRadius: '16px',
+            width: '90%',
+            maxWidth: '800px',
+          },
+        }}
+      >
+        {selectedSpeaker && (
+          <>
+            <StyledDialogTitle>
+              <Typography variant="h5" component="div" sx={{ fontWeight: 600 }}>
+                {`${selectedSpeaker.user?.firstName} ${selectedSpeaker.user?.lastName}`}
+              </Typography>
+              <IconButton onClick={handleClose} size="large">
+                <CloseIcon />
+              </IconButton>
+            </StyledDialogTitle>
+            <DialogContent>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: { xs: 'column', md: 'row' },
+                  gap: 4,
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  image={selectedSpeaker.imageUrl || DEFAULT_IMAGE}
+                  alt={`${selectedSpeaker.user?.firstName} ${selectedSpeaker.user?.lastName}`}
+                  sx={{
+                    width: { xs: '100%', md: '40%' },
+                    height: 'auto',
                     borderRadius: '8px',
                     objectFit: 'cover',
+                    maxHeight: '400px',
                   }}
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
@@ -419,45 +377,200 @@ function AdminAllSpeakerPage() {
                     target.onerror = null;
                   }}
                 />
-              </Box>
-            )}
+                <Box sx={{ width: { xs: '100%', md: '60%' } }}>
+                  <Typography
+                    variant="h6"
+                    gutterBottom
+                    sx={{ color: '#3498db', fontWeight: 600 }}
+                  >
+                    {selectedSpeaker.organization}
+                  </Typography>
 
-            <FormLabel component="legend" sx={{ mt: 2 }}>
-              Speaking Format
-            </FormLabel>
-            <RadioGroup
-              value={editForm.speakingFormat}
-              onChange={(e) =>
-                setEditForm({
-                  ...editForm,
-                  speakingFormat: e.target.value as
-                    | 'in-person'
-                    | 'virtual'
-                    | 'both',
-                })
-              }
-            >
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <EmailIcon sx={{ mr: 1, color: '#7f8c8d' }} />
+                    <Typography variant="body1">
+                      {selectedSpeaker.user?.email}
+                    </Typography>
+                  </Box>
+
+                  <Typography
+                    variant="subtitle1"
+                    gutterBottom
+                    sx={{ color: 'text.secondary', mb: 2 }}
+                  >
+                    {selectedSpeaker.location}
+                  </Typography>
+
+                  <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
+                    {selectedSpeaker.inperson && (
+                      <Chip
+                        icon={<PersonIcon />}
+                        label="In-person"
+                        color="primary"
+                        variant="outlined"
+                      />
+                    )}
+                    {selectedSpeaker.virtual && (
+                      <Chip
+                        icon={<VideocamIcon />}
+                        label="Virtual"
+                        color="secondary"
+                        variant="outlined"
+                      />
+                    )}
+                  </Box>
+
+                  <Typography
+                    variant="h6"
+                    sx={{ mt: 2, mb: 1, fontWeight: 600 }}
+                  >
+                    About
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    {selectedSpeaker.bio}
+                  </Typography>
+                </Box>
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                onClick={() => {
+                  handleClose();
+                  handleEdit(selectedSpeaker);
+                }}
+                color="primary"
+                startIcon={<EditIcon />}
+              >
+                Edit Speaker
+              </Button>
+            </DialogActions>
+          </>
+        )}
+      </Dialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={editOpen} onClose={handleEditClose} maxWidth="md" fullWidth>
+        <DialogTitle>Edit Speaker</DialogTitle>
+        <DialogContent>
+          <Box
+            component="form"
+            sx={{
+              '& .MuiTextField-root': { my: 1 },
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <TextField
+              label="First Name"
+              name="firstName"
+              value={editFormState.firstName}
+              onChange={handleEditFormChange}
+              fullWidth
+            />
+            <TextField
+              label="Last Name"
+              name="lastName"
+              value={editFormState.lastName}
+              onChange={handleEditFormChange}
+              fullWidth
+            />
+            <TextField
+              label="Email"
+              name="email"
+              value={editFormState.email}
+              onChange={handleEditFormChange}
+              fullWidth
+            />
+            <TextField
+              label="Organization"
+              name="organization"
+              value={editFormState.organization}
+              onChange={handleEditFormChange}
+              fullWidth
+            />
+            <TextField
+              label="Bio"
+              name="bio"
+              value={editFormState.bio}
+              onChange={handleEditFormChange}
+              fullWidth
+              multiline
+              rows={4}
+            />
+            <TextField
+              label="Location"
+              name="location"
+              value={editFormState.location}
+              onChange={handleEditFormChange}
+              fullWidth
+            />
+            <TextField
+              label="Image URL"
+              name="imageUrl"
+              value={editFormState.imageUrl}
+              onChange={handleEditFormChange}
+              fullWidth
+            />
+            <Box sx={{ mt: 2 }}>
+              <FormLabel component="legend">Speaking Format</FormLabel>
               <FormControlLabel
-                value="in-person"
-                control={<Radio />}
-                label="In-Person"
+                control={
+                  <Switch
+                    checked={editFormState.inperson}
+                    onChange={handleEditFormChange}
+                    name="inperson"
+                  />
+                }
+                label="In-person"
               />
               <FormControlLabel
-                value="virtual"
-                control={<Radio />}
+                control={
+                  <Switch
+                    checked={editFormState.virtual}
+                    onChange={handleEditFormChange}
+                    name="virtual"
+                  />
+                }
                 label="Virtual"
               />
-              <FormControlLabel value="both" control={<Radio />} label="Both" />
-            </RadioGroup>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSaveEdit} variant="contained">
-              Save
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </div>
+            </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleEditClose} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleSaveEdit} color="primary" variant="contained">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteOpen} onClose={handleDeleteClose}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete{' '}
+            {selectedSpeaker
+              ? `${selectedSpeaker.user?.firstName} ${selectedSpeaker.user?.lastName}`
+              : 'this speaker'}
+            ? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteClose} color="primary">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            color="error"
+            variant="contained"
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
