@@ -1,12 +1,12 @@
-import express from 'express';
-import ApiError from '../util/apiError.ts';
-import StatusCode from '../util/statusCode.ts';
+import express from "express";
+import ApiError from "../util/apiError.ts";
+import StatusCode from "../util/statusCode.ts";
 import {
   deleteUserById,
   getAllUsersFromDB,
   getUserById,
   updateUser,
-} from '../services/user.service.ts';
+} from "../services/user.service.ts";
 
 const getUser = async (
   req: express.Request,
@@ -15,7 +15,7 @@ const getUser = async (
 ) => {
   const { userId } = req.params;
   if (!userId) {
-    next(ApiError.missingFields(['userId']));
+    next(ApiError.missingFields(["userId"]));
     return;
   }
 
@@ -23,12 +23,12 @@ const getUser = async (
     const user = await getUserById(userId);
     console.log(user);
     if (!user) {
-      next(ApiError.notFound('User not found'));
+      next(ApiError.notFound("User not found"));
       return;
     }
     res.status(StatusCode.OK).json(user);
   } catch (error) {
-    next(ApiError.internal('Unable to retrieve user'));
+    next(ApiError.internal("Unable to retrieve user"));
   }
 };
 
@@ -41,7 +41,7 @@ const getAllUsersHandler = async (
     const users = await getAllUsersFromDB();
     res.status(StatusCode.OK).json(users);
   } catch (error) {
-    next(ApiError.internal('Unable to retrieve users'));
+    next(ApiError.internal("Unable to retrieve users"));
   }
 };
 
@@ -54,19 +54,19 @@ const updateUserProfile = async (
   const updateData = req.body;
 
   if (!userId) {
-    next(ApiError.missingFields(['userId']));
+    next(ApiError.missingFields(["userId"]));
     return;
   }
 
   try {
     const user = await updateUser(userId, updateData);
     if (!user) {
-      next(ApiError.notFound('User not found'));
+      next(ApiError.notFound("User not found"));
       return;
     }
     res.status(StatusCode.OK).json(user);
   } catch (error) {
-    next(ApiError.internal('Unable to update user profile'));
+    next(ApiError.internal("Unable to update user profile"));
   }
 };
 
@@ -81,19 +81,19 @@ const deleteUserProfile = async (
   const { userId } = req.params;
 
   if (!userId) {
-    next(ApiError.missingFields(['userId']));
+    next(ApiError.missingFields(["userId"]));
     return;
   }
 
   try {
     const user = await deleteUserById(userId);
     if (!user) {
-      next(ApiError.notFound('User not found'));
+      next(ApiError.notFound("User not found"));
       return;
     }
     res.status(StatusCode.OK).json(user);
   } catch (error) {
-    next(ApiError.internal('Unable to delete user profile'));
+    next(ApiError.internal("Unable to delete user profile"));
   }
 };
 

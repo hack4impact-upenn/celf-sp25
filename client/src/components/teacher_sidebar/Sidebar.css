@@ -8,7 +8,7 @@
   align-items: center;
   padding: 1rem;
   position: fixed;
-  z-index: 1200; 
+  z-index: 1200;
 }
 
 .sidebar-logo {
@@ -53,4 +53,3 @@
   margin-right: 0.75rem;
   font-size: 1.25rem;
 }
-

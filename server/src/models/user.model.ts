@@ -2,7 +2,7 @@
  * Defines the User model for the database and also the interface to
  * access the model in TypeScript.
  */
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema({
   firstName: {
@@ -25,8 +25,8 @@ const UserSchema = new mongoose.Schema({
   role: {
     type: String,
     required: true,
-    enum: ['teacher', 'admin', 'speaker'],
-    default: 'speaker',
+    enum: ["teacher", "admin", "speaker"],
+    default: "speaker",
   },
   verified: {
     type: Boolean,
@@ -62,7 +62,7 @@ interface IUser extends mongoose.Document {
   lastName: string;
   email: string;
   password: string;
-  role: 'teacher' | 'admin' | 'speaker';
+  role: "teacher" | "admin" | "speaker";
   verified: boolean;
   verificationToken: string | null | undefined;
   resetPasswordToken: string | null | undefined;
@@ -70,6 +70,6 @@ interface IUser extends mongoose.Document {
   admin: boolean;
 }
 
-const User = mongoose.model<IUser>('User', UserSchema);
+const User = mongoose.model<IUser>("User", UserSchema);
 
 export { IUser, User };

@@ -1,7 +1,4 @@
 import React from 'react';
-import { styled } from '@mui/system';
-import AdminSidebar from '../components/admin_sidebar/AdminSidebar';
-import TopBar from '../components/top_bar/TopBar';
 import {
   Box,
   TextField,
@@ -12,6 +9,8 @@ import {
   Radio,
   FormLabel,
 } from '@mui/material';
+import AdminSidebar from '../components/admin_sidebar/AdminSidebar';
+import TopBar from '../components/top_bar/TopBar';
 
 interface SpeakerFormState {
   firstName: string;

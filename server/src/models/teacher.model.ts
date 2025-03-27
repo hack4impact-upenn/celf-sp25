@@ -1,9 +1,9 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const TeacherSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
     required: true,
   },
   school: {
@@ -23,6 +23,6 @@ interface ITeacher extends mongoose.Document {
   location: string;
 }
 
-const Teacher = mongoose.model<ITeacher>('Teacher', TeacherSchema);
+const Teacher = mongoose.model<ITeacher>("Teacher", TeacherSchema);
 
 export { ITeacher, Teacher };

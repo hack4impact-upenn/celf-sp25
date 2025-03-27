@@ -1,1 +1,1 @@
-export const DEFAULT_IMAGE = '/defaultprofile.jpg'; 
+export const DEFAULT_IMAGE = '/defaultprofile.jpg';

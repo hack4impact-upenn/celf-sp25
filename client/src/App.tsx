@@ -29,7 +29,6 @@ import EmailResetPasswordPage from './Authentication/EmailResetPasswordPage.tsx'
 import ResetPasswordPage from './Authentication/ResetPasswordPage.tsx';
 import AlertPopup from './components/AlertPopup.tsx';
 import InviteRegisterPage from './Authentication/InviteRegisterPage.tsx';
-import CardTest from './CardTest/CardTest.tsx';
 import LoginSelectPage from './Home/LoginSelect.tsx';
 import SpeakerRegisterPage from './Authentication/SpeakerRegister.tsx';
 import TeacherRegisterPage from './Authentication/TeacherRegister.tsx';
@@ -122,7 +121,6 @@ function App() {
                 />
 
                 <Route path="*" element={<NotFoundPage />} />
-                <Route path="/cardtest" element={<CardTest requests={[]} />} />
               </Routes>
             </CssBaseline>
             {/* </ThemeProvider> */}

@@ -10,7 +10,7 @@ import PromoteUserButton from './PromoteUserButton.tsx';
 import { useData } from '../util/api.tsx';
 import { useAppSelector } from '../util/redux/hooks.ts';
 import { selectUser } from '../util/redux/userSlice.ts';
-import IUser from '../util/types/user.ts';
+import { IUser } from '../util/types/user.ts';
 
 interface AdminDashboardRow {
   key: string;

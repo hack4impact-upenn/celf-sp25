@@ -30,7 +30,7 @@ function SpeakerRegisterPage() {
     password: '',
     confirmPassword: '',
     organization: '',
-    location: ''
+    location: '',
   };
   const defaultShowErrors = {
     firstName: false,
@@ -50,7 +50,7 @@ function SpeakerRegisterPage() {
     confirmPassword: '',
     alert: '',
     organization: '',
-    location: ''
+    location: '',
   };
   type ValueType = keyof typeof values;
 
@@ -152,7 +152,7 @@ function SpeakerRegisterPage() {
     }
   }
 
-  const title = "Welcome speaker";
+  const title = 'Welcome speaker';
   return (
     <ScreenGrid>
       <FormGrid>

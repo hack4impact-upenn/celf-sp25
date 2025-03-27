@@ -1,10 +1,10 @@
-import { Strategy as LocalStrategy, IVerifyOptions } from 'passport-local';
-import * as passportStrat from 'passport';
-import { compare } from 'bcrypt';
+import { Strategy as LocalStrategy, IVerifyOptions } from "passport-local";
+import * as passportStrat from "passport";
+import { compare } from "bcrypt";
 import {
   getUserByEmailWithPassword,
   getUserById,
-} from '../services/user.service.ts';
+} from "../services/user.service.ts";
 
 interface IUserWithPassword {
   _id: string;
@@ -25,14 +25,14 @@ interface IUserWithPassword {
 const verifyLocalUser = (
   email: string,
   password: string,
-  done: (error: any, user?: any, options?: IVerifyOptions | undefined) => void,
+  done: (error: any, user?: any, options?: IVerifyOptions | undefined) => void
 ): void => {
   // Match user with email
   const lowercaseEmail = email.toLowerCase();
   getUserByEmailWithPassword(lowercaseEmail)
     .then((user: IUserWithPassword | null) => {
       if (!user) {
-        return done(null, false, { message: 'User not found' });
+        return done(null, false, { message: "User not found" });
       }
       // Match user with password
       return compare(password, user.password!, (err: any, isMatch: boolean) => {
@@ -44,7 +44,7 @@ const verifyLocalUser = (
           delete cleanUser.password;
           return done(null, cleanUser);
         }
-        return done(null, false, { message: 'Incorrect password.' });
+        return done(null, false, { message: "Incorrect password." });
       });
     })
     .catch((error: any) => {
@@ -61,10 +61,10 @@ const initializePassport = (passport: passportStrat.PassportStatic) => {
   passport.use(
     new LocalStrategy(
       {
-        usernameField: 'email', // Treat email field in request as username
+        usernameField: "email", // Treat email field in request as username
       },
-      verifyLocalUser,
-    ),
+      verifyLocalUser
+    )
   );
 
   // Set up serialization and deserialization of user objects

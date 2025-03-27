@@ -2,7 +2,7 @@
  * Specifies the middleware and controller functions to call for each route
  * relating to authentication.
  */
-import express from 'express';
+import express from "express";
 import {
   login,
   logout,
@@ -12,9 +12,9 @@ import {
   resetPassword,
   verifyAccount,
   registerInvite,
-} from '../controllers/auth.controller.ts';
-import { isAuthenticated } from '../controllers/auth.middleware.ts';
-import 'dotenv/config';
+} from "../controllers/auth.controller.ts";
+import { isAuthenticated } from "../controllers/auth.middleware.ts";
+import "dotenv/config";
 
 const router = express.Router();
 
@@ -25,32 +25,32 @@ const router = express.Router();
  * - email (string) - The email of the user
  * - password (string) - The password of the user
  */
-router.post('/register', register);
+router.post("/register", register);
 
 /**
  * A POST route to verify a user's account. Expects a JSON body with the following fields:
  * - token (string) - The token identifying the verification attempt
  */
-router.post('/verify-account', verifyAccount);
+router.post("/verify-account", verifyAccount);
 
 /**
  * A POST route to log in a user. Expects a JSON body with the following fields:
  * - email (string) - The email of the user
  * - password (string) - The password of the user
  */
-router.post('/login', login);
+router.post("/login", login);
 
 /**
  * A POST route to log out a user.
  */
-router.post('/logout', logout);
+router.post("/logout", logout);
 
 /**
  * A POST route to send a password reset email to a user. Expects a JSON body
  * with the following fields:
  * - email (string) - The email of the user
  */
-router.post('/send-reset-password-email', sendResetPasswordEmail);
+router.post("/send-reset-password-email", sendResetPasswordEmail);
 
 /**
  * A POST route to reset a user's password. Expects a JSON body with the
@@ -58,19 +58,19 @@ router.post('/send-reset-password-email', sendResetPasswordEmail);
  * - password (string) - The new password of the user
  * - token (string) - The token identifying the reset password attempt
  */
-router.post('/reset-password', resetPassword);
+router.post("/reset-password", resetPassword);
 
 /**
  * A GET request to check if a user is an logged in. Utilizes the middleware to
  * check if a user if authenticated. Returns 200 OK if the user is authenticated
  * and 401 unauthorized if the user is not authenticated.
  */
-router.get('/authstatus', isAuthenticated, approve);
+router.get("/authstatus", isAuthenticated, approve);
 
 /**
  * A POST register a user from an invite. If the information and invite are valid
  * a new account is created. Otherwise a 400 bad request error is returned
  */
-router.post('/register-invite', registerInvite);
+router.post("/register-invite", registerInvite);
 
 export default router;

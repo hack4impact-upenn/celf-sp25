@@ -1,6 +1,6 @@
-import express from 'express';
-import ApiError from './apiError.ts';
-import StatusCode from './statusCode.ts';
+import express from "express";
+import ApiError from "./apiError.ts";
+import StatusCode from "./statusCode.ts";
 
 /**
  * The final error handler for all errors encountered in the server. Responsible
@@ -17,7 +17,7 @@ const apiErrorResponder = (
   req: express.Request,
   res: express.Response,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  next: express.NextFunction, // Need this param so express actually calls handler
+  next: express.NextFunction // Need this param so express actually calls handler
 ) => {
   // .send() populates res.error.response.data
   if (err instanceof ApiError) {

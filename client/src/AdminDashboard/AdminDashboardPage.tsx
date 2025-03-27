@@ -10,7 +10,6 @@ import ScreenGrid from '../components/ScreenGrid.tsx';
 import UserTable from './UserTable.tsx';
 import InviteUserButton from '../components/buttons/InviteUserButton.tsx';
 
-
 function AdminDashboardPage() {
   return (
     <div className="flex-div">
