@@ -62,16 +62,16 @@ const createSpeakerProfile = async (
   res: express.Response,
   next: express.NextFunction
 ) => {
-  const { userId, bio, email, title, 
+  const {firstName, lastName, bio, email, title, 
     organisation, personalSite, industryFocus, areaOfExpertise, 
-    ageGroup, location, inperson, languages, available} = req.body;
+    ageGroup, location, speakingFormat, languages, available} = req.body;
 
-  if (!userId || !bio || !email || !title || 
-    !organisation || !personalSite || !industryFocus || !areaOfExpertise ||
-    !ageGroup || !location || !inperson || !languages || !available) {
+  if (!firstName || !lastName || !email || !title || 
+    !organisation) {      // TODO: change fields depending on what you need
     next(
       ApiError.missingFields([
-        "userId",
+        "firstName",
+        "lastName",
         "bio",
         "email",
         "title",
@@ -81,23 +81,22 @@ const createSpeakerProfile = async (
         "areaOfExpertise",
         "ageGroup",
         "location",
-        "inperson",
-        "languages",
-        "avaliable"
+        "speakingFormat"
       ])
     );
     return;
   }
 
   try {
-    const existingSpeaker = await getSpeakerByUserId(userId);
-    if (existingSpeaker) {
-      next(ApiError.badRequest("Speaker profile already exists"));
-      return;
-    }
+    // const existingSpeaker = await getSpeakerByUserId(userId);
+    // if (existingSpeaker) {
+    //   next(ApiError.badRequest("Speaker profile already exists"));
+    //   return;
+    // }
 
     const speaker = await createSpeaker(
-      userId,
+      firstName,
+      lastName,
       bio,
       email,
       title,
@@ -107,7 +106,7 @@ const createSpeakerProfile = async (
       areaOfExpertise,
       ageGroup,
       location,
-      inperson,
+      speakingFormat,
       languages,
       available
     );

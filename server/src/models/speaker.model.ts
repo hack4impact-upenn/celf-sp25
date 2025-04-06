@@ -1,10 +1,13 @@
 import mongoose from "mongoose";
 
 const SpeakerSchema = new mongoose.Schema({
-  userId: {
+  firstName: {
     type: String,
-    ref: "User",
     required: true,
+  },
+  lastName: {
+    type: String,
+    required: true
   },
   bio: {
     type: String,
@@ -18,7 +21,7 @@ const SpeakerSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  organization: {
+  organisation: {
     type: String,
     required: true,
   },
@@ -42,23 +45,24 @@ const SpeakerSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  inperson: {
-    type: Boolean,
+  speakingFormat: {
+    type: String,
     required: true,
   },
   languages: {
     type: Array,
-    required: true
+    required: false
   },
   avaliability: {
     type: Array,
-    required: true
+    required: false
   }
 });
 
 interface ISpeaker extends mongoose.Document {
   _id: string;
-  userId: string;
+  firstName: string;
+  lastName: string;
   bio: string;
   email: string;
   title: string;
@@ -68,7 +72,7 @@ interface ISpeaker extends mongoose.Document {
   areaOfExpertise: [];
   ageGroup: string;
   location: string;
-  inperson: boolean;
+  speakingFormat: string;
   languages: [];
   available: [];
 }
