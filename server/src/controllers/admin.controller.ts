@@ -2,25 +2,25 @@
  * All the controller functions containing the logic for routes relating to
  * admin users such as getting all users, deleting users and upgrading users.
  */
-import express from 'express';
-import crypto from 'crypto';
-import ApiError from '../util/apiError.ts';
-import StatusCode from '../util/statusCode.ts';
-import { IUser } from '../models/user.model.ts';
+import express from "express";
+import crypto from "crypto";
+import ApiError from "../util/apiError.ts";
+import StatusCode from "../util/statusCode.ts";
+import { IUser } from "../models/user.model.ts";
 import {
   upgradeUserToAdmin,
   getUserByEmail,
   getAllUsersFromDB,
   deleteUserById,
-} from '../services/user.service.ts';
+} from "../services/user.service.ts";
 import {
   createInvite,
   getInviteByEmail,
   getInviteByToken,
   updateInvite,
-} from '../services/invite.service.ts';
-import { IInvite } from '../models/invite.model.ts';
-import { emailInviteLink } from '../services/mail.service.ts';
+} from "../services/invite.service.ts";
+import { IInvite } from "../models/invite.model.ts";
+import { emailInviteLink } from "../services/mail.service.ts";
 
 /**
  * Get all users from the database. Upon success, send the a list of all users in the res body with 200 OK status code.
@@ -28,7 +28,7 @@ import { emailInviteLink } from '../services/mail.service.ts';
 const getAllUsers = async (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction,
+  next: express.NextFunction
 ) => {
   return (
     getAllUsersFromDB()
@@ -37,7 +37,7 @@ const getAllUsers = async (
       })
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       .catch((e) => {
-        next(ApiError.internal('Unable to retrieve all users'));
+        next(ApiError.internal("Unable to retrieve all users"));
       })
   );
 };
@@ -49,11 +49,11 @@ const getAllUsers = async (
 const upgradePrivilege = async (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction,
+  next: express.NextFunction
 ) => {
   const { email } = req.body;
   if (!email) {
-    next(ApiError.missingFields(['email']));
+    next(ApiError.missingFields(["email"]));
     return;
   }
 
@@ -73,7 +73,7 @@ const upgradePrivilege = async (
     })
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     .catch((e) => {
-      next(ApiError.internal('Unable to upgrade user to admin.'));
+      next(ApiError.internal("Unable to upgrade user to admin."));
     });
 };
 
@@ -83,11 +83,11 @@ const upgradePrivilege = async (
 const deleteUser = async (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction,
+  next: express.NextFunction
 ) => {
   const { email } = req.params;
   if (!email) {
-    next(ApiError.missingFields(['email']));
+    next(ApiError.missingFields(["email"]));
     return;
   }
 
@@ -100,11 +100,11 @@ const deleteUser = async (
 
   const reqUser: IUser | undefined = req.user as IUser;
   if (reqUser.email === user.email) {
-    next(ApiError.badRequest('Cannot delete self.'));
+    next(ApiError.badRequest("Cannot delete self."));
     return;
   }
   if (user.admin) {
-    next(ApiError.forbidden('Cannot delete an admin.'));
+    next(ApiError.forbidden("Cannot delete an admin."));
     return;
   }
 
@@ -112,14 +112,14 @@ const deleteUser = async (
     .then(() => res.sendStatus(StatusCode.OK))
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     .catch((e) => {
-      next(ApiError.internal('Failed to delete user.'));
+      next(ApiError.internal("Failed to delete user."));
     });
 };
 
 const verifyToken = async (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction,
+  next: express.NextFunction
 ) => {
   const { token } = req.params;
   getInviteByToken(token)
@@ -127,25 +127,25 @@ const verifyToken = async (
       if (invite) {
         res.status(StatusCode.OK).send(invite);
       } else {
-        next(ApiError.notFound('Unable to retrieve invite'));
+        next(ApiError.notFound("Unable to retrieve invite"));
       }
     })
     .catch(() => {
-      next(ApiError.internal('Error retrieving invite'));
+      next(ApiError.internal("Error retrieving invite"));
     });
 };
 
 const inviteUser = async (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction,
+  next: express.NextFunction
 ) => {
   const { emails } = req.body;
   if (!emails) {
-    next(ApiError.missingFields(['email']));
+    next(ApiError.missingFields(["email"]));
     return;
   }
-  const emailList = emails.replaceAll(' ', '').split(',');
+  const emailList = emails.replaceAll(" ", "").split(",");
   const emailRegex =
     /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/g;
 
@@ -156,7 +156,7 @@ const inviteUser = async (
   }
 
   function combineEmailToken(email: string, invite: IInvite | null) {
-    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const verificationToken = crypto.randomBytes(32).toString("hex");
     return [email, invite, verificationToken];
   }
 
@@ -188,12 +188,12 @@ const inviteUser = async (
 
   try {
     if (emailList.length === 0) {
-      next(ApiError.missingFields(['email']));
+      next(ApiError.missingFields(["email"]));
       return;
     }
     emailList.forEach(validateEmail);
     const lowercaseEmailList: string[] = emailList.map((email: string) =>
-      email.toLowerCase(),
+      email.toLowerCase()
     );
 
     const userPromises = lowercaseEmailList.map(getUserByEmail);
@@ -203,10 +203,10 @@ const inviteUser = async (
     const existingInviteList = await Promise.all(invitePromises);
 
     const existingUserEmails = existingUserList.map((user) =>
-      user ? user.email : '',
+      user ? user.email : ""
     );
     const existingInviteEmails = existingInviteList.map((invite) =>
-      invite ? invite.email : '',
+      invite ? invite.email : ""
     );
 
     const emailInviteList = lowercaseEmailList.filter((email) => {

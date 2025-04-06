@@ -1,6 +1,6 @@
-import { IInvite, Invite } from '../models/invite.model.ts';
+import { IInvite, Invite } from "../models/invite.model.ts";
 
-const removeSensitiveDataQuery = ['-verificationToken'];
+const removeSensitiveDataQuery = ["-verificationToken"];
 
 /**
  * Creates a new invite in the database.

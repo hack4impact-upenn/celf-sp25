@@ -1,12 +1,12 @@
 /**
  * All the functions related to sending emails with SendGrid
  */
-import 'dotenv/config';
-import SGmail, { MailDataRequired } from '@sendgrid/mail';
+import "dotenv/config";
+import SGmail, { MailDataRequired } from "@sendgrid/mail";
 
-const appName = 'Boilerplate'; // Replace with a relevant project name
-const senderName = 'Hack4Impact UPenn'; // Replace with a relevant project sender
-const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+const appName = "Boilerplate"; // Replace with a relevant project name
+const senderName = "Hack4Impact UPenn"; // Replace with a relevant project sender
+const baseUrl = process.env.FRONTEND_URL || "http://localhost:3000";
 
 // eslint-disable-next-line no-useless-concat
 SGmail.setApiKey(`${process.env.SENDGRID_API_KEY}`);
@@ -21,11 +21,11 @@ const emailResetPasswordLink = async (email: string, token: string) => {
   const resetLink = `${baseUrl}/reset-password/${token}`;
   const mailSettings: MailDataRequired = {
     from: {
-      email: process.env.SENDGRID_EMAIL_ADDRESS || 'missing@mail.com',
+      email: process.env.SENDGRID_EMAIL_ADDRESS || "missing@mail.com",
       name: senderName,
     },
     to: email,
-    subject: 'Link to Reset Password',
+    subject: "Link to Reset Password",
     html:
       `<p>You are receiving this because you (or someone else) have requested ` +
       `the reset of your account password for ${appName}. Please visit this ` +
@@ -48,11 +48,11 @@ const emailVerificationLink = async (email: string, token: string) => {
   const resetLink = `${baseUrl}/verify-account/${token}`;
   const mailSettings: MailDataRequired = {
     from: {
-      email: process.env.SENDGRID_EMAIL_ADDRESS || 'missing@mail.com',
+      email: process.env.SENDGRID_EMAIL_ADDRESS || "missing@mail.com",
       name: senderName,
     },
     to: email,
-    subject: 'Verify account',
+    subject: "Verify account",
     html:
       `<p> Please visit the following ` +
       `<a href=${resetLink}>link</a> ` +
@@ -73,11 +73,11 @@ const emailInviteLink = async (email: string, token: string) => {
   const resetLink = `${baseUrl}/invite/${token}`;
   const mailSettings: MailDataRequired = {
     from: {
-      email: process.env.SENDGRID_EMAIL_ADDRESS || 'missing@mail.com',
+      email: process.env.SENDGRID_EMAIL_ADDRESS || "missing@mail.com",
       name: senderName,
     },
     to: email,
-    subject: 'Verify account',
+    subject: "Verify account",
     html:
       `<p> Please visit the following ` +
       `<a href=${resetLink}>link</a> ` +

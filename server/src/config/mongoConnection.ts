@@ -1,7 +1,7 @@
-import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
-import 'dotenv/config';
-import MongoStore from 'connect-mongo';
+import mongoose from "mongoose";
+import { MongoMemoryServer } from "mongodb-memory-server";
+import "dotenv/config";
+import MongoStore from "connect-mongo";
 
 /* uncomment for database logger */
 // mongoose.set('debug', process.env.DEBUG !== 'production');
@@ -33,7 +33,7 @@ class MongoConnection {
 
   private constructor(
     mongoUrl: string,
-    memoryServer: MongoMemoryServer | null = null,
+    memoryServer: MongoMemoryServer | null = null
   ) {
     this.mongoUri = mongoUrl;
     this.mongoMemoryServer = memoryServer;
@@ -42,12 +42,12 @@ class MongoConnection {
   static async getInstance(): Promise<MongoConnection> {
     if (!MongoConnection.instance) {
       // If in a testing environment, create an in memory database to connect to
-      if (process.env.NODE_ENV === 'test') {
+      if (process.env.NODE_ENV === "test") {
         const mongod = await MongoMemoryServer.create();
         MongoConnection.instance = new MongoConnection(mongod.getUri(), mongod);
       } else {
         MongoConnection.instance = new MongoConnection(
-          process.env.ATLAS_URI || 'NO ATLAS_URI IN .ENV',
+          process.env.ATLAS_URI || "NO ATLAS_URI IN .ENV"
         );
       }
     }
@@ -65,29 +65,29 @@ class MongoConnection {
           console.error(
             `Connection to MongoDB failed at: ${this.mongoUri}. ` +
               `Please check your env file to ensure you have the correct link. \n`,
-            e,
-          ),
+            e
+          )
         );
 
-      mongoose.connection.on('connected', () => {
-        console.log('MongoDB: Connected ✅');
+      mongoose.connection.on("connected", () => {
+        console.log("MongoDB: Connected ✅");
       });
 
-      mongoose.connection.on('disconnected', () => {
-        if (process.env.NODE_ENV === 'test') {
+      mongoose.connection.on("disconnected", () => {
+        if (process.env.NODE_ENV === "test") {
           return; // Can't log after tests are done, Jest fails
         }
-        console.log('MongoDB: Disconnected 🛑');
+        console.log("MongoDB: Disconnected 🛑");
       });
 
-      mongoose.connection.on('error', (err: Error) => {
+      mongoose.connection.on("error", (err: Error) => {
         console.log(`ERROR MongoDB: `, err);
-        if (err.name === 'MongoNetworkError') {
+        if (err.name === "MongoNetworkError") {
           setTimeout(() => mongoose.connect(this.mongoUri, opts), 5000);
         }
       });
     } catch (err) {
-      console.log('ERROR while opening: ', err);
+      console.log("ERROR while opening: ", err);
       throw err;
     }
   }
@@ -120,11 +120,11 @@ class MongoConnection {
   public async close(): Promise<void> {
     try {
       await mongoose.disconnect();
-      if (process.env.NODE_ENV === 'test') {
+      if (process.env.NODE_ENV === "test") {
         await this.mongoMemoryServer!.stop();
       }
     } catch (err) {
-      console.log('db.close: ', err);
+      console.log("db.close: ", err);
       throw err;
     }
   }

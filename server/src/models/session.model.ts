@@ -2,7 +2,7 @@
  * Defines the Session model for the database, which stores information
  * about user sessions, and also the interface to access the model in TypeScript.
  */
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 interface ISession extends mongoose.Document {
   _id: string;
@@ -21,6 +21,6 @@ const SessionSchema = new mongoose.Schema({
   },
 });
 
-const Session = mongoose.model<ISession>('Session', SessionSchema);
+const Session = mongoose.model<ISession>("Session", SessionSchema);
 
 export default Session;
