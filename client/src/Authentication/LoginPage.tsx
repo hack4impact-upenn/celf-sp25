@@ -136,7 +136,7 @@ function LoginPage() {
         <FormCol>
           <Grid item container justifyContent="center">
             <Typography variant="h2" textAlign="center">
-              Welcome to Boilerplate
+              Welcome to CELF Speaker Portal!
             </Typography>
           </Grid>
           <Grid item width="1">
