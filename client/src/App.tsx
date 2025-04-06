@@ -13,6 +13,7 @@ import TeacherRequestSpeakerPage from './TeacherPage/TeacherRequestSpeakerPage.t
 import AdminDashboardPage from './AdminDashboard/AdminDashboardPage.tsx';
 import AdminAddSpeakerPage from './AdminDashboard/AdminAddSpeakerPage.tsx';
 import AdminAllSpeakerPage from './AdminDashboard/AdminAllSpeakerPage.tsx';
+import AllSpeakerFilterPageTest from './AdminDashboard/AllSpeakerFilterPageTest.tsx';
 import AdminRequestsPage from './AdminDashboard/AdminRequestsPage';
 
 import {
@@ -105,7 +106,7 @@ function App() {
                   />
                   <Route
                     path="/admin-all-speakers"
-                    element={<AdminAllSpeakerPage />}
+                    element={<AllSpeakerFilterPageTest />}
                   />
                   <Route
                     path="/admin-requests"
