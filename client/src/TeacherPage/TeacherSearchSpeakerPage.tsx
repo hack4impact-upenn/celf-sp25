@@ -42,19 +42,22 @@ import { SelectChangeEvent } from '@mui/material';
 interface Speaker {
   id: string;
   name: string;
-  title: string;
-  company: string;
   bio: string;
-  imageUrl: string;
-  industry: string[];
-  grades: string[];
-  languages: string[];
-  city: string;
-  state: string;
-  inperson: boolean;
-  virtual: boolean;
-  email: string;
-  bookingRequests?: BookingRequest[];
+  organization?: string;
+  location?: string;
+  email?: string;
+  inperson?: boolean;
+  virtual?: boolean;
+  imageUrl?: string;
+  industry?: string[];
+  grades?: string[];
+  city?: string;
+  state?: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+  languages?: string[];
 }
 
 interface BookingRequest {
@@ -118,6 +121,17 @@ const SearchFilterContainer = styled(Box)({
   gap: '16px',
   marginBottom: '24px',
   alignItems: 'center',
+  '& .MuiButton-root': {
+    height: '56px',
+    backgroundColor: '#E4E4E4',
+    border: 'none',
+    boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
+    borderRadius: '20px',
+    padding: '8px 24px',
+    '&:hover': {
+      backgroundColor: '#D0D0D0',
+    },
+  },
 });
 
 const FilterPanelContainer = styled(Box)({
@@ -222,8 +236,42 @@ function TeacherSearchSpeakerPage() {
   });
   const [bookingForm, setBookingForm] = useState<BookingFormState>(initialBookingFormState);
 
+  // Add filtered speakers state
+  const [filteredSpeakers, setFilteredSpeakers] = useState<Speaker[]>(speakers);
+
+  // Function to calculate distance between two points using Haversine formula
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 3958.8; // Earth's radius in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distance = R * c;
+    return distance;
+  };
+
+  // Update handleSearch to filter speakers
   const handleSearch = (query: string) => {
     setSearchQuery(query);
+    if (!query.trim()) {
+      setFilteredSpeakers(speakers);
+      return;
+    }
+    
+    const lowercaseQuery = query.toLowerCase();
+    const results = speakers.filter(speaker => {
+      return (
+        speaker.name.toLowerCase().includes(lowercaseQuery) ||
+        (speaker.organization && speaker.organization.toLowerCase().includes(lowercaseQuery)) ||
+        speaker.bio.toLowerCase().includes(lowercaseQuery) ||
+        (speaker.location && speaker.location.toLowerCase().includes(lowercaseQuery))
+      );
+    });
+    
+    setFilteredSpeakers(results);
   };
 
   const handleCardClick = (speaker: Speaker) => {
@@ -240,9 +288,99 @@ function TeacherSearchSpeakerPage() {
     setFilterPanelOpen(!filterPanelOpen);
   };
 
+  // Update handleFilterChange to filter speakers
   const handleFilterChange = (newFilters: FilterState) => {
     setFilters(newFilters);
     setFilterPanelOpen(false);
+
+    let result = [...speakers];
+    
+    // Apply search query filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(speaker => {
+        return (
+          speaker.name.toLowerCase().includes(query) ||
+          (speaker.organization && speaker.organization.toLowerCase().includes(query)) ||
+          speaker.bio.toLowerCase().includes(query) ||
+          (speaker.location && speaker.location.toLowerCase().includes(query))
+        );
+      });
+    }
+    
+    // Apply industry filter
+    if (newFilters.industry && newFilters.industry.length > 0) {
+      result = result.filter(speaker => 
+        speaker.industry && 
+        newFilters.industry.some(industry => 
+          speaker.industry?.includes(industry)
+        )
+      );
+    }
+    
+    // Apply grade level filter
+    if (newFilters.grades && newFilters.grades.length > 0) {
+      result = result.filter(speaker => 
+        speaker.grades && 
+        newFilters.grades.some(grade => 
+          speaker.grades?.includes(grade)
+        )
+      );
+    }
+    
+    // Apply location filter
+    if (newFilters.city && newFilters.city.trim() !== '') {
+      result = result.filter(speaker => 
+        speaker.city && 
+        speaker.city.toLowerCase() === newFilters.city.toLowerCase()
+      );
+    }
+    
+    if (newFilters.state && newFilters.state.trim() !== '') {
+      result = result.filter(speaker => 
+        speaker.state && 
+        speaker.state.toLowerCase() === newFilters.state.toLowerCase()
+      );
+    }
+    
+    // Apply radius filter if coordinates are available
+    if (newFilters.radius && newFilters.radius > 0 && newFilters.userCoordinates) {
+      const { lat: userLat, lng: userLng } = newFilters.userCoordinates;
+      
+      result = result.filter(speaker => {
+        if (!speaker.coordinates) return true;
+        const distance = calculateDistance(
+          userLat, 
+          userLng, 
+          speaker.coordinates.lat, 
+          speaker.coordinates.lng
+        );
+        return distance <= newFilters.radius;
+      });
+    }
+    
+    // Apply format filter
+    if (newFilters.formats) {
+      if (newFilters.formats.inperson && !newFilters.formats.virtual) {
+        result = result.filter(speaker => speaker.inperson === true);
+      } else if (!newFilters.formats.inperson && newFilters.formats.virtual) {
+        result = result.filter(speaker => speaker.virtual === true);
+      } else if (newFilters.formats.inperson && newFilters.formats.virtual) {
+        result = result.filter(speaker => speaker.inperson === true || speaker.virtual === true);
+      }
+    }
+    
+    // Apply language filter
+    if (newFilters.languages && newFilters.languages.length > 0) {
+      result = result.filter(speaker => 
+        speaker.languages && 
+        newFilters.languages.some(language => 
+          speaker.languages?.includes(language)
+        )
+      );
+    }
+    
+    setFilteredSpeakers(result);
   };
 
   const handleBookingFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -312,7 +450,7 @@ function TeacherSearchSpeakerPage() {
               <Box sx={{ flexGrow: 1 }}>
                 <SearchBar
                   onSearch={handleSearch}
-                  placeholder="Type your search..."
+                  placeholder="Search speakers..."
                 />
               </Box>
               <Button
@@ -334,13 +472,34 @@ function TeacherSearchSpeakerPage() {
               <FilterPanelContainer>
                 <SpeakerFilterPanel
                   filters={filters}
-                  onChange={setFilters}
+                  onChange={handleFilterChange}
                 />
               </FilterPanelContainer>
             </Collapse>
 
             <CardContainer>
-              {/* Speaker cards will be rendered here */}
+              {filteredSpeakers.length > 0 ? (
+                filteredSpeakers.map((speaker) => (
+                  <div
+                    key={speaker.id}
+                    onClick={() => handleCardClick(speaker)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <SpeakerCard
+                      id={speaker.id}
+                      name={speaker.name}
+                      bio={speaker.bio}
+                      organization={speaker.organization || ''}
+                      location={speaker.location || ''}
+                      imageUrl={speaker.imageUrl}
+                    />
+                  </div>
+                ))
+              ) : (
+                <Typography variant="body1" sx={{ p: 2 }}>
+                  No speakers match the current filters. Try adjusting your search or filters.
+                </Typography>
+              )}
             </CardContainer>
           </Section>
         </div>
@@ -419,13 +578,13 @@ function TeacherSearchSpeakerPage() {
                       gutterBottom
                       sx={{ color: '#3498db', fontWeight: 600 }}
                     >
-                      {selectedSpeaker.company}
+                      {selectedSpeaker.organization || selectedSpeaker.name}
                     </Typography>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                       <EmailIcon sx={{ mr: 1, color: '#7f8c8d' }} />
                       <Typography variant="body1">
-                        {selectedSpeaker.email}
+                        {selectedSpeaker.email || ''}
                       </Typography>
                     </Box>
 
