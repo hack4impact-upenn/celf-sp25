@@ -14,6 +14,7 @@ import {
 import AdminSidebar from '../components/admin_sidebar/AdminSidebar';
 import TopBar from '../components/top_bar/TopBar';
 import MultiSelect from './MultiSelect';
+import { postData } from '../util/api.tsx';
 
 const industryFocuses = [
   'Clean Energy',
@@ -134,7 +135,7 @@ function AdminUsersPage() {
     }));
   };
   const handleSelectChange = (
-    event: SelectChangeEvent<string>,
+    event: SelectChangeEvent<string | string[]>,
     name: string,
   ) => {
     const {
@@ -163,10 +164,35 @@ function AdminUsersPage() {
   };
 
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+
+    const payload = {
+      firstName: formState.firstName,
+      lastName: formState.lastName,
+      email: formState.email,
+      title: formState.jobTitle,
+      organisation: formState.organization,
+      personalSite: formState.website,
+      bio: formState.bio,
+      location: formState.location,
+      speakingFormat: formState.speakingFormat,
+      ageGroup: formState.ageSpecialty,
+      industryFocus: formState.industryFocuses,
+      areaOfExpertise: formState.expertise,
+      languages: [], // TODO: add this in frontend
+      available: [], // TODO: add this in frontend
+    };
+
     e.preventDefault();
-    // Replace with your submission logic (e.g., API call)
-    console.log('Form submitted:', formState);
+  
+    const res = await postData('speaker/create', 
+      payload
+    );
+    if (res.error) {
+      throw new Error(
+        typeof res.error === 'string' ? res.error : JSON.stringify(res.error)
+      );
+    }
   };
 
   return (
