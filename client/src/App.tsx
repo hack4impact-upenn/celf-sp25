@@ -106,7 +106,7 @@ function App() {
                   />
                   <Route
                     path="/admin-all-speakers"
-                    element={<AllSpeakerFilterPageTest />}
+                    element={<AdminAllSpeakerPage />}
                   />
                   <Route
                     path="/admin-requests"

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { styled } from '@mui/system';
 import {
   Dialog,
@@ -9,17 +9,21 @@ import {
   Box,
   CardMedia,
   Chip,
+  Button,
+  Collapse,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import EmailIcon from '@mui/icons-material/Email';
 import PersonIcon from '@mui/icons-material/Person';
 import VideocamIcon from '@mui/icons-material/Videocam';
+import FilterListIcon from '@mui/icons-material/FilterList';
 import SearchBar from '../components/search_bar/SearchBar';
 import SpeakerCard from '../components/cards/SpeakerCard';
 import Sidebar from '../components/teacher_sidebar/Sidebar';
 import TopBar from '../components/top_bar/TopBar';
 import './TeacherPage.css';
 import { DEFAULT_IMAGE } from '../components/cards/SpeakerCard';
+import SpeakerFilterPanel, { FilterState } from '../components/SpeakerFilterPanel';
 
 interface Speaker {
   id: string;
@@ -27,10 +31,19 @@ interface Speaker {
   bio: string;
   organization: string;
   location: string;
-  imageUrl: string;
   email: string;
   inperson: boolean;
   virtual: boolean;
+  imageUrl: string;
+  industry?: string[];
+  grades?: string[];
+  city?: string;
+  state?: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+  languages?: string[];
 }
 
 const CardContainer = styled('div')({
@@ -57,6 +70,32 @@ const StyledDialogTitle = styled(DialogTitle)({
   backgroundColor: '#f5f5f5',
 });
 
+const SearchFilterContainer = styled(Box)({
+  display: 'flex',
+  gap: '16px',
+  marginBottom: '24px',
+  alignItems: 'center',
+  '& .MuiButton-root': {
+    height: '56px',
+    backgroundColor: '#E4E4E4',
+    border: 'none',
+    boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
+    borderRadius: '20px',
+    padding: '8px 24px',
+    '&:hover': {
+      backgroundColor: '#D0D0D0',
+    },
+  },
+});
+
+const FilterPanelContainer = styled(Box)({
+  marginBottom: '24px',
+  backgroundColor: '#E4E4E4',
+  borderRadius: '20px',
+  boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
+  padding: '16px',
+});
+
 // TODO: REMOVE THIS TEST DATA
 const speakers = [
   {
@@ -68,8 +107,16 @@ const speakers = [
     email: 'david@buffalo.com',
     inperson: true,
     virtual: false,
-    imageUrl:
-      'https://t3.ftcdn.net/jpg/02/99/04/20/360_F_299042079_vGBD7wIlSeNl7vOevWHiL93G4koMM967.jpg',
+    imageUrl: 'https://t3.ftcdn.net/jpg/02/99/04/20/360_F_299042079_vGBD7wIlSeNl7vOevWHiL93G4koMM967.jpg',
+    industry: ['Education', 'Research'],
+    grades: ['High School', 'College'],
+    city: 'Buffalo',
+    state: 'NY',
+    coordinates: {
+      lat: 42.8864,
+      lng: -78.8784
+    },
+    languages: ['English', 'Spanish']
   },
   {
     id: '2',
@@ -80,8 +127,16 @@ const speakers = [
     email: 'khoi@xxx.org',
     inperson: true,
     virtual: true,
-    imageUrl:
-      'https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg',
+    imageUrl: 'https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg',
+    industry: ['Technology', 'Education'],
+    grades: ['Middle School', 'High School'],
+    city: 'Richmond',
+    state: 'VA',
+    coordinates: {
+      lat: 37.5407,
+      lng: -77.4360
+    },
+    languages: ['English', 'Vietnamese']
   },
   {
     id: '3',
@@ -92,17 +147,139 @@ const speakers = [
     email: 'edward@yyy.org',
     inperson: false,
     virtual: true,
-    imageUrl:
-      'https://media.istockphoto.com/id/1389348844/photo/studio-shot-of-a-beautiful-young-woman-smiling-while-standing-against-a-grey-background.jpg?s=612x612&w=0&k=20&c=anRTfD_CkOxRdyFtvsiPopOluzKbhBNEQdh4okZImQc=',
-  },
+    imageUrl: 'https://media.istockphoto.com/id/1389348844/photo/studio-shot-of-a-beautiful-young-woman-smiling-while-standing-against-a-grey-background.jpg?s=612x612&w=0&k=20&c=anRTfD_CkOxRdyFtvsiPopOluzKbhBNEQdh4okZImQc=',
+    industry: ['Research', 'Technology'],
+    grades: ['Elementary', 'Middle School'],
+    city: 'Hong Kong',
+    state: 'Hong Kong',
+    coordinates: {
+      lat: 22.3193,
+      lng: 114.1694
+    },
+    languages: ['English', 'Cantonese', 'Mandarin']
+  }
 ];
 
 function TeacherSearchSpeakerPage() {
   const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
   const [open, setOpen] = useState(false);
+  const [filterPanelOpen, setFilterPanelOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredSpeakers, setFilteredSpeakers] = useState<Speaker[]>(speakers);
+  const [filters, setFilters] = useState<FilterState>({
+    industry: [],
+    grades: [],
+    city: '',
+    state: '',
+    radius: 50,
+    formats: {
+      inperson: false,
+      virtual: false,
+    },
+    languages: [],
+  });
+
+  // Function to calculate distance between two points using Haversine formula
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 3958.8; // Earth's radius in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distance = R * c;
+    return distance;
+  };
+
+  // Apply filters and search
+  useEffect(() => {
+    let result = [...speakers];
+    
+    // Apply search query filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(speaker => 
+        speaker.name.toLowerCase().includes(query) ||
+        speaker.organization.toLowerCase().includes(query) ||
+        speaker.bio.toLowerCase().includes(query) ||
+        speaker.location.toLowerCase().includes(query)
+      );
+    }
+    
+    // Apply industry filter
+    if (filters.industry && filters.industry.length > 0) {
+      result = result.filter(speaker => 
+        filters.industry.some(industry => 
+          speaker.industry?.includes(industry)
+        )
+      );
+    }
+    
+    // Apply grade level filter
+    if (filters.grades && filters.grades.length > 0) {
+      result = result.filter(speaker => 
+        filters.grades.some(grade => 
+          speaker.grades?.includes(grade)
+        )
+      );
+    }
+    
+    // Apply location filter
+    if (filters.city && filters.city.trim() !== '') {
+      result = result.filter(speaker => 
+        speaker.city?.toLowerCase() === filters.city.toLowerCase()
+      );
+    }
+    
+    if (filters.state && filters.state.trim() !== '') {
+      result = result.filter(speaker => 
+        speaker.state?.toLowerCase() === filters.state.toLowerCase()
+      );
+    }
+    
+    // Apply radius filter if coordinates are available
+    if (filters.radius && filters.radius > 0 && filters.userCoordinates) {
+      const { lat: userLat, lng: userLng } = filters.userCoordinates;
+      
+      result = result.filter(speaker => {
+        if (!speaker.coordinates) return true;
+        const distance = calculateDistance(
+          userLat, 
+          userLng, 
+          speaker.coordinates.lat, 
+          speaker.coordinates.lng
+        );
+        return distance <= filters.radius;
+      });
+    }
+    
+    // Apply format filter
+    if (filters.formats) {
+      if (filters.formats.inperson && !filters.formats.virtual) {
+        result = result.filter(speaker => speaker.inperson);
+      } else if (!filters.formats.inperson && filters.formats.virtual) {
+        result = result.filter(speaker => speaker.virtual);
+      } else if (filters.formats.inperson && filters.formats.virtual) {
+        result = result.filter(speaker => speaker.inperson || speaker.virtual);
+      }
+    }
+    
+    // Apply language filter
+    if (filters.languages && filters.languages.length > 0) {
+      result = result.filter(speaker => 
+        filters.languages.some(language => 
+          speaker.languages?.includes(language)
+        )
+      );
+    }
+    
+    setFilteredSpeakers(result);
+  }, [searchQuery, filters]);
 
   const handleSearch = (query: string) => {
-    console.log('Searching for:', query);
+    setSearchQuery(query);
   };
 
   const handleCardClick = (speaker: Speaker) => {
@@ -114,6 +291,15 @@ function TeacherSearchSpeakerPage() {
     setOpen(false);
   };
 
+  const handleFilterPanelToggle = () => {
+    setFilterPanelOpen(!filterPanelOpen);
+  };
+
+  const handleFilterChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+    setFilterPanelOpen(false);
+  };
+
   return (
     <div className="flex-div">
       <TopBar />
@@ -122,13 +308,41 @@ function TeacherSearchSpeakerPage() {
         <div className="request-stack">
           <Section>
             <SectionTitle>Available Speakers</SectionTitle>
-            <SearchBar
-              onSearch={handleSearch}
-              placeholder="Type your search..."
-            />
+            
+            <SearchFilterContainer>
+              <Box sx={{ flexGrow: 1 }}>
+                <SearchBar
+                  onSearch={handleSearch}
+                  placeholder="Type your search..."
+                />
+              </Box>
+              <Button
+                variant="contained"
+                startIcon={<FilterListIcon />}
+                onClick={handleFilterPanelToggle}
+                sx={{
+                  textTransform: 'none',
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: '#49454F',
+                }}
+              >
+                Filters
+              </Button>
+            </SearchFilterContainer>
+
+            <Collapse in={filterPanelOpen}>
+              <FilterPanelContainer>
+                <SpeakerFilterPanel
+                  filters={filters}
+                  onChange={handleFilterChange}
+                />
+              </FilterPanelContainer>
+            </Collapse>
+
             <CardContainer>
-              {speakers.length > 0 ? (
-                speakers.map((speaker) => (
+              {filteredSpeakers.length > 0 ? (
+                filteredSpeakers.map((speaker) => (
                   <div
                     key={speaker.id}
                     onClick={() => handleCardClick(speaker)}
@@ -145,7 +359,9 @@ function TeacherSearchSpeakerPage() {
                   </div>
                 ))
               ) : (
-                <p>No speakers found</p>
+                <Typography variant="body1" sx={{ p: 2 }}>
+                  No speakers match the current filters. Try adjusting your search or filters.
+                </Typography>
               )}
             </CardContainer>
           </Section>

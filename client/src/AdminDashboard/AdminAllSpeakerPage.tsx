@@ -18,6 +18,7 @@ import {
   Radio,
   CardMedia,
   Chip,
+  Collapse,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -25,13 +26,16 @@ import CloseIcon from '@mui/icons-material/Close';
 import EmailIcon from '@mui/icons-material/Email';
 import PersonIcon from '@mui/icons-material/Person';
 import VideocamIcon from '@mui/icons-material/Videocam';
+import FilterListIcon from '@mui/icons-material/FilterList';
 import SearchBar from '../components/search_bar/SearchBar';
 import SpeakerCard from '../components/cards/SpeakerCard';
 import AdminSidebar from '../components/admin_sidebar/AdminSidebar';
 import TopBar from '../components/top_bar/TopBar';
 import './AdminDashboard.css';
 import { DEFAULT_IMAGE } from '../components/cards/SpeakerCard';
+import SpeakerFilterPanel, { FilterState } from '../components/SpeakerFilterPanel';
 
+// Updated Speaker interface with new fields for filtering
 interface Speaker {
   _id: string;
   userId: string;
@@ -46,6 +50,16 @@ interface Speaker {
     lastName: string;
     email: string;
   };
+  // New fields for filtering
+  industry: string[];
+  grades: string[];
+  city: string;
+  state: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+  languages: string[];
 }
 
 const CardContainer = styled('div')({
@@ -81,6 +95,7 @@ const SectionTitle = styled('h2')({
   marginBottom: '20px',
 });
 
+// Updated TEST_SPEAKERS with new fields
 const TEST_SPEAKERS: Speaker[] = [
   {
     _id: '1',
@@ -88,6 +103,12 @@ const TEST_SPEAKERS: Speaker[] = [
     organization: 'Environmental Education Center',
     bio: 'Expert in environmental education',
     location: 'New York, NY',
+    city: 'New York',
+    state: 'NY',
+    coordinates: {
+      lat: 40.7128,
+      lng: -74.0060
+    },
     inperson: true,
     virtual: false,
     imageUrl:
@@ -97,6 +118,9 @@ const TEST_SPEAKERS: Speaker[] = [
       lastName: 'Zhang',
       email: 'edward@xxx.org',
     },
+    industry: ['Environmental', 'Education'],
+    grades: ['Elementary', 'Middle School'],
+    languages: ['English', 'Mandarin']
   },
   {
     _id: '2',
@@ -104,6 +128,12 @@ const TEST_SPEAKERS: Speaker[] = [
     organization: 'Climate Research Institute',
     bio: 'Climate change researcher',
     location: 'Boston, MA',
+    city: 'Boston',
+    state: 'MA',
+    coordinates: {
+      lat: 42.3601,
+      lng: -71.0589
+    },
     inperson: true,
     virtual: true,
     imageUrl:
@@ -113,6 +143,9 @@ const TEST_SPEAKERS: Speaker[] = [
       lastName: 'Dinh',
       email: 'khoi@xxx.org',
     },
+    industry: ['Environment', 'Science', 'Technology'],
+    grades: ['High School'],
+    languages: ['English', 'Vietnamese']
   },
   {
     _id: '3',
@@ -120,6 +153,12 @@ const TEST_SPEAKERS: Speaker[] = [
     organization: 'Sustainability Foundation',
     bio: 'Sustainability consultant',
     location: 'San Francisco, CA',
+    city: 'San Francisco',
+    state: 'CA',
+    coordinates: {
+      lat: 37.7749,
+      lng: -122.4194
+    },
     inperson: false,
     virtual: true,
     imageUrl:
@@ -129,8 +168,37 @@ const TEST_SPEAKERS: Speaker[] = [
       lastName: 'Li',
       email: 'evelyn@xxx.org',
     },
+    industry: ['Business', 'Sustainability'],
+    grades: ['Middle School', 'High School'],
+    languages: ['English', 'Spanish']
   },
 ];
+
+const SearchFilterContainer = styled(Box)({
+  display: 'flex',
+  gap: '16px',
+  marginBottom: '24px',
+  alignItems: 'center',
+  '& .MuiButton-root': {
+    height: '56px',
+    backgroundColor: '#E4E4E4',
+    border: 'none',
+    boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
+    borderRadius: '20px',
+    padding: '8px 24px',
+    '&:hover': {
+      backgroundColor: '#D0D0D0',
+    },
+  },
+});
+
+const FilterPanelContainer = styled(Box)({
+  marginBottom: '24px',
+  backgroundColor: '#E4E4E4',
+  borderRadius: '20px',
+  boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
+  padding: '16px',
+});
 
 function AdminAllSpeakerPage() {
   const [speakers, setSpeakers] = useState<Speaker[]>([]);
@@ -138,6 +206,20 @@ function AdminAllSpeakerPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
+  const [filteredSpeakers, setFilteredSpeakers] = useState<Speaker[]>([]);
+  const [filterPanelOpen, setFilterPanelOpen] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({
+    industry: [],
+    grades: [],
+    city: '',
+    state: '',
+    radius: 50,
+    formats: {
+      inperson: false,
+      virtual: false,
+    },
+    languages: [],
+  });
   const [editFormState, setEditFormState] = useState({
     firstName: '',
     lastName: '',
@@ -148,16 +230,132 @@ function AdminAllSpeakerPage() {
     inperson: false,
     virtual: false,
     imageUrl: '',
+    industry: [] as string[],
+    grades: [] as string[],
+    city: '',
+    state: '',
+    languages: [] as string[],
   });
-
+  
+  // Load speakers
   useEffect(() => {
     // In a real app, fetch speakers from API
     setSpeakers(TEST_SPEAKERS);
+    setFilteredSpeakers(TEST_SPEAKERS);
   }, []);
+  
+  // Function to calculate distance between two points using Haversine formula
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 3958.8; // Earth's radius in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distance = R * c;
+    return distance;
+  };
+
+
+  // Apply filters to speakers
+useEffect(() => {
+    let result = [...speakers];
+    
+    // Filter by industry (optional)
+    if (filters.industry && filters.industry.length > 0) {
+      result = result.filter(speaker => 
+        filters.industry.some(industry => 
+          speaker.industry.includes(industry)
+        )
+      );
+    }
+    
+    // Filter by grades (optional)
+    if (filters.grades && filters.grades.length > 0) {
+      result = result.filter(speaker => 
+        filters.grades.some(grade => 
+          speaker.grades.includes(grade)
+        )
+      );
+    }
+    
+    // Filter by location (city, state) - all optional
+    if (filters.city && filters.city.trim() !== '') {
+      result = result.filter(speaker => 
+        speaker.city && speaker.city.toLowerCase() === filters.city.toLowerCase()
+      );
+    }
+    
+    if (filters.state && filters.state.trim() !== '') {
+      result = result.filter(speaker => 
+        speaker.state && speaker.state.toLowerCase() === filters.state.toLowerCase()
+      );
+    }
+    
+    // Filter by radius (optional) - only if coordinates are available
+    if (filters.radius && filters.radius > 0 && filters.userCoordinates) {
+      const { lat: userLat, lng: userLng } = filters.userCoordinates;
+      
+      result = result.filter(speaker => {
+        if (!speaker.coordinates || !speaker.coordinates.lat || !speaker.coordinates.lng) {
+          return true; // Keep speakers without coordinates when filtering by radius
+        }
+        
+        const distance = calculateDistance(
+          userLat, 
+          userLng, 
+          speaker.coordinates.lat, 
+          speaker.coordinates.lng
+        );
+        
+        return distance <= filters.radius;
+      });
+    }
+    
+    // Filter by formats (optional)
+    if (filters.formats) {
+      if (filters.formats.inperson === true && filters.formats.virtual !== true) {
+        result = result.filter(speaker => speaker.inperson === true);
+      } else if (filters.formats.inperson !== true && filters.formats.virtual === true) {
+        result = result.filter(speaker => speaker.virtual === true);
+      } else if (filters.formats.inperson === true && filters.formats.virtual === true) {
+        result = result.filter(speaker => speaker.inperson === true || speaker.virtual === true);
+      }
+      // If both are false or undefined, don't filter by format
+    }
+    
+    // Filter by languages (optional)
+    if (filters.languages && filters.languages.length > 0) {
+      result = result.filter(speaker => 
+        filters.languages.some(language => 
+          speaker.languages && speaker.languages.includes(language)
+        )
+      );
+    }
+    
+    setFilteredSpeakers(result);
+  }, [filters, speakers]);
+
 
   const handleSearch = (query: string) => {
     console.log('Searching speakers for:', query);
-    // Filter speakers based on query
+    if (!query.trim()) {
+      setFilteredSpeakers(speakers);
+      return;
+    }
+    
+    const lowercaseQuery = query.toLowerCase();
+    const results = speakers.filter(speaker => {
+      const fullName = `${speaker.user?.firstName} ${speaker.user?.lastName}`.toLowerCase();
+      return fullName.includes(lowercaseQuery) || 
+             speaker.organization.toLowerCase().includes(lowercaseQuery) ||
+             speaker.bio.toLowerCase().includes(lowercaseQuery) ||
+             speaker.location.toLowerCase().includes(lowercaseQuery);
+    });
+    
+    setFilteredSpeakers(results);
   };
 
   const handleCardClick = (speaker: Speaker) => {
@@ -181,6 +379,11 @@ function AdminAllSpeakerPage() {
       inperson: speaker.inperson,
       virtual: speaker.virtual || false,
       imageUrl: speaker.imageUrl || '',
+      industry: speaker.industry || [],
+      grades: speaker.grades || [],
+      city: speaker.city || '',
+      state: speaker.state || '',
+      languages: speaker.languages || ['English'],
     });
     setEditOpen(true);
   };
@@ -206,33 +409,47 @@ function AdminAllSpeakerPage() {
     });
   };
 
+  const handleFilterPanelToggle = () => {
+    setFilterPanelOpen(!filterPanelOpen);
+  };
+
+  const handleFilterChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+    setFilterPanelOpen(false);
+  };
+
   const handleSaveEdit = async () => {
     try {
       if (selectedSpeaker) {
         // In a real app, make API call to update speaker
         console.log('Updating speaker:', selectedSpeaker._id, editFormState);
 
-        // Update the speakers state
-        setSpeakers(
-          speakers.map((speaker) =>
-            speaker._id === selectedSpeaker._id
-              ? {
-                  ...speaker,
-                  organization: editFormState.organization,
-                  bio: editFormState.bio,
-                  location: editFormState.location,
-                  inperson: editFormState.inperson,
-                  virtual: editFormState.virtual,
-                  imageUrl: editFormState.imageUrl,
-                  user: {
-                    firstName: editFormState.firstName,
-                    lastName: editFormState.lastName,
-                    email: editFormState.email,
-                  },
-                }
-              : speaker,
-          ),
+        // Update the speakers state with all fields including new ones
+        const updatedSpeakers = speakers.map((speaker) =>
+          speaker._id === selectedSpeaker._id
+            ? {
+                ...speaker,
+                organization: editFormState.organization,
+                bio: editFormState.bio,
+                location: editFormState.location,
+                inperson: editFormState.inperson,
+                virtual: editFormState.virtual,
+                imageUrl: editFormState.imageUrl,
+                industry: editFormState.industry,
+                grades: editFormState.grades,
+                city: editFormState.city,
+                state: editFormState.state,
+                languages: editFormState.languages,
+                user: {
+                  firstName: editFormState.firstName,
+                  lastName: editFormState.lastName,
+                  email: editFormState.email,
+                },
+              }
+            : speaker
         );
+        
+        setSpeakers(updatedSpeakers);
       }
       setEditOpen(false);
     } catch (error) {
@@ -264,9 +481,40 @@ function AdminAllSpeakerPage() {
       <div className="main-window">
         <Section>
           <SectionTitle>All Speakers</SectionTitle>
-          <SearchBar onSearch={handleSearch} placeholder="Search speakers..." />
+          
+          <SearchFilterContainer>
+            <Box sx={{ flexGrow: 1 }}>
+              <SearchBar 
+                onSearch={handleSearch} 
+                placeholder="Search speakers..." 
+              />
+            </Box>
+            <Button
+              variant="contained"
+              startIcon={<FilterListIcon />}
+              onClick={handleFilterPanelToggle}
+              sx={{
+                textTransform: 'none',
+                fontSize: '16px',
+                fontWeight: 500,
+                color: '#49454F',
+              }}
+            >
+              Filters
+            </Button>
+          </SearchFilterContainer>
+
+          <Collapse in={filterPanelOpen}>
+            <FilterPanelContainer>
+              <SpeakerFilterPanel
+                filters={filters}
+                onChange={handleFilterChange}
+              />
+            </FilterPanelContainer>
+          </Collapse>
+
           <CardContainer>
-            {speakers.map((speaker) => (
+            {filteredSpeakers.map((speaker) => (
               <div key={speaker._id} style={{ position: 'relative' }}>
                 <div
                   onClick={() => handleCardClick(speaker)}
