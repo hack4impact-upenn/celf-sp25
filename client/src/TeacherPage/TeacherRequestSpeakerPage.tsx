@@ -36,6 +36,15 @@ interface Speaker {
   inperson?: boolean;
   virtual?: boolean;
   imageUrl?: string;
+  industry?: string[];
+  grades?: string[];
+  city?: string;
+  state?: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+  languages?: string[];
   bookingRequests?: BookingRequest[];
 }
 
@@ -340,7 +349,7 @@ const speakers: Speaker[] = [
   }
 ];
 
-const requests = [
+const requests: Request[] = [
   { 
     id: '1', 
     speaker: speakers[0], 

@@ -113,6 +113,21 @@ const StyledDialogTitle = styled(DialogTitle)({
   backgroundColor: '#f5f5f5',
 });
 
+const SearchFilterContainer = styled(Box)({
+  display: 'flex',
+  gap: '16px',
+  marginBottom: '24px',
+  alignItems: 'center',
+});
+
+const FilterPanelContainer = styled(Box)({
+  marginBottom: '24px',
+  backgroundColor: '#E4E4E4',
+  borderRadius: '20px',
+  boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
+  padding: '16px',
+});
+
 // TODO: REMOVE THIS TEST DATA
 const speakers = [
   {
@@ -186,30 +201,6 @@ const timezones = [
   { value: 'Pacific/Honolulu', label: 'Hawaii Time (HT)' },
 ];
 
-// Styled components
-const CardContainer = styled('div')({
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: '20px',
-  justifyContent: 'flex-start',
-});
-
-const Section = styled('div')({
-  marginBottom: '40px',
-});
-
-const SectionTitle = styled('h2')({
-  textAlign: 'left',
-});
-
-const StyledDialogTitle = styled(DialogTitle)({
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  padding: '16px 24px',
-  backgroundColor: '#f5f5f5',
-});
-
 function TeacherSearchSpeakerPage() {
   const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
   const [open, setOpen] = useState(false);
@@ -251,27 +242,15 @@ function TeacherSearchSpeakerPage() {
 
   const handleFilterChange = (newFilters: FilterState) => {
     setFilters(newFilters);
+    setFilterPanelOpen(false);
   };
 
   const handleBookingFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target as HTMLInputElement;
+    const { name, value, type, checked } = e.target;
     setBookingForm(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
-  };
-
-  const handleBookSpeaker = () => {
-    setShowBookingForm(!showBookingForm);
-  };
-
-  const handleBookingSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle booking submission
-  };
-
-  const handleCloseBookingForm = () => {
-    setShowBookingForm(false);
   };
 
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
@@ -292,44 +271,19 @@ function TeacherSearchSpeakerPage() {
     }));
   };
 
-  const handleFilterPanelToggle = () => {
-    setFilterPanelOpen(!filterPanelOpen);
-  };
-
-  const handleFilterChange = (newFilters: FilterState) => {
-    setFilters(newFilters);
-    setFilterPanelOpen(false);
-  };
-
-  const handleBookingFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setBookingFormState((prev: BookingFormState) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
-
-  const handleSelectChange = (e: SelectChangeEvent<string>) => {
-    const { name, value } = e.target;
-    setBookingFormState((prev: BookingFormState) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const handleBookSpeaker = () => {
+    setShowBookingForm(prev => !prev);
   };
 
   const handleBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // TODO: Implement booking submission logic
-    console.log('Booking form submitted:', bookingFormState);
-  };
-
-  const handleBookSpeaker = () => {
-    setShowBookingForm(prev => !prev);
+    console.log('Booking form submitted:', bookingForm);
   };
 
   const handleCloseBookingForm = () => {
     setShowBookingForm(false);
-    setBookingFormState(initialBookingFormState);
+    setBookingForm(initialBookingFormState);
   };
 
   const formatDateTime = (dateTime: string, timezone: string) => {
