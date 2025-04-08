@@ -62,34 +62,53 @@ const createSpeakerProfile = async (
   res: express.Response,
   next: express.NextFunction
 ) => {
-  const { userId, organization, bio, location, inperson } = req.body;
+  const {firstName, lastName, bio, email, title, 
+    organisation, personalSite, industryFocus, areaOfExpertise, 
+    ageGroup, location, speakingFormat, languages, available} = req.body;
 
-  if (!userId || !organization || !bio || !location || inperson === undefined) {
+  if (!firstName || !lastName || !email || !title || 
+    !organisation) {      // TODO: change fields depending on what you need
     next(
       ApiError.missingFields([
-        "userId",
-        "organization",
+        "firstName",
+        "lastName",
         "bio",
+        "email",
+        "title",
+        "organisation",
+        "personalSite",
+        "industryFocus",
+        "areaOfExpertise",
+        "ageGroup",
         "location",
-        "inperson",
+        "speakingFormat"
       ])
     );
     return;
   }
 
   try {
-    const existingSpeaker = await getSpeakerByUserId(userId);
-    if (existingSpeaker) {
-      next(ApiError.badRequest("Speaker profile already exists"));
-      return;
-    }
+    // const existingSpeaker = await getSpeakerByUserId(userId);
+    // if (existingSpeaker) {
+    //   next(ApiError.badRequest("Speaker profile already exists"));
+    //   return;
+    // }
 
     const speaker = await createSpeaker(
-      userId,
-      organization,
+      firstName,
+      lastName,
       bio,
+      email,
+      title,
+      organisation,
+      personalSite,
+      industryFocus,
+      areaOfExpertise,
+      ageGroup,
       location,
-      inperson
+      speakingFormat,
+      languages,
+      available
     );
     res.status(StatusCode.CREATED).json(speaker);
   } catch (error) {
@@ -186,3 +205,4 @@ export {
   deleteSpeakerProfile,
   filterSpeaker,
 };
+

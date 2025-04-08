@@ -11,18 +11,36 @@ import { User } from "../models/user.model.ts";
  * @returns The created Speaker profile
  */
 const createSpeaker = async (
-  userId: string,
-  organization: string,
+  firstName: string,
+  lastName: string,
   bio: string,
+  email: string,
+  title: string,
+  organisation: string,
+  personalSite: string,
+  industryFocus: [],
+  areaOfExpertise: [],
+  ageGroup: [],
   location: string,
-  inperson: boolean
+  speakingFormat: string,
+  languages: [],
+  available: []
 ) => {
   const newSpeaker = new Speaker({
-    userId,
-    organization,
+    firstName,
+    lastName,
     bio,
+    email,
+    title,
+    organisation,
+    personalSite,
+    industryFocus,
+    areaOfExpertise,
+    ageGroup,
     location,
-    inperson,
+    speakingFormat,
+    languages,
+    available
   });
   const speaker = await newSpeaker.save();
   return speaker;
