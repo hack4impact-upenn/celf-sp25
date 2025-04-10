@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { styled } from '@mui/system';
 import {
   Dialog,
@@ -10,23 +10,25 @@ import {
   CardMedia,
   Chip,
   Button,
-  TextField,
-  FormControlLabel,
-  Checkbox,
-  FormGroup,
-  Divider,
-  Slide,
+  Collapse,
   Paper,
-  Select,
-  MenuItem,
+  Slide,
+  Divider,
+  TextField,
+  Grid,
   FormControl,
   InputLabel,
-  Grid,
+  Select,
+  MenuItem,
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import EmailIcon from '@mui/icons-material/Email';
 import PersonIcon from '@mui/icons-material/Person';
 import VideocamIcon from '@mui/icons-material/Videocam';
+import FilterListIcon from '@mui/icons-material/FilterList';
 import EventIcon from '@mui/icons-material/Event';
 import SearchBar from '../components/search_bar/SearchBar';
 import SpeakerCard from '../components/cards/SpeakerCard';
@@ -34,18 +36,45 @@ import Sidebar from '../components/teacher_sidebar/Sidebar';
 import TopBar from '../components/top_bar/TopBar';
 import './TeacherPage.css';
 import { DEFAULT_IMAGE } from '../components/cards/SpeakerCard';
+import SpeakerFilterPanel, { FilterState } from '../components/SpeakerFilterPanel';
 import { SelectChangeEvent } from '@mui/material';
 
 interface Speaker {
   id: string;
   name: string;
   bio: string;
-  organization: string;
+  organization?: string;
+  location?: string;
+  email?: string;
+  inperson?: boolean;
+  virtual?: boolean;
+  imageUrl?: string;
+  industry?: string[];
+  grades?: string[];
+  city?: string;
+  state?: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+  languages?: string[];
+}
+
+interface BookingRequest {
+  id: string;
+  eventName: string;
+  eventPurpose: string;
+  dateTime: string;
+  timezone: string;
+  isInPerson: boolean;
+  isVirtual: boolean;
+  expertise: string;
+  preferredLanguage: string;
   location: string;
-  imageUrl: string;
-  email: string;
-  inperson: boolean;
-  virtual: boolean;
+  goals: string;
+  budget: string;
+  engagementFormat: string;
+  status: 'pending' | 'approved' | 'rejected' | 'upcoming' | 'archived';
 }
 
 interface BookingFormState {
@@ -62,6 +91,56 @@ interface BookingFormState {
   budget: string;
   engagementFormat: string;
 }
+
+// Styled components
+const CardContainer = styled('div')({
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: '20px',
+  justifyContent: 'flex-start',
+});
+
+const Section = styled('div')({
+  marginBottom: '40px',
+});
+
+const SectionTitle = styled('h2')({
+  textAlign: 'left',
+});
+
+const StyledDialogTitle = styled(DialogTitle)({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  padding: '16px 24px',
+  backgroundColor: '#f5f5f5',
+});
+
+const SearchFilterContainer = styled(Box)({
+  display: 'flex',
+  gap: '16px',
+  marginBottom: '24px',
+  alignItems: 'center',
+  '& .MuiButton-root': {
+    height: '56px',
+    backgroundColor: '#E4E4E4',
+    border: 'none',
+    boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
+    borderRadius: '20px',
+    padding: '8px 24px',
+    '&:hover': {
+      backgroundColor: '#D0D0D0',
+    },
+  },
+});
+
+const FilterPanelContainer = styled(Box)({
+  marginBottom: '24px',
+  backgroundColor: '#E4E4E4',
+  borderRadius: '20px',
+  boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
+  padding: '16px',
+});
 
 // TODO: REMOVE THIS TEST DATA
 const speakers = [
@@ -98,9 +177,17 @@ const speakers = [
     email: 'edward@yyy.org',
     inperson: false,
     virtual: true,
-    imageUrl:
-      'https://media.istockphoto.com/id/1389348844/photo/studio-shot-of-a-beautiful-young-woman-smiling-while-standing-against-a-grey-background.jpg?s=612x612&w=0&k=20&c=anRTfD_CkOxRdyFtvsiPopOluzKbhBNEQdh4okZImQc=',
-  },
+    imageUrl: 'https://media.istockphoto.com/id/1389348844/photo/studio-shot-of-a-beautiful-young-woman-smiling-while-standing-against-a-grey-background.jpg?s=612x612&w=0&k=20&c=anRTfD_CkOxRdyFtvsiPopOluzKbhBNEQdh4okZImQc=',
+    industry: ['Research', 'Technology'],
+    grades: ['Elementary', 'Middle School'],
+    city: 'Hong Kong',
+    state: 'Hong Kong',
+    coordinates: {
+      lat: 22.3193,
+      lng: 114.1694
+    },
+    languages: ['English', 'Cantonese', 'Mandarin']
+  }
 ];
 
 const initialBookingFormState: BookingFormState = {
@@ -128,38 +215,63 @@ const timezones = [
   { value: 'Pacific/Honolulu', label: 'Hawaii Time (HT)' },
 ];
 
-// Styled components
-const CardContainer = styled('div')({
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: '20px',
-  justifyContent: 'flex-start',
-});
-
-const Section = styled('div')({
-  marginBottom: '40px',
-});
-
-const SectionTitle = styled('h2')({
-  textAlign: 'left',
-});
-
-const StyledDialogTitle = styled(DialogTitle)({
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  padding: '16px 24px',
-  backgroundColor: '#f5f5f5',
-});
-
 function TeacherSearchSpeakerPage() {
   const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
   const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterPanelOpen, setFilterPanelOpen] = useState(false);
   const [showBookingForm, setShowBookingForm] = useState(false);
-  const [bookingFormState, setBookingFormState] = useState<BookingFormState>(initialBookingFormState);
+  const [filters, setFilters] = useState<FilterState>({
+    industry: [],
+    grades: [],
+    city: '',
+    state: '',
+    radius: 50,
+    formats: {
+      inperson: false,
+      virtual: false
+    },
+    languages: [],
+    userCoordinates: undefined
+  });
+  const [bookingForm, setBookingForm] = useState<BookingFormState>(initialBookingFormState);
 
+  // Add filtered speakers state
+  const [filteredSpeakers, setFilteredSpeakers] = useState<Speaker[]>(speakers);
+
+  // Function to calculate distance between two points using Haversine formula
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 3958.8; // Earth's radius in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distance = R * c;
+    return distance;
+  };
+
+  // Update handleSearch to filter speakers
   const handleSearch = (query: string) => {
-    console.log('Searching for:', query);
+    setSearchQuery(query);
+    if (!query.trim()) {
+      setFilteredSpeakers(speakers);
+      return;
+    }
+    
+    const lowercaseQuery = query.toLowerCase();
+    const results = speakers.filter(speaker => {
+      return (
+        speaker.name.toLowerCase().includes(lowercaseQuery) ||
+        (speaker.organization && speaker.organization.toLowerCase().includes(lowercaseQuery)) ||
+        speaker.bio.toLowerCase().includes(lowercaseQuery) ||
+        (speaker.location && speaker.location.toLowerCase().includes(lowercaseQuery))
+      );
+    });
+    
+    setFilteredSpeakers(results);
   };
 
   const handleCardClick = (speaker: Speaker) => {
@@ -169,37 +281,147 @@ function TeacherSearchSpeakerPage() {
 
   const handleClose = () => {
     setOpen(false);
+    setShowBookingForm(false);
+  };
+
+  const handleFilterPanelToggle = () => {
+    setFilterPanelOpen(!filterPanelOpen);
+  };
+
+  // Update handleFilterChange to filter speakers
+  const handleFilterChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+    setFilterPanelOpen(false);
+
+    let result = [...speakers];
+    
+    // Apply search query filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(speaker => {
+        return (
+          speaker.name.toLowerCase().includes(query) ||
+          (speaker.organization && speaker.organization.toLowerCase().includes(query)) ||
+          speaker.bio.toLowerCase().includes(query) ||
+          (speaker.location && speaker.location.toLowerCase().includes(query))
+        );
+      });
+    }
+    
+    // Apply industry filter
+    if (newFilters.industry && newFilters.industry.length > 0) {
+      result = result.filter(speaker => 
+        speaker.industry && 
+        newFilters.industry.some(industry => 
+          speaker.industry?.includes(industry)
+        )
+      );
+    }
+    
+    // Apply grade level filter
+    if (newFilters.grades && newFilters.grades.length > 0) {
+      result = result.filter(speaker => 
+        speaker.grades && 
+        newFilters.grades.some(grade => 
+          speaker.grades?.includes(grade)
+        )
+      );
+    }
+    
+    // Apply location filter
+    if (newFilters.city && newFilters.city.trim() !== '') {
+      result = result.filter(speaker => 
+        speaker.city && 
+        speaker.city.toLowerCase() === newFilters.city.toLowerCase()
+      );
+    }
+    
+    if (newFilters.state && newFilters.state.trim() !== '') {
+      result = result.filter(speaker => 
+        speaker.state && 
+        speaker.state.toLowerCase() === newFilters.state.toLowerCase()
+      );
+    }
+    
+    // Apply radius filter if coordinates are available
+    if (newFilters.radius && newFilters.radius > 0 && newFilters.userCoordinates) {
+      const { lat: userLat, lng: userLng } = newFilters.userCoordinates;
+      
+      result = result.filter(speaker => {
+        if (!speaker.coordinates) return true;
+        const distance = calculateDistance(
+          userLat, 
+          userLng, 
+          speaker.coordinates.lat, 
+          speaker.coordinates.lng
+        );
+        return distance <= newFilters.radius;
+      });
+    }
+    
+    // Apply format filter
+    if (newFilters.formats) {
+      if (newFilters.formats.inperson && !newFilters.formats.virtual) {
+        result = result.filter(speaker => speaker.inperson === true);
+      } else if (!newFilters.formats.inperson && newFilters.formats.virtual) {
+        result = result.filter(speaker => speaker.virtual === true);
+      } else if (newFilters.formats.inperson && newFilters.formats.virtual) {
+        result = result.filter(speaker => speaker.inperson === true || speaker.virtual === true);
+      }
+    }
+    
+    // Apply language filter
+    if (newFilters.languages && newFilters.languages.length > 0) {
+      result = result.filter(speaker => 
+        speaker.languages && 
+        newFilters.languages.some(language => 
+          speaker.languages?.includes(language)
+        )
+      );
+    }
+    
+    setFilteredSpeakers(result);
   };
 
   const handleBookingFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    setBookingFormState((prev: BookingFormState) => ({
+    setBookingForm(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target;
-    setBookingFormState((prev: BookingFormState) => ({
-      ...prev,
-      [name]: value,
-    }));
+    if (name) {
+      setBookingForm(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
-  const handleBookingSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement booking submission logic
-    console.log('Booking form submitted:', bookingFormState);
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setBookingForm(prev => ({
+      ...prev,
+      [name]: checked
+    }));
   };
 
   const handleBookSpeaker = () => {
     setShowBookingForm(prev => !prev);
   };
 
+  const handleBookingSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: Implement booking submission logic
+    console.log('Booking form submitted:', bookingForm);
+  };
+
   const handleCloseBookingForm = () => {
     setShowBookingForm(false);
-    setBookingFormState(initialBookingFormState);
+    setBookingForm(initialBookingFormState);
   };
 
   const formatDateTime = (dateTime: string, timezone: string) => {
@@ -223,13 +445,41 @@ function TeacherSearchSpeakerPage() {
         <div className="request-stack">
           <Section>
             <SectionTitle>Available Speakers</SectionTitle>
-            <SearchBar
-              onSearch={handleSearch}
-              placeholder="Type your search..."
-            />
+            
+            <SearchFilterContainer>
+              <Box sx={{ flexGrow: 1 }}>
+                <SearchBar
+                  onSearch={handleSearch}
+                  placeholder="Search speakers..."
+                />
+              </Box>
+              <Button
+                variant="contained"
+                startIcon={<FilterListIcon />}
+                onClick={handleFilterPanelToggle}
+                sx={{
+                  textTransform: 'none',
+                  fontSize: '16px',
+                  fontWeight: 500,
+                  color: '#49454F',
+                }}
+              >
+                Filters
+              </Button>
+            </SearchFilterContainer>
+
+            <Collapse in={filterPanelOpen}>
+              <FilterPanelContainer>
+                <SpeakerFilterPanel
+                  filters={filters}
+                  onChange={handleFilterChange}
+                />
+              </FilterPanelContainer>
+            </Collapse>
+
             <CardContainer>
-              {speakers.length > 0 ? (
-                speakers.map((speaker) => (
+              {filteredSpeakers.length > 0 ? (
+                filteredSpeakers.map((speaker) => (
                   <div
                     key={speaker.id}
                     onClick={() => handleCardClick(speaker)}
@@ -239,14 +489,16 @@ function TeacherSearchSpeakerPage() {
                       id={speaker.id}
                       name={speaker.name}
                       bio={speaker.bio}
-                      organization={speaker.organization}
-                      location={speaker.location}
+                      organization={speaker.organization || ''}
+                      location={speaker.location || ''}
                       imageUrl={speaker.imageUrl}
                     />
                   </div>
                 ))
               ) : (
-                <p>No speakers found</p>
+                <Typography variant="body1" sx={{ p: 2 }}>
+                  No speakers match the current filters. Try adjusting your search or filters.
+                </Typography>
               )}
             </CardContainer>
           </Section>
@@ -326,13 +578,13 @@ function TeacherSearchSpeakerPage() {
                       gutterBottom
                       sx={{ color: '#3498db', fontWeight: 600 }}
                     >
-                      {selectedSpeaker.organization}
+                      {selectedSpeaker.organization || selectedSpeaker.name}
                     </Typography>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                       <EmailIcon sx={{ mr: 1, color: '#7f8c8d' }} />
                       <Typography variant="body1">
-                        {selectedSpeaker.email}
+                        {selectedSpeaker.email || ''}
                       </Typography>
                     </Box>
 
@@ -341,7 +593,7 @@ function TeacherSearchSpeakerPage() {
                       gutterBottom
                       sx={{ color: 'text.secondary', mb: 2 }}
                     >
-                      {selectedSpeaker.location}
+                      {selectedSpeaker.city}, {selectedSpeaker.state}
                     </Typography>
 
                     <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
@@ -400,7 +652,7 @@ function TeacherSearchSpeakerPage() {
                       fullWidth
                       label="Event Name"
                       name="eventName"
-                      value={bookingFormState.eventName}
+                      value={bookingForm.eventName}
                       onChange={handleBookingFormChange}
                       required
                       helperText="What is this event or session called?"
@@ -411,7 +663,7 @@ function TeacherSearchSpeakerPage() {
                       fullWidth
                       label="Event Purpose"
                       name="eventPurpose"
-                      value={bookingFormState.eventPurpose}
+                      value={bookingForm.eventPurpose}
                       onChange={handleBookingFormChange}
                       required
                       multiline
@@ -426,7 +678,7 @@ function TeacherSearchSpeakerPage() {
                           fullWidth
                           label="Proposed Date/Time"
                           name="dateTime"
-                          value={bookingFormState.dateTime}
+                          value={bookingForm.dateTime}
                           onChange={handleBookingFormChange}
                           required
                           type="datetime-local"
@@ -438,7 +690,7 @@ function TeacherSearchSpeakerPage() {
                         <FormControl fullWidth>
                           <InputLabel>Time Zone</InputLabel>
                           <Select
-                            value={bookingFormState.timezone}
+                            value={bookingForm.timezone}
                             onChange={handleSelectChange}
                             name="timezone"
                             label="Time Zone"
@@ -460,8 +712,8 @@ function TeacherSearchSpeakerPage() {
                       <FormControlLabel
                         control={
                           <Checkbox
-                            checked={bookingFormState.isInPerson}
-                            onChange={handleBookingFormChange}
+                            checked={bookingForm.isInPerson}
+                            onChange={handleCheckboxChange}
                             name="isInPerson"
                           />
                         }
@@ -470,8 +722,8 @@ function TeacherSearchSpeakerPage() {
                       <FormControlLabel
                         control={
                           <Checkbox
-                            checked={bookingFormState.isVirtual}
-                            onChange={handleBookingFormChange}
+                            checked={bookingForm.isVirtual}
+                            onChange={handleCheckboxChange}
                             name="isVirtual"
                           />
                         }
@@ -483,7 +735,7 @@ function TeacherSearchSpeakerPage() {
                       fullWidth
                       label="Area of Expertise Requested"
                       name="expertise"
-                      value={bookingFormState.expertise}
+                      value={bookingForm.expertise}
                       onChange={handleBookingFormChange}
                       required
                       helperText="What topic(s) would you like the speaker to focus on? (e.g. food systems, clean energy, sustainable fashion)"
@@ -494,7 +746,7 @@ function TeacherSearchSpeakerPage() {
                       fullWidth
                       label="Preferred Language"
                       name="preferredLanguage"
-                      value={bookingFormState.preferredLanguage}
+                      value={bookingForm.preferredLanguage}
                       onChange={handleBookingFormChange}
                       helperText="What language would you prefer the speaker to use?"
                       sx={{ mb: 2 }}
@@ -504,7 +756,7 @@ function TeacherSearchSpeakerPage() {
                       fullWidth
                       label="Location"
                       name="location"
-                      value={bookingFormState.location}
+                      value={bookingForm.location}
                       onChange={handleBookingFormChange}
                       required
                       helperText="Where will this event take place (or be hosted virtually)?"
@@ -515,7 +767,7 @@ function TeacherSearchSpeakerPage() {
                       fullWidth
                       label="Goals / Notes"
                       name="goals"
-                      value={bookingFormState.goals}
+                      value={bookingForm.goals}
                       onChange={handleBookingFormChange}
                       multiline
                       rows={3}
@@ -527,7 +779,7 @@ function TeacherSearchSpeakerPage() {
                       fullWidth
                       label="Budget"
                       name="budget"
-                      value={bookingFormState.budget}
+                      value={bookingForm.budget}
                       onChange={handleBookingFormChange}
                       helperText="If you have a budget to offer a speaker honorarium or travel reimbursement, please include details."
                       sx={{ mb: 2 }}
@@ -537,7 +789,7 @@ function TeacherSearchSpeakerPage() {
                       fullWidth
                       label="Engagement Format"
                       name="engagementFormat"
-                      value={bookingFormState.engagementFormat}
+                      value={bookingForm.engagementFormat}
                       onChange={handleBookingFormChange}
                       required
                       multiline

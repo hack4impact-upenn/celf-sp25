@@ -18,7 +18,6 @@ import {
   Radio,
   CardMedia,
   Chip,
-  Collapse,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -26,7 +25,6 @@ import CloseIcon from '@mui/icons-material/Close';
 import EmailIcon from '@mui/icons-material/Email';
 import PersonIcon from '@mui/icons-material/Person';
 import VideocamIcon from '@mui/icons-material/Videocam';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import SearchBar from '../components/search_bar/SearchBar';
 import SpeakerCard from '../components/cards/SpeakerCard';
 import AdminSidebar from '../components/admin_sidebar/AdminSidebar';
@@ -174,52 +172,13 @@ const TEST_SPEAKERS: Speaker[] = [
   },
 ];
 
-const SearchFilterContainer = styled(Box)({
-  display: 'flex',
-  gap: '16px',
-  marginBottom: '24px',
-  alignItems: 'center',
-  '& .MuiButton-root': {
-    height: '56px',
-    backgroundColor: '#E4E4E4',
-    border: 'none',
-    boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
-    borderRadius: '20px',
-    padding: '8px 24px',
-    '&:hover': {
-      backgroundColor: '#D0D0D0',
-    },
-  },
-});
-
-const FilterPanelContainer = styled(Box)({
-  marginBottom: '24px',
-  backgroundColor: '#E4E4E4',
-  borderRadius: '20px',
-  boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
-  padding: '16px',
-});
-
-function AdminAllSpeakerPage() {
+function AllSpeakerFilterPageTest() {
   const [speakers, setSpeakers] = useState<Speaker[]>([]);
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
   const [filteredSpeakers, setFilteredSpeakers] = useState<Speaker[]>([]);
-  const [filterPanelOpen, setFilterPanelOpen] = useState(false);
-  const [filters, setFilters] = useState<FilterState>({
-    industry: [],
-    grades: [],
-    city: '',
-    state: '',
-    radius: 50,
-    formats: {
-      inperson: false,
-      virtual: false,
-    },
-    languages: [],
-  });
   const [editFormState, setEditFormState] = useState({
     firstName: '',
     lastName: '',
@@ -230,11 +189,26 @@ function AdminAllSpeakerPage() {
     inperson: false,
     virtual: false,
     imageUrl: '',
+    // Add new fields to editFormState
     industry: [] as string[],
     grades: [] as string[],
     city: '',
     state: '',
     languages: [] as string[],
+  });
+  
+  // Use the proper FilterState type for initializing filters
+  const [filters, setFilters] = useState<FilterState>({
+    industry: [],
+    grades: [],
+    city: '',
+    state: '',
+    radius: 50,
+    formats: {
+      inperson: false,
+      virtual: false,
+    },
+    languages: ['English'],
   });
   
   // Load speakers
@@ -409,13 +383,14 @@ useEffect(() => {
     });
   };
 
-  const handleFilterPanelToggle = () => {
-    setFilterPanelOpen(!filterPanelOpen);
-  };
-
+  // Enhanced handleFilterChange function
   const handleFilterChange = (newFilters: FilterState) => {
+    console.log('New filters applied:', newFilters);
     setFilters(newFilters);
-    setFilterPanelOpen(false);
+    
+    // Additional logic can be added here if needed
+    // For example, you might want to store the filters in local storage
+    // or reset pagination when filters change
   };
 
   const handleSaveEdit = async () => {
@@ -481,40 +456,10 @@ useEffect(() => {
       <div className="main-window">
         <Section>
           <SectionTitle>All Speakers</SectionTitle>
-          
-          <SearchFilterContainer>
-            <Box sx={{ flexGrow: 1 }}>
-              <SearchBar 
-                onSearch={handleSearch} 
-                placeholder="Search speakers..." 
-              />
-            </Box>
-            <Button
-              variant="contained"
-              startIcon={<FilterListIcon />}
-              onClick={handleFilterPanelToggle}
-              sx={{
-                textTransform: 'none',
-                fontSize: '16px',
-                fontWeight: 500,
-                color: '#49454F',
-              }}
-            >
-              Filters
-            </Button>
-          </SearchFilterContainer>
-
-          <Collapse in={filterPanelOpen}>
-            <FilterPanelContainer>
-              <SpeakerFilterPanel
-                filters={filters}
-                onChange={handleFilterChange}
-              />
-            </FilterPanelContainer>
-          </Collapse>
-
+          <SearchBar onSearch={handleSearch} placeholder="Search speakers..." />
+          <SpeakerFilterPanel filters={filters} onChange={handleFilterChange} />
           <CardContainer>
-            {filteredSpeakers.map((speaker) => (
+            {filteredSpeakers.length > 0 ? filteredSpeakers.map((speaker) => (
               <div key={speaker._id} style={{ position: 'relative' }}>
                 <div
                   onClick={() => handleCardClick(speaker)}
@@ -572,7 +517,11 @@ useEffect(() => {
                   </IconButton>
                 </div>
               </div>
-            ))}
+            )) : (
+              <Typography variant="body1" sx={{ p: 2 }}>
+                No speakers match the current filters. Try adjusting your filters.
+              </Typography>
+            )}
           </CardContainer>
         </Section>
       </div>
@@ -823,4 +772,4 @@ useEffect(() => {
   );
 }
 
-export default AdminAllSpeakerPage;
+export default AllSpeakerFilterPageTest;

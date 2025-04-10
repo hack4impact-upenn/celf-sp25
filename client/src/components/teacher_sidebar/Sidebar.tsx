@@ -13,7 +13,7 @@ const Sidebar = () => {
   return (
     <div className="sidebar-container">
       {/* Logo Section */}
-      <div className="sidebar-logo">
+      <div className="sidebar-logo" onClick={() => handleNavigation('/home')} style={{ cursor: 'pointer' }}>
         <img
           src={require('../../assets/logo.png')}
           alt="Children's Environmental Literacy Foundation Logo"

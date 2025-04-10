@@ -13,6 +13,7 @@ import TeacherRequestSpeakerPage from './TeacherPage/TeacherRequestSpeakerPage.t
 import AdminDashboardPage from './AdminDashboard/AdminDashboardPage.tsx';
 import AdminAddSpeakerPage from './AdminDashboard/AdminAddSpeakerPage.tsx';
 import AdminAllSpeakerPage from './AdminDashboard/AdminAllSpeakerPage.tsx';
+import AllSpeakerFilterPageTest from './AdminDashboard/AllSpeakerFilterPageTest.tsx';
 import AdminRequestsPage from './AdminDashboard/AdminRequestsPage';
 
 import {
@@ -33,6 +34,8 @@ import LoginSelectPage from './Home/LoginSelect.tsx';
 import SpeakerRegisterPage from './Authentication/SpeakerRegister.tsx';
 import TeacherRegisterPage from './Authentication/TeacherRegister.tsx';
 import AdminRegisterPage from './Authentication/AdminRegister.tsx';
+import { useAppSelector } from './util/redux/hooks.ts';
+import { selectUser } from './util/redux/userSlice.ts';
 
 function App() {
   return (

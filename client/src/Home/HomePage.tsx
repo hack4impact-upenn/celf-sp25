@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from '@mui/material/Button';
 import { NavigateFunction, useNavigate } from 'react-router-dom';
 import { Typography, Grid } from '@mui/material';
@@ -45,6 +45,7 @@ function PromoteButton({
     </PrimaryButton>
   );
 }
+
 /**
  * The HomePage of the user dashboard. Displays a welcome message, a logout button and a button to promote the user to admin if they are not already an admin. If the user is an admin, the button will navigate them to the admin dashboard. This utilizes redux to access the current user's information.
  */
@@ -53,6 +54,15 @@ function HomePage() {
   const dispatch = useAppDispatch();
   const navigator = useNavigate();
   const [admin, setAdmin] = useState(user.admin);
+  
+  useEffect(() => {
+    if (user.admin) {
+      navigator('/admin-dashboard', { replace: true });
+    } else {
+      navigator('/teacher-search-speaker', { replace: true });
+    }
+  }, [user.admin, navigator]);
+
   const logoutDispatch = () => dispatch(logoutAction());
   const handleLogout = async () => {
     try {
