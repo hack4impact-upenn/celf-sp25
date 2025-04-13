@@ -15,7 +15,7 @@ import AdminAddSpeakerPage from './AdminDashboard/AdminAddSpeakerPage.tsx';
 import AdminAllSpeakerPage from './AdminDashboard/AdminAllSpeakerPage.tsx';
 import AllSpeakerFilterPageTest from './AdminDashboard/AllSpeakerFilterPageTest.tsx';
 import AdminRequestsPage from './AdminDashboard/AdminRequestsPage';
-
+import ProfilePage from './Profile/ProfilePage.tsx';
 import {
   UnauthenticatedRoutesWrapper,
   ProtectedRoutesWrapper,
@@ -88,6 +88,10 @@ function App() {
                 {/* Routes accessed only if user is authenticated */}
                 <Route element={<ProtectedRoutesWrapper />}>
                   <Route path="/home" element={<HomePage />} />
+                  <Route
+                    path="/profile"
+                    element={<ProfilePage />}
+                  />
                   <Route
                     path="/teacher-search-speaker"
                     element={<TeacherSearchSpeakerPage />}

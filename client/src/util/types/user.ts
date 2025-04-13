@@ -10,6 +10,31 @@ interface IUser {
   admin: boolean;
 }
 
+interface ISpeaker {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  bio: string;
+  email: string;
+  title: string;
+  organization: string;
+  personalSite: string;
+  industryFocus: string[];
+  areaOfExpertise: string[];
+  ageGroup: string;
+  location: string;
+  speakingFormat: string;
+  languages: string[];
+  available: string[];
+}
+
+interface ITeacher {
+  _id: string;
+  userId: string;
+  school: string;
+  location: string;
+}
+
 interface ITeacherDetails {
   department: string;
   subjects: string[];
@@ -24,4 +49,4 @@ interface IStudentDetails {
   courses: string[];
 }
 
-export type { IUser, ITeacherDetails, IStudentDetails };
+export type { IUser, ISpeaker, ITeacher, ITeacherDetails, IStudentDetails };

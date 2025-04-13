@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppBar, Toolbar, Typography, IconButton, Box } from '@mui/material';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import { Link } from 'react-router-dom';
+import { useAppSelector, useAppDispatch } from '../../util/redux/hooks.ts';
+import { selectUser, logout as logoutAction } from '../../util/redux/userSlice.ts';
 import ProfileDropDown from '../ProfileDropDown'; // Adjust the import path as needed
 import COLORS from '../../assets/colors'; // Adjust the import path as needed
 
 function TopBar() {
+
   return (
     <div className="topbar-container">
       <AppBar position="fixed" style={{ backgroundColor: COLORS.white }}>

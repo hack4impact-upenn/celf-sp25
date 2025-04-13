@@ -1,5 +1,6 @@
 import express from "express";
 import { isAdmin } from "../controllers/admin.middleware.ts";
+import { isAuthenticated } from "../controllers/auth.middleware.ts";
 import {
   getAllSpeakers,
   getSpeaker,
@@ -11,16 +12,16 @@ import {
 
 const router = express.Router();
 
-router.get("/all", getAllSpeakers);
+router.get("/all", isAuthenticated, getAllSpeakers);
 
-router.get("/:userId", getSpeaker);
+router.get("/:userId", isAuthenticated, getSpeaker);
 
-router.post("/create", createSpeakerProfile);
+router.post("/create", isAuthenticated, createSpeakerProfile);
 
-router.put("/update/:userId", updateSpeakerProfile);
+router.put("/update/:userId", isAuthenticated, updateSpeakerProfile);
 
 router.delete("/:userId", isAdmin, deleteSpeakerProfile);
 
-router.get("/", filterSpeaker);
+router.get("/", isAuthenticated, filterSpeaker);
 
 export default router;

@@ -72,6 +72,7 @@ function LoginPage() {
     firstName: string,
     lastName: string,
     admin: boolean,
+
   ) {
     dispatch(loginRedux({ email: userEmail, firstName, lastName, admin }));
   }
@@ -114,6 +115,8 @@ function LoginPage() {
       loginUser(values.email, values.password)
         .then((user) => {
           console.log('navigating to home!');
+          console.log(user);
+
           dispatchUser(
             user.email!,
             user.firstName!,
