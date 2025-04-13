@@ -112,6 +112,7 @@ const createSpeakerProfile = async (
     );
     res.status(StatusCode.CREATED).json(speaker);
   } catch (error) {
+    console.log(error);
     next(ApiError.internal("Unable to create speaker profile"));
   }
 };

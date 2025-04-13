@@ -19,6 +19,7 @@ import {
   CardMedia,
   Chip,
   Collapse,
+  Grid,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -63,11 +64,22 @@ interface Speaker {
 }
 
 const CardContainer = styled('div')({
-  display: 'flex',
-  flexWrap: 'wrap',
+  display: 'grid',
+  gridTemplateColumns: 'repeat(3, 1fr)',
   gap: '20px',
-  justifyContent: 'flex-start',
   padding: '20px',
+  width: '100%',
+  boxSizing: 'border-box',
+  maxWidth: '1200px',
+  margin: '0 auto',
+});
+
+const GridItem = styled(Grid)({
+  display: 'flex',
+  justifyContent: 'center',
+  padding: '10px',
+  width: '100%',
+  boxSizing: 'border-box',
 });
 
 const ActionButton = styled(Button)({
@@ -85,14 +97,51 @@ const StyledDialogTitle = styled(DialogTitle)({
 
 const Section = styled('div')({
   marginBottom: '40px',
+  maxWidth: '1200px',
+  margin: '0 auto',
+  padding: '0 20px',
 });
 
 const SectionTitle = styled('h2')({
   textAlign: 'left',
+  padding: '0 20px',
   color: '#2c3e50',
   borderBottom: '2px solid #3498db',
   paddingBottom: '10px',
   marginBottom: '20px',
+});
+
+const SearchFilterContainer = styled(Box)({
+  display: 'flex',
+  marginBottom: '40px',
+  alignItems: 'center',
+  position: 'relative',
+  maxWidth: '1200px',
+  margin: '0 auto',
+  padding: '0 20px',
+  '& .MuiButton-root': {
+    height: '56px',
+    backgroundColor: '#E4E4E4',
+    border: 'none',
+    boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
+    borderRadius: '20px',
+    padding: '8px 24px',
+    position: 'absolute',
+    right: '20px',
+    '&:hover': {
+      backgroundColor: '#D0D0D0',
+    },
+  },
+});
+
+const FilterPanelContainer = styled(Box)({
+  marginBottom: '40px',
+  backgroundColor: '#E4E4E4',
+  borderRadius: '20px',
+  boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
+  maxWidth: '1200px',
+  margin: '0 auto',
+  padding: '16px 20px',
 });
 
 // Updated TEST_SPEAKERS with new fields
@@ -173,32 +222,6 @@ const TEST_SPEAKERS: Speaker[] = [
     languages: ['English', 'Spanish']
   },
 ];
-
-const SearchFilterContainer = styled(Box)({
-  display: 'flex',
-  gap: '16px',
-  marginBottom: '24px',
-  alignItems: 'center',
-  '& .MuiButton-root': {
-    height: '56px',
-    backgroundColor: '#E4E4E4',
-    border: 'none',
-    boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
-    borderRadius: '20px',
-    padding: '8px 24px',
-    '&:hover': {
-      backgroundColor: '#D0D0D0',
-    },
-  },
-});
-
-const FilterPanelContainer = styled(Box)({
-  marginBottom: '24px',
-  backgroundColor: '#E4E4E4',
-  borderRadius: '20px',
-  boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
-  padding: '16px',
-});
 
 function AdminAllSpeakerPage() {
   const [speakers, setSpeakers] = useState<Speaker[]>([]);
@@ -540,36 +563,7 @@ useEffect(() => {
                     zIndex: 10,
                   }}
                 >
-                  <IconButton
-                    size="small"
-                    sx={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                      '&:hover': {
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                      },
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEdit(speaker);
-                    }}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    sx={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                      '&:hover': {
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                      },
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(speaker);
-                    }}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
+  
                 </div>
               </div>
             ))}
