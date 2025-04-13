@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, TextField, Grid, Typography } from '@mui/material';
+import { Link, TextField, Grid, Typography, Paper, Box } from '@mui/material';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import FormCol from '../components/form/FormCol.tsx';
 import {
@@ -14,6 +14,7 @@ import PrimaryButton from '../components/buttons/PrimaryButton.tsx';
 import ScreenGrid from '../components/ScreenGrid.tsx';
 import FormRow from '../components/form/FormRow.tsx';
 import FormGrid from '../components/form/FormGrid.tsx';
+import COLORS from '../assets/colors.ts';
 
 /**
  * A page users visit to be able to register for a new account by inputting
@@ -152,125 +153,249 @@ function SpeakerRegisterPage() {
     }
   }
 
-  const title = 'Welcome speaker';
   return (
     <ScreenGrid>
-      <FormGrid>
-        <FormCol>
-          <Grid item container justifyContent="center">
-            <Typography variant="h2">{title}</Typography>
-          </Grid>
-          <FormRow>
-            <Grid item width=".5">
-              <TextField
-                fullWidth
-                error={showError.firstName}
-                helperText={errorMessage.firstName}
-                size="small"
-                type="text"
-                required
-                label="First Name"
-                value={values.firstName}
-                onChange={(e) => setValue('firstName', e.target.value)}
-              />
+      <Box
+        sx={{
+          background: `linear-gradient(135deg, ${COLORS.background} 0%, ${COLORS.white} 100%)`,
+          minHeight: '100vh',
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 4,
+        }}
+      >
+        <Paper
+          elevation={3}
+          sx={{
+            padding: 4,
+            borderRadius: 2,
+            width: '100%',
+            maxWidth: 450,
+            background: COLORS.white,
+          }}
+        >
+          <Box sx={{ width: '100%' }}>
+            <Grid container direction="column" alignItems="center" spacing={2}>
+              <Grid item sx={{ mb: 3 }}>
+                <Box
+                  component="img"
+                  src="/images/celf-logo.png"
+                  alt="CELF Logo"
+                  sx={{
+                    height: 80,
+                    width: 'auto',
+                    objectFit: 'contain',
+                  }}
+                />
+              </Grid>
+              <Grid item>
+                <Typography
+                  variant="h4"
+                  textAlign="center"
+                  sx={{
+                    color: COLORS.primaryDark,
+                    fontWeight: 'bold',
+                    mb: 1,
+                  }}
+                >
+                  Welcome Speaker
+                </Typography>
+                <Typography
+                  variant="subtitle1"
+                  textAlign="center"
+                  sx={{ color: COLORS.gray }}
+                >
+                  Create your speaker account
+                </Typography>
+              </Grid>
+              <Grid item container sx={{ width: '100%' }}>
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <TextField
+                      fullWidth
+                      error={showError.firstName}
+                      helperText={errorMessage.firstName}
+                      type="text"
+                      required
+                      label="First Name"
+                      value={values.firstName}
+                      onChange={(e) => setValue('firstName', e.target.value)}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          '&:hover fieldset': {
+                            borderColor: COLORS.primaryBlue,
+                          },
+                        },
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      fullWidth
+                      error={showError.lastName}
+                      helperText={errorMessage.lastName}
+                      type="text"
+                      required
+                      label="Last Name"
+                      value={values.lastName}
+                      onChange={(e) => setValue('lastName', e.target.value)}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          '&:hover fieldset': {
+                            borderColor: COLORS.primaryBlue,
+                          },
+                        },
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+              </Grid>
+              <Grid item sx={{ width: '100%' }}>
+                <TextField
+                  fullWidth
+                  error={showError.organization}
+                  helperText={errorMessage.organization}
+                  type="text"
+                  required
+                  label="Organization"
+                  value={values.organization}
+                  onChange={(e) => setValue('organization', e.target.value)}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&:hover fieldset': {
+                        borderColor: COLORS.primaryBlue,
+                      },
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid item sx={{ width: '100%' }}>
+                <TextField
+                  fullWidth
+                  error={showError.location}
+                  helperText={errorMessage.location}
+                  type="text"
+                  required
+                  label="Location"
+                  value={values.location}
+                  onChange={(e) => setValue('location', e.target.value)}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&:hover fieldset': {
+                        borderColor: COLORS.primaryBlue,
+                      },
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid item sx={{ width: '100%' }}>
+                <TextField
+                  fullWidth
+                  error={showError.email}
+                  helperText={errorMessage.email}
+                  type="email"
+                  required
+                  label="Email"
+                  value={values.email}
+                  onChange={(e) => setValue('email', e.target.value)}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&:hover fieldset': {
+                        borderColor: COLORS.primaryBlue,
+                      },
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid item container sx={{ width: '100%' }}>
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <TextField
+                      fullWidth
+                      error={showError.password}
+                      helperText={errorMessage.password}
+                      type="password"
+                      required
+                      label="Password"
+                      value={values.password}
+                      onChange={(e) => setValue('password', e.target.value)}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          '&:hover fieldset': {
+                            borderColor: COLORS.primaryBlue,
+                          },
+                        },
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      fullWidth
+                      error={showError.confirmPassword}
+                      helperText={errorMessage.confirmPassword}
+                      type="password"
+                      required
+                      label="Confirm Password"
+                      value={values.confirmPassword}
+                      onChange={(e) =>
+                        setValue('confirmPassword', e.target.value)
+                      }
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          '&:hover fieldset': {
+                            borderColor: COLORS.primaryBlue,
+                          },
+                        },
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+              </Grid>
+              <Grid item sx={{ width: '100%', mt: 1 }}>
+                <PrimaryButton
+                  fullWidth
+                  type="submit"
+                  variant="contained"
+                  onClick={() => handleSubmit()}
+                  sx={{
+                    height: 48,
+                    fontSize: '1rem',
+                    textTransform: 'none',
+                  }}
+                >
+                  Register
+                </PrimaryButton>
+              </Grid>
+              <Grid item>
+                <Link
+                  component={RouterLink}
+                  to="../"
+                  sx={{
+                    color: COLORS.primaryBlue,
+                    textDecoration: 'none',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                    },
+                  }}
+                >
+                  Back to Login
+                </Link>
+              </Grid>
             </Grid>
-            <Grid item width=".5">
-              <TextField
-                fullWidth
-                error={showError.lastName}
-                helperText={errorMessage.lastName}
-                size="small"
-                type="text"
-                required
-                label="Last Name"
-                value={values.lastName}
-                onChange={(e) => setValue('lastName', e.target.value)}
-              />
-            </Grid>
-          </FormRow>
-          <Grid item width="1">
-            <TextField
-              fullWidth
-              error={showError.organization}
-              helperText={errorMessage.organization}
-              size="small"
-              type="text"
-              required
-              label="What organization are you representing?"
-              value={values.organization}
-              onChange={(e) => setValue('organization', e.target.value)}
-            />
-          </Grid>
-          <Grid item width="1">
-            <TextField
-              fullWidth
-              error={showError.email}
-              helperText={errorMessage.email}
-              size="small"
-              type="text"
-              required
-              label="Email"
-              value={values.email}
-              onChange={(e) => setValue('email', e.target.value)}
-            />
-          </Grid>
-          <FormRow>
-            <Grid item width=".5">
-              <TextField
-                fullWidth
-                error={showError.password}
-                helperText={errorMessage.password}
-                size="small"
-                type="password"
-                required
-                label="Password"
-                value={values.password}
-                onChange={(e) => setValue('password', e.target.value)}
-              />
-            </Grid>
-            <Grid item container width=".5">
-              <TextField
-                fullWidth
-                error={showError.confirmPassword}
-                helperText={errorMessage.confirmPassword}
-                size="small"
-                type="password"
-                required
-                label=" Confirm Password"
-                value={values.confirmPassword}
-                onChange={(e) => setValue('confirmPassword', e.target.value)}
-              />
-            </Grid>
-          </FormRow>
-          <Grid item container justifyContent="center">
-            <PrimaryButton
-              fullWidth
-              type="submit"
-              variant="contained"
-              color="primary"
-              onClick={() => handleSubmit()}
-            >
-              Register
-            </PrimaryButton>
-          </Grid>
-          <FormRow>
-            <Grid container justifyContent="center">
-              <Link component={RouterLink} to="../">
-                Back to Login
-              </Link>
-            </Grid>
-          </FormRow>
-        </FormCol>
-        {/* The alert that pops up */}
-        <Grid item>
-          <AlertDialog
-            showAlert={showError.alert}
-            title={alertTitle}
-            message={errorMessage.alert}
-            onClose={handleAlertClose}
-          />
-        </Grid>
-      </FormGrid>
+          </Box>
+        </Paper>
+      </Box>
+      {/* The alert that pops up */}
+      <Grid item>
+        <AlertDialog
+          showAlert={showError.alert}
+          title={alertTitle}
+          message={errorMessage.alert}
+          onClose={handleAlertClose}
+        />
+      </Grid>
     </ScreenGrid>
   );
 }
