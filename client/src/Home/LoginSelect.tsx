@@ -103,7 +103,7 @@ function LoginSelectPage() {
                       Teacher
                     </Typography>
                     <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                      Register as a teacher to create and manage classes
+                      Register as a teacher to view and request speakers
                     </Typography>
                   </ItemButton>
                 </Grid>
