@@ -30,7 +30,7 @@ function TeacherRegisterPage() {
     email: '',
     password: '',
     confirmPassword: '',
-    subject: '',
+    school: '',
   };
   const defaultShowErrors = {
     firstName: false,
@@ -39,7 +39,7 @@ function TeacherRegisterPage() {
     password: false,
     confirmPassword: false,
     alert: false,
-    subject: false,
+    school: false,
   };
   const defaultErrorMessages = {
     firstName: '',
@@ -48,7 +48,7 @@ function TeacherRegisterPage() {
     password: '',
     confirmPassword: '',
     alert: '',
-    subject: '',
+    school: '',
   };
   type ValueType = keyof typeof values;
 
@@ -253,13 +253,13 @@ function TeacherRegisterPage() {
               <Grid item sx={{ width: '100%' }}>
                 <TextField
                   fullWidth
-                  error={showError.subject}
-                  helperText={errorMessage.subject}
+                  error={showError.school}
+                  helperText={errorMessage.school}
                   type="text"
                   required
-                  label="Subject"
-                  value={values.subject}
-                  onChange={(e) => setValue('subject', e.target.value)}
+                  label="School"
+                  value={values.school}
+                  onChange={(e) => setValue('school', e.target.value)}
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       '&:hover fieldset': {
