@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TextField, Link, Typography, Grid } from '@mui/material';
+import { TextField, Link, Typography, Grid, Paper, Box } from '@mui/material';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { useAppDispatch } from '../util/redux/hooks.ts';
 import { login as loginRedux } from '../util/redux/userSlice.ts';
@@ -11,6 +11,7 @@ import { loginUser } from './api.ts';
 import AlertDialog from '../components/AlertDialog.tsx';
 import PrimaryButton from '../components/buttons/PrimaryButton.tsx';
 import ScreenGrid from '../components/ScreenGrid.tsx';
+import COLORS from '../assets/colors.ts';
 
 /**
  * A page allowing users to input their email and password to login. The default
@@ -132,61 +133,155 @@ function LoginPage() {
 
   return (
     <ScreenGrid>
-      <FormGrid>
-        <FormCol>
-          <Grid item container justifyContent="center">
-            <Typography variant="h2" textAlign="center">
-              Welcome to Boilerplate
-            </Typography>
-          </Grid>
-          <Grid item width="1">
-            <TextField
-              fullWidth
-              error={showError.email}
-              helperText={errorMessage.email}
-              type="email"
-              required
-              label="Email"
-              value={values.email}
-              onChange={(e) => setValue('email', e.target.value)}
-            />
-          </Grid>
-          <Grid item width="1">
-            <TextField
-              fullWidth
-              error={showError.password}
-              helperText={errorMessage.password}
-              type="password"
-              required
-              label="Password"
-              value={values.password}
-              onChange={(e) => setValue('password', e.target.value)}
-            />
-          </Grid>
-          <Grid item container justifyContent="center">
-            <PrimaryButton
-              fullWidth
-              type="submit"
-              variant="contained"
-              onClick={() => handleSubmit()}
-            >
-              Login
-            </PrimaryButton>
-          </Grid>
-          <FormRow>
-            <Grid item>
-              <Link component={RouterLink} to="/email-reset">
-                Forgot password?
-              </Link>
+      <Box
+        sx={{
+          background: `linear-gradient(135deg, ${COLORS.background} 0%, ${COLORS.white} 100%)`,
+          minHeight: '100vh',
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 4,
+        }}
+      >
+        <Paper
+          elevation={3}
+          sx={{
+            padding: 4,
+            borderRadius: 2,
+            width: '100%',
+            maxWidth: 450,
+            background: COLORS.white,
+          }}
+        >
+          <Box sx={{ width: '100%' }}>
+            <Grid container direction="column" alignItems="center" spacing={3}>
+              <Grid item sx={{ mb: 3 }}>
+                <Box
+                  component="img"
+                  src="/images/celf-logo.png"
+                  alt="CELF Logo"
+                  sx={{
+                    height: 80,
+                    width: 'auto',
+                    objectFit: 'contain',
+                  }}
+                />
+              </Grid>
+              <Grid item>
+                <Typography
+                  variant="h4"
+                  textAlign="center"
+                  sx={{
+                    color: COLORS.primaryDark,
+                    fontWeight: 'bold',
+                    mb: 1,
+                  }}
+                >
+                  Welcome to CELF
+                </Typography>
+                <Typography
+                  variant="subtitle1"
+                  textAlign="center"
+                  sx={{ color: COLORS.gray }}
+                >
+                  Sign in to your account
+                </Typography>
+              </Grid>
+              <Grid item sx={{ width: '100%' }}>
+                <TextField
+                  fullWidth
+                  error={showError.email}
+                  helperText={errorMessage.email}
+                  type="email"
+                  required
+                  label="Email"
+                  value={values.email}
+                  onChange={(e) => setValue('email', e.target.value)}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&:hover fieldset': {
+                        borderColor: COLORS.primaryBlue,
+                      },
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid item sx={{ width: '100%' }}>
+                <TextField
+                  fullWidth
+                  error={showError.password}
+                  helperText={errorMessage.password}
+                  type="password"
+                  required
+                  label="Password"
+                  value={values.password}
+                  onChange={(e) => setValue('password', e.target.value)}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&:hover fieldset': {
+                        borderColor: COLORS.primaryBlue,
+                      },
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid item sx={{ width: '100%' }}>
+                <PrimaryButton
+                  fullWidth
+                  type="submit"
+                  variant="contained"
+                  onClick={() => handleSubmit()}
+                  sx={{
+                    height: 48,
+                    fontSize: '1rem',
+                    textTransform: 'none',
+                  }}
+                >
+                  Sign In
+                </PrimaryButton>
+              </Grid>
+              <Grid
+                item
+                container
+                justifyContent="space-between"
+                sx={{ width: '100%' }}
+              >
+                <Grid item>
+                  <Link
+                    component={RouterLink}
+                    to="/email-reset"
+                    sx={{
+                      color: COLORS.primaryBlue,
+                      textDecoration: 'none',
+                      '&:hover': {
+                        textDecoration: 'underline',
+                      },
+                    }}
+                  >
+                    Forgot password?
+                  </Link>
+                </Grid>
+                <Grid item>
+                  <Link
+                    component={RouterLink}
+                    to="/login-select"
+                    sx={{
+                      color: COLORS.primaryBlue,
+                      textDecoration: 'none',
+                      '&:hover': {
+                        textDecoration: 'underline',
+                      },
+                    }}
+                  >
+                    Sign up
+                  </Link>
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item>
-              <Link component={RouterLink} to="/login-select">
-                Sign up
-              </Link>
-            </Grid>
-          </FormRow>
-        </FormCol>
-      </FormGrid>
+          </Box>
+        </Paper>
+      </Box>
       {/* The alert that pops up */}
       <Grid item>
         <AlertDialog

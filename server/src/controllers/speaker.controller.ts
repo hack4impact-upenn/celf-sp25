@@ -63,11 +63,11 @@ const createSpeakerProfile = async (
   next: express.NextFunction
 ) => {
   const {firstName, lastName, bio, email, title, 
-    organisation, personalSite, industryFocus, areaOfExpertise, 
+    organization, personalSite, industryFocus, areaOfExpertise, 
     ageGroup, location, speakingFormat, languages, available} = req.body;
 
   if (!firstName || !lastName || !email || !title || 
-    !organisation) {      // TODO: change fields depending on what you need
+    !organization) {      // TODO: change fields depending on what you need
     next(
       ApiError.missingFields([
         "firstName",
@@ -75,7 +75,7 @@ const createSpeakerProfile = async (
         "bio",
         "email",
         "title",
-        "organisation",
+        "organization",
         "personalSite",
         "industryFocus",
         "areaOfExpertise",
@@ -100,7 +100,7 @@ const createSpeakerProfile = async (
       bio,
       email,
       title,
-      organisation,
+      organization,
       personalSite,
       industryFocus,
       areaOfExpertise,
@@ -112,6 +112,7 @@ const createSpeakerProfile = async (
     );
     res.status(StatusCode.CREATED).json(speaker);
   } catch (error) {
+    console.log(error);
     next(ApiError.internal("Unable to create speaker profile"));
   }
 };
@@ -178,7 +179,7 @@ const filterSpeaker = async (
 ) => {
   const { location, organization, inperson } = req.query;
 
-  const filterParams: Record<string, any> = {};
+  const filterParams: Record<string, any> = {}; 
 
   if (location) filterParams.location = location;
   if (organization) filterParams.organization = organization;

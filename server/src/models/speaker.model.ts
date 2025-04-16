@@ -66,7 +66,7 @@ interface ISpeaker extends mongoose.Document {
   bio: string;
   email: string;
   title: string;
-  organisation: string;
+  organization: string;
   personalSite: string;
   industryFocus: [];
   areaOfExpertise: [];

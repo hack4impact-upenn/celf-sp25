@@ -15,7 +15,7 @@ router.get("/all", getAllSpeakers);
 
 router.get("/:userId", getSpeaker);
 
-router.post("/create", createSpeakerProfile);
+router.post("/create", isAdmin, createSpeakerProfile);
 
 router.put("/update/:userId", updateSpeakerProfile);
 

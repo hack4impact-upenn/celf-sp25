@@ -19,14 +19,15 @@ import {
   CardMedia,
   Chip,
   Collapse,
+  Grid,
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
 import EmailIcon from '@mui/icons-material/Email';
 import PersonIcon from '@mui/icons-material/Person';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import DeleteIcon from '@mui/icons-material/Delete';
 import SearchBar from '../components/search_bar/SearchBar';
 import SpeakerCard from '../components/cards/SpeakerCard';
 import AdminSidebar from '../components/admin_sidebar/AdminSidebar';
@@ -34,6 +35,7 @@ import TopBar from '../components/top_bar/TopBar';
 import './AdminDashboard.css';
 import { DEFAULT_IMAGE } from '../components/cards/SpeakerCard';
 import SpeakerFilterPanel, { FilterState } from '../components/SpeakerFilterPanel';
+import { deleteData, postData } from '../util/api';
 
 // Updated Speaker interface with new fields for filtering
 interface Speaker {
@@ -63,11 +65,22 @@ interface Speaker {
 }
 
 const CardContainer = styled('div')({
-  display: 'flex',
-  flexWrap: 'wrap',
+  display: 'grid',
+  gridTemplateColumns: 'repeat(3, 1fr)',
   gap: '20px',
-  justifyContent: 'flex-start',
   padding: '20px',
+  width: '100%',
+  boxSizing: 'border-box',
+  maxWidth: '1200px',
+  margin: '0 auto',
+});
+
+const GridItem = styled(Grid)({
+  display: 'flex',
+  justifyContent: 'center',
+  padding: '10px',
+  width: '100%',
+  boxSizing: 'border-box',
 });
 
 const ActionButton = styled(Button)({
@@ -85,14 +98,51 @@ const StyledDialogTitle = styled(DialogTitle)({
 
 const Section = styled('div')({
   marginBottom: '40px',
+  maxWidth: '1200px',
+  margin: '0 auto',
+  padding: '0 20px',
 });
 
 const SectionTitle = styled('h2')({
   textAlign: 'left',
+  padding: '0 20px',
   color: '#2c3e50',
   borderBottom: '2px solid #3498db',
   paddingBottom: '10px',
   marginBottom: '20px',
+});
+
+const SearchFilterContainer = styled(Box)({
+  display: 'flex',
+  marginBottom: '40px',
+  alignItems: 'center',
+  position: 'relative',
+  maxWidth: '1200px',
+  margin: '0 auto',
+  padding: '0 20px',
+  '& .MuiButton-root': {
+    height: '56px',
+    backgroundColor: '#E4E4E4',
+    border: 'none',
+    boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
+    borderRadius: '20px',
+    padding: '8px 24px',
+    position: 'absolute',
+    right: '20px',
+    '&:hover': {
+      backgroundColor: '#D0D0D0',
+    },
+  },
+});
+
+const FilterPanelContainer = styled(Box)({
+  marginBottom: '40px',
+  backgroundColor: '#E4E4E4',
+  borderRadius: '20px',
+  boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
+  maxWidth: '1200px',
+  margin: '0 auto',
+  padding: '16px 20px',
 });
 
 // Updated TEST_SPEAKERS with new fields
@@ -173,32 +223,6 @@ const TEST_SPEAKERS: Speaker[] = [
     languages: ['English', 'Spanish']
   },
 ];
-
-const SearchFilterContainer = styled(Box)({
-  display: 'flex',
-  gap: '16px',
-  marginBottom: '24px',
-  alignItems: 'center',
-  '& .MuiButton-root': {
-    height: '56px',
-    backgroundColor: '#E4E4E4',
-    border: 'none',
-    boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
-    borderRadius: '20px',
-    padding: '8px 24px',
-    '&:hover': {
-      backgroundColor: '#D0D0D0',
-    },
-  },
-});
-
-const FilterPanelContainer = styled(Box)({
-  marginBottom: '24px',
-  backgroundColor: '#E4E4E4',
-  borderRadius: '20px',
-  boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
-  padding: '16px',
-});
 
 function AdminAllSpeakerPage() {
   const [speakers, setSpeakers] = useState<Speaker[]>([]);
@@ -461,7 +485,7 @@ useEffect(() => {
     try {
       if (selectedSpeaker) {
         // In a real app, make API call to delete speaker
-        console.log('Deleting speaker:', selectedSpeaker._id);
+        deleteData(`/api/speakers/delete/${selectedSpeaker._id}`);
 
         // Update the speakers state
         setSpeakers(
@@ -540,36 +564,7 @@ useEffect(() => {
                     zIndex: 10,
                   }}
                 >
-                  <IconButton
-                    size="small"
-                    sx={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                      '&:hover': {
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                      },
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEdit(speaker);
-                    }}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    sx={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                      '&:hover': {
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                      },
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(speaker);
-                    }}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
+  
                 </div>
               </div>
             ))}
@@ -680,7 +675,12 @@ useEffect(() => {
                 </Box>
               </Box>
             </DialogContent>
-            <DialogActions>
+            <DialogActions sx={{ 
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              padding: '20px'
+            }}>
               <Button
                 onClick={() => {
                   handleClose();
@@ -688,8 +688,33 @@ useEffect(() => {
                 }}
                 color="primary"
                 startIcon={<EditIcon />}
+                variant="contained"
+                sx={{
+                  borderRadius: '4px',
+                  textTransform: 'none',
+                  fontSize: '16px',
+                  height: '40px'
+                }}
               >
                 Edit Speaker
+              </Button>
+              <Button
+                onClick={() => {
+                  handleClose();
+                  handleDelete(selectedSpeaker);
+                }}
+                color="error"
+                startIcon={<DeleteIcon />}
+                variant="contained"
+                sx={{
+                  borderRadius: '4px',
+                  textTransform: 'none',
+                  fontSize: '16px',
+                  height: '40px',
+                  marginLeft: '10px'
+                }}
+              >
+                Delete Speaker
               </Button>
             </DialogActions>
           </>

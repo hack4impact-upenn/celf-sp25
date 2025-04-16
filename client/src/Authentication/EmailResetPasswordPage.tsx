@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { TextField, Typography, Link, Grid } from '@mui/material';
+import { TextField, Typography, Link, Grid, Paper, Box } from '@mui/material';
 import { sendResetPasswordEmail } from './api.ts';
 import AlertDialog from '../components/AlertDialog.tsx';
-import FormGrid from '../components/form/FormGrid.tsx';
 import { emailRegex, InputErrorMessage } from '../util/inputvalidation.ts';
 import PrimaryButton from '../components/buttons/PrimaryButton.tsx';
 import ScreenGrid from '../components/ScreenGrid.tsx';
-import FormCol from '../components/form/FormCol.tsx';
+import COLORS from '../assets/colors.ts';
 
 /**
  * A page allowing users to input their email so a reset password link can be
@@ -80,44 +79,117 @@ function EmailResetPasswordPage() {
     }
   };
 
-  const title = "Let's get you back";
   return (
     <ScreenGrid>
-      <FormGrid>
-        <FormCol>
-          <Grid item container justifyContent="center">
-            <Typography variant="h2">{title}</Typography>
-          </Grid>
-          <Grid item width="1">
-            <TextField
-              fullWidth
-              value={email}
-              error={showError.email}
-              helperText={errorMessage.email}
-              onChange={(e) => setEmail(e.target.value)}
-              type="Email"
-              label="Email"
-              required
-              placeholder="Email Address"
-            />
-          </Grid>
-          <Grid item container justifyContent="center">
-            <PrimaryButton
-              fullWidth
-              type="submit"
-              variant="contained"
-              onClick={() => handleSubmit()}
-            >
-              Send Reset Link
-            </PrimaryButton>
-          </Grid>
-          <Grid item container justifyContent="center">
-            <Link component={RouterLink} to="../">
-              Back to Login
-            </Link>
-          </Grid>
-        </FormCol>
-      </FormGrid>
+      <Box
+        sx={{
+          background: `linear-gradient(135deg, ${COLORS.background} 0%, ${COLORS.white} 100%)`,
+          minHeight: '100vh',
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 4,
+        }}
+      >
+        <Paper
+          elevation={3}
+          sx={{
+            padding: 4,
+            borderRadius: 2,
+            width: '100%',
+            maxWidth: 450,
+            background: COLORS.white,
+          }}
+        >
+          <Box sx={{ width: '100%' }}>
+            <Grid container direction="column" alignItems="center" spacing={3}>
+              <Grid item sx={{ mb: 3 }}>
+                <Box
+                  component="img"
+                  src="/images/celf-logo.png"
+                  alt="CELF Logo"
+                  sx={{
+                    height: 80,
+                    width: 'auto',
+                    objectFit: 'contain',
+                  }}
+                />
+              </Grid>
+              <Grid item>
+                <Typography
+                  variant="h4"
+                  textAlign="center"
+                  sx={{
+                    color: COLORS.primaryDark,
+                    fontWeight: 'bold',
+                    mb: 1,
+                  }}
+                >
+                  Reset Your Password
+                </Typography>
+                <Typography
+                  variant="subtitle1"
+                  textAlign="center"
+                  sx={{ color: COLORS.gray }}
+                >
+                  Enter your email to receive a password reset link
+                </Typography>
+              </Grid>
+              <Grid item sx={{ width: '100%', px: 0 }}>
+                <TextField
+                  fullWidth
+                  value={email}
+                  error={showError.email}
+                  helperText={errorMessage.email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  type="email"
+                  label="Email"
+                  required
+                  placeholder="Email Address"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&:hover fieldset': {
+                        borderColor: COLORS.primaryBlue,
+                      },
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid item sx={{ width: '100%', px: 0 }}>
+                <PrimaryButton
+                  fullWidth
+                  type="submit"
+                  variant="contained"
+                  onClick={() => handleSubmit()}
+                  sx={{
+                    height: 48,
+                    fontSize: '1rem',
+                    textTransform: 'none',
+                  }}
+                >
+                  Send Reset Link
+                </PrimaryButton>
+              </Grid>
+              <Grid item>
+                <Link
+                  component={RouterLink}
+                  to="../"
+                  sx={{
+                    color: COLORS.primaryBlue,
+                    textDecoration: 'none',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                    },
+                  }}
+                >
+                  Back to Login
+                </Link>
+              </Grid>
+            </Grid>
+          </Box>
+        </Paper>
+      </Box>
       {/* The alert that pops up */}
       <Grid item>
         <AlertDialog
