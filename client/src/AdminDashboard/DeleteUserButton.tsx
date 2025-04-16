@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Button from '@mui/material/Button';
-import { deleteUser } from './api.tsx';
+import { deleteSpeaker } from './api.tsx';
 import LoadingButton from '../components/buttons/LoadingButton.tsx';
 import ConfirmationModal from '../components/ConfirmationModal.tsx';
 import AlertType from '../util/types/alert.ts';
@@ -25,7 +25,7 @@ function DeleteUserButton({ admin, email, removeRow }: DeleteUserButtonProps) {
   const [isLoading, setLoading] = useState(false);
   async function handleDelete() {
     setLoading(true);
-    if (await deleteUser(email)) {
+    if (await deleteSpeaker(email)) {
       removeRow(email);
       setAlert(`User ${email} has been deleted.`, AlertType.SUCCESS);
     } else {

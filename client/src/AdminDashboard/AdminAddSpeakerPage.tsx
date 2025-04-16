@@ -171,7 +171,7 @@ function AdminUsersPage() {
       lastName: formState.lastName,
       email: formState.email,
       title: formState.jobTitle,
-      organisation: formState.organization,
+      organization: formState.organization,
       personalSite: formState.website,
       bio: formState.bio,
       location: formState.location,
