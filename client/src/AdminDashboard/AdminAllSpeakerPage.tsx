@@ -21,13 +21,13 @@ import {
   Collapse,
   Grid,
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
 import EmailIcon from '@mui/icons-material/Email';
 import PersonIcon from '@mui/icons-material/Person';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import DeleteIcon from '@mui/icons-material/Delete';
 import SearchBar from '../components/search_bar/SearchBar';
 import SpeakerCard from '../components/cards/SpeakerCard';
 import AdminSidebar from '../components/admin_sidebar/AdminSidebar';
@@ -35,6 +35,7 @@ import TopBar from '../components/top_bar/TopBar';
 import './AdminDashboard.css';
 import { DEFAULT_IMAGE } from '../components/cards/SpeakerCard';
 import SpeakerFilterPanel, { FilterState } from '../components/SpeakerFilterPanel';
+import { deleteData, postData } from '../util/api';
 
 // Updated Speaker interface with new fields for filtering
 interface Speaker {
@@ -484,7 +485,7 @@ useEffect(() => {
     try {
       if (selectedSpeaker) {
         // In a real app, make API call to delete speaker
-        console.log('Deleting speaker:', selectedSpeaker._id);
+        deleteData(`/api/speakers/delete/${selectedSpeaker._id}`);
 
         // Update the speakers state
         setSpeakers(
@@ -674,7 +675,12 @@ useEffect(() => {
                 </Box>
               </Box>
             </DialogContent>
-            <DialogActions>
+            <DialogActions sx={{ 
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              padding: '20px'
+            }}>
               <Button
                 onClick={() => {
                   handleClose();
@@ -682,8 +688,33 @@ useEffect(() => {
                 }}
                 color="primary"
                 startIcon={<EditIcon />}
+                variant="contained"
+                sx={{
+                  borderRadius: '4px',
+                  textTransform: 'none',
+                  fontSize: '16px',
+                  height: '40px'
+                }}
               >
                 Edit Speaker
+              </Button>
+              <Button
+                onClick={() => {
+                  handleClose();
+                  handleDelete(selectedSpeaker);
+                }}
+                color="error"
+                startIcon={<DeleteIcon />}
+                variant="contained"
+                sx={{
+                  borderRadius: '4px',
+                  textTransform: 'none',
+                  fontSize: '16px',
+                  height: '40px',
+                  marginLeft: '10px'
+                }}
+              >
+                Delete Speaker
               </Button>
             </DialogActions>
           </>
