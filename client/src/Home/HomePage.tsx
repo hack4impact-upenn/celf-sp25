@@ -54,14 +54,16 @@ function HomePage() {
   const dispatch = useAppDispatch();
   const navigator = useNavigate();
   const [admin, setAdmin] = useState(user.admin);
-  
+
   useEffect(() => {
     if (user.admin) {
       navigator('/admin-dashboard', { replace: true });
+    } else if (user.role === 'speaker') {
+      navigator('/speaker-dashboard', { replace: true });
     } else {
       navigator('/teacher-search-speaker', { replace: true });
     }
-  }, [user.admin, navigator]);
+  }, [user.admin, user.role, navigator]);
 
   const logoutDispatch = () => dispatch(logoutAction());
   const handleLogout = async () => {

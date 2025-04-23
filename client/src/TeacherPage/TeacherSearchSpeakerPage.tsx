@@ -36,7 +36,9 @@ import Sidebar from '../components/teacher_sidebar/Sidebar';
 import TopBar from '../components/top_bar/TopBar';
 import './TeacherPage.css';
 import { DEFAULT_IMAGE } from '../components/cards/SpeakerCard';
-import SpeakerFilterPanel, { FilterState } from '../components/SpeakerFilterPanel';
+import SpeakerFilterPanel, {
+  FilterState,
+} from '../components/SpeakerFilterPanel';
 import { SelectChangeEvent } from '@mui/material';
 
 interface Speaker {
@@ -177,17 +179,18 @@ const speakers = [
     email: 'edward@yyy.org',
     inperson: false,
     virtual: true,
-    imageUrl: 'https://media.istockphoto.com/id/1389348844/photo/studio-shot-of-a-beautiful-young-woman-smiling-while-standing-against-a-grey-background.jpg?s=612x612&w=0&k=20&c=anRTfD_CkOxRdyFtvsiPopOluzKbhBNEQdh4okZImQc=',
+    imageUrl:
+      'https://media.istockphoto.com/id/1389348844/photo/studio-shot-of-a-beautiful-young-woman-smiling-while-standing-against-a-grey-background.jpg?s=612x612&w=0&k=20&c=anRTfD_CkOxRdyFtvsiPopOluzKbhBNEQdh4okZImQc=',
     industry: ['Research', 'Technology'],
     grades: ['Elementary', 'Middle School'],
     city: 'Hong Kong',
     state: 'Hong Kong',
     coordinates: {
       lat: 22.3193,
-      lng: 114.1694
+      lng: 114.1694,
     },
-    languages: ['English', 'Cantonese', 'Mandarin']
-  }
+    languages: ['English', 'Cantonese', 'Mandarin'],
+  },
 ];
 
 const initialBookingFormState: BookingFormState = {
@@ -229,26 +232,35 @@ function TeacherSearchSpeakerPage() {
     radius: 50,
     formats: {
       inperson: false,
-      virtual: false
+      virtual: false,
     },
     languages: [],
-    userCoordinates: undefined
+    userCoordinates: undefined,
   });
-  const [bookingForm, setBookingForm] = useState<BookingFormState>(initialBookingFormState);
+  const [bookingForm, setBookingForm] = useState<BookingFormState>(
+    initialBookingFormState,
+  );
 
   // Add filtered speakers state
   const [filteredSpeakers, setFilteredSpeakers] = useState<Speaker[]>(speakers);
 
   // Function to calculate distance between two points using Haversine formula
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ): number => {
     const R = 3958.8; // Earth's radius in miles
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distance = R * c;
     return distance;
   };
@@ -260,17 +272,19 @@ function TeacherSearchSpeakerPage() {
       setFilteredSpeakers(speakers);
       return;
     }
-    
+
     const lowercaseQuery = query.toLowerCase();
-    const results = speakers.filter(speaker => {
+    const results = speakers.filter((speaker) => {
       return (
         speaker.name.toLowerCase().includes(lowercaseQuery) ||
-        (speaker.organization && speaker.organization.toLowerCase().includes(lowercaseQuery)) ||
+        (speaker.organization &&
+          speaker.organization.toLowerCase().includes(lowercaseQuery)) ||
         speaker.bio.toLowerCase().includes(lowercaseQuery) ||
-        (speaker.location && speaker.location.toLowerCase().includes(lowercaseQuery))
+        (speaker.location &&
+          speaker.location.toLowerCase().includes(lowercaseQuery))
       );
     });
-    
+
     setFilteredSpeakers(results);
   };
 
@@ -292,125 +306,122 @@ function TeacherSearchSpeakerPage() {
   const handleFilterChange = (newFilters: FilterState) => {
     setFilters(newFilters);
     setFilterPanelOpen(false);
+    setSearchQuery(''); // Reset search query when applying filters
 
     let result = [...speakers];
-    
-    // Apply search query filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(speaker => {
-        return (
-          speaker.name.toLowerCase().includes(query) ||
-          (speaker.organization && speaker.organization.toLowerCase().includes(query)) ||
-          speaker.bio.toLowerCase().includes(query) ||
-          (speaker.location && speaker.location.toLowerCase().includes(query))
-        );
-      });
-    }
-    
+
     // Apply industry filter
     if (newFilters.industry && newFilters.industry.length > 0) {
-      result = result.filter(speaker => 
-        speaker.industry && 
-        newFilters.industry.some(industry => 
-          speaker.industry?.includes(industry)
-        )
+      result = result.filter(
+        (speaker) =>
+          speaker.industry &&
+          newFilters.industry.some((industry) =>
+            speaker.industry?.includes(industry),
+          ),
       );
     }
-    
+
     // Apply grade level filter
     if (newFilters.grades && newFilters.grades.length > 0) {
-      result = result.filter(speaker => 
-        speaker.grades && 
-        newFilters.grades.some(grade => 
-          speaker.grades?.includes(grade)
-        )
+      result = result.filter(
+        (speaker) =>
+          speaker.grades &&
+          newFilters.grades.some((grade) => speaker.grades?.includes(grade)),
       );
     }
-    
+
     // Apply location filter
     if (newFilters.city && newFilters.city.trim() !== '') {
-      result = result.filter(speaker => 
-        speaker.city && 
-        speaker.city.toLowerCase() === newFilters.city.toLowerCase()
+      result = result.filter(
+        (speaker) =>
+          speaker.city &&
+          speaker.city.toLowerCase() === newFilters.city.toLowerCase(),
       );
     }
-    
+
     if (newFilters.state && newFilters.state.trim() !== '') {
-      result = result.filter(speaker => 
-        speaker.state && 
-        speaker.state.toLowerCase() === newFilters.state.toLowerCase()
+      result = result.filter(
+        (speaker) =>
+          speaker.state &&
+          speaker.state.toLowerCase() === newFilters.state.toLowerCase(),
       );
     }
-    
+
     // Apply radius filter if coordinates are available
-    if (newFilters.radius && newFilters.radius > 0 && newFilters.userCoordinates) {
+    if (
+      newFilters.radius &&
+      newFilters.radius > 0 &&
+      newFilters.userCoordinates
+    ) {
       const { lat: userLat, lng: userLng } = newFilters.userCoordinates;
-      
-      result = result.filter(speaker => {
+
+      result = result.filter((speaker) => {
         if (!speaker.coordinates) return true;
         const distance = calculateDistance(
-          userLat, 
-          userLng, 
-          speaker.coordinates.lat, 
-          speaker.coordinates.lng
+          userLat,
+          userLng,
+          speaker.coordinates.lat,
+          speaker.coordinates.lng,
         );
         return distance <= newFilters.radius;
       });
     }
-    
+
     // Apply format filter
     if (newFilters.formats) {
       if (newFilters.formats.inperson && !newFilters.formats.virtual) {
-        result = result.filter(speaker => speaker.inperson === true);
+        result = result.filter((speaker) => speaker.inperson === true);
       } else if (!newFilters.formats.inperson && newFilters.formats.virtual) {
-        result = result.filter(speaker => speaker.virtual === true);
+        result = result.filter((speaker) => speaker.virtual === true);
       } else if (newFilters.formats.inperson && newFilters.formats.virtual) {
-        result = result.filter(speaker => speaker.inperson === true || speaker.virtual === true);
+        result = result.filter(
+          (speaker) => speaker.inperson === true || speaker.virtual === true,
+        );
       }
     }
-    
+
     // Apply language filter
     if (newFilters.languages && newFilters.languages.length > 0) {
-      result = result.filter(speaker => 
-        speaker.languages && 
-        newFilters.languages.some(language => 
-          speaker.languages?.includes(language)
-        )
+      result = result.filter(
+        (speaker) =>
+          speaker.languages &&
+          newFilters.languages.some((language) =>
+            speaker.languages?.includes(language),
+          ),
       );
     }
-    
+
     setFilteredSpeakers(result);
   };
 
   const handleBookingFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    setBookingForm(prev => ({
+    setBookingForm((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target;
     if (name) {
-      setBookingForm(prev => ({
+      setBookingForm((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }));
     }
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
-    setBookingForm(prev => ({
+    setBookingForm((prev) => ({
       ...prev,
-      [name]: checked
+      [name]: checked,
     }));
   };
 
   const handleBookSpeaker = () => {
-    setShowBookingForm(prev => !prev);
+    setShowBookingForm((prev) => !prev);
   };
 
   const handleBookingSubmit = (e: React.FormEvent) => {
@@ -433,7 +444,7 @@ function TeacherSearchSpeakerPage() {
       day: 'numeric',
       hour: 'numeric',
       minute: 'numeric',
-      timeZone: timezone
+      timeZone: timezone,
     });
   };
 
@@ -445,7 +456,7 @@ function TeacherSearchSpeakerPage() {
         <div className="request-stack">
           <Section>
             <SectionTitle>Available Speakers</SectionTitle>
-            
+
             <SearchFilterContainer>
               <Box sx={{ flexGrow: 1 }}>
                 <SearchBar
@@ -497,7 +508,8 @@ function TeacherSearchSpeakerPage() {
                 ))
               ) : (
                 <Typography variant="body1" sx={{ p: 2 }}>
-                  No speakers match the current filters. Try adjusting your search or filters.
+                  No speakers match the current filters. Try adjusting your
+                  search or filters.
                 </Typography>
               )}
             </CardContainer>
@@ -528,12 +540,12 @@ function TeacherSearchSpeakerPage() {
               <Box>
                 <Button
                   variant="contained"
-                  color={showBookingForm ? "secondary" : "primary"}
+                  color={showBookingForm ? 'secondary' : 'primary'}
                   onClick={handleBookSpeaker}
                   startIcon={<EventIcon />}
                   sx={{ mr: 1 }}
                 >
-                  {showBookingForm ? "Close Form" : "Book Speaker"}
+                  {showBookingForm ? 'Close Form' : 'Book Speaker'}
                 </Button>
                 <IconButton onClick={handleClose} size="large">
                   <CloseIcon />
@@ -627,8 +639,13 @@ function TeacherSearchSpeakerPage() {
                   </Box>
                 </Box>
               </Box>
-              
-              <Slide direction="left" in={showBookingForm} mountOnEnter unmountOnExit>
+
+              <Slide
+                direction="left"
+                in={showBookingForm}
+                mountOnEnter
+                unmountOnExit
+              >
                 <Paper
                   elevation={0}
                   sx={{
@@ -642,12 +659,16 @@ function TeacherSearchSpeakerPage() {
                     height: '100%',
                   }}
                 >
-                  <Box component="form" onSubmit={handleBookingSubmit} sx={{ flex: 1 }}>
+                  <Box
+                    component="form"
+                    onSubmit={handleBookingSubmit}
+                    sx={{ flex: 1 }}
+                  >
                     <Typography variant="h6" gutterBottom>
                       Book Speaker
                     </Typography>
                     <Divider sx={{ my: 2 }} />
-                    
+
                     <TextField
                       fullWidth
                       label="Event Name"
@@ -658,7 +679,7 @@ function TeacherSearchSpeakerPage() {
                       helperText="What is this event or session called?"
                       sx={{ mb: 2 }}
                     />
-                    
+
                     <TextField
                       fullWidth
                       label="Event Purpose"
@@ -671,7 +692,7 @@ function TeacherSearchSpeakerPage() {
                       helperText="What's the goal or theme of the event?"
                       sx={{ mb: 2 }}
                     />
-                    
+
                     <Grid container spacing={2} sx={{ mb: 2 }}>
                       <Grid item xs={8}>
                         <TextField
@@ -704,9 +725,13 @@ function TeacherSearchSpeakerPage() {
                         </FormControl>
                       </Grid>
                     </Grid>
-                    
+
                     <FormGroup sx={{ mb: 2 }}>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mb: 1 }}
+                      >
                         Event Format*
                       </Typography>
                       <FormControlLabel
@@ -730,7 +755,7 @@ function TeacherSearchSpeakerPage() {
                         label="Virtual"
                       />
                     </FormGroup>
-                    
+
                     <TextField
                       fullWidth
                       label="Area of Expertise Requested"
@@ -741,7 +766,7 @@ function TeacherSearchSpeakerPage() {
                       helperText="What topic(s) would you like the speaker to focus on? (e.g. food systems, clean energy, sustainable fashion)"
                       sx={{ mb: 2 }}
                     />
-                    
+
                     <TextField
                       fullWidth
                       label="Preferred Language"
@@ -751,7 +776,7 @@ function TeacherSearchSpeakerPage() {
                       helperText="What language would you prefer the speaker to use?"
                       sx={{ mb: 2 }}
                     />
-                    
+
                     <TextField
                       fullWidth
                       label="Location"
@@ -762,7 +787,7 @@ function TeacherSearchSpeakerPage() {
                       helperText="Where will this event take place (or be hosted virtually)?"
                       sx={{ mb: 2 }}
                     />
-                    
+
                     <TextField
                       fullWidth
                       label="Goals / Notes"
@@ -774,7 +799,7 @@ function TeacherSearchSpeakerPage() {
                       helperText="What do you hope students gain from this experience? Feel free to share curriculum connections, relevant projects, or speaker guidance."
                       sx={{ mb: 2 }}
                     />
-                    
+
                     <TextField
                       fullWidth
                       label="Budget"
@@ -784,7 +809,7 @@ function TeacherSearchSpeakerPage() {
                       helperText="If you have a budget to offer a speaker honorarium or travel reimbursement, please include details."
                       sx={{ mb: 2 }}
                     />
-                    
+
                     <TextField
                       fullWidth
                       label="Engagement Format"
@@ -797,14 +822,16 @@ function TeacherSearchSpeakerPage() {
                       helperText="How do you envision the session running? (e.g. 30-min talk with Q&A, panel, presentation with slides, interactive workshop)"
                       sx={{ mb: 2 }}
                     />
-                    
-                    <Box sx={{ 
-                      display: 'flex', 
-                      justifyContent: 'flex-end', 
-                      gap: 1,
-                      mt: 'auto',
-                      pt: 2,
-                    }}>
+
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                        gap: 1,
+                        mt: 'auto',
+                        pt: 2,
+                      }}
+                    >
                       <Button onClick={handleCloseBookingForm} color="inherit">
                         Cancel
                       </Button>

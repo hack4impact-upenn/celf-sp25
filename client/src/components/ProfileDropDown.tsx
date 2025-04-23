@@ -39,6 +39,16 @@ function ProfileDropDown({ sx }: ProfileDropDownProps) {
     handleClose();
   };
 
+  const handleProfileClick = () => {
+    handleClose();
+    navigate('/profile');
+  };
+
+  const handleAccountSettingsClick = () => {
+    handleClose();
+    navigate('/account-settings');
+  };
+
   return (
     <>
       <Box
@@ -50,6 +60,11 @@ function ProfileDropDown({ sx }: ProfileDropDownProps) {
           padding: '10px 12px',
           border: 2,
           borderColor: COLORS.primaryDark,
+          cursor: 'pointer',
+          '&:hover': {
+            backgroundColor: COLORS.lightGray,
+            opacity: 0.9,
+          },
         }}
         onClick={handleMenu}
       >
@@ -66,14 +81,44 @@ function ProfileDropDown({ sx }: ProfileDropDownProps) {
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         open={Boolean(anchorEl)}
         onClose={handleClose}
+        PaperProps={{
+          sx: {
+            mt: 1,
+            borderRadius: '8px',
+            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+          },
+        }}
       >
-        <MenuItem onClick={handleClose} component={Link} to="/profile">
+        <MenuItem
+          onClick={handleProfileClick}
+          sx={{
+            '&:hover': {
+              backgroundColor: COLORS.lightGray,
+            },
+          }}
+        >
           Profile
         </MenuItem>
-        <MenuItem onClick={handleClose} component={Link} to="/account-settings">
+        <MenuItem
+          onClick={handleAccountSettingsClick}
+          sx={{
+            '&:hover': {
+              backgroundColor: COLORS.lightGray,
+            },
+          }}
+        >
           Account Settings
         </MenuItem>
-        <MenuItem onClick={handleLogout}>Logout</MenuItem>
+        <MenuItem
+          onClick={handleLogout}
+          sx={{
+            '&:hover': {
+              backgroundColor: COLORS.lightGray,
+            },
+          }}
+        >
+          Logout
+        </MenuItem>
       </Menu>
     </>
   );

@@ -15,6 +15,7 @@ import AdminAddSpeakerPage from './AdminDashboard/AdminAddSpeakerPage.tsx';
 import AdminAllSpeakerPage from './AdminDashboard/AdminAllSpeakerPage.tsx';
 import AllSpeakerFilterPageTest from './AdminDashboard/AllSpeakerFilterPageTest.tsx';
 import AdminRequestsPage from './AdminDashboard/AdminRequestsPage';
+import SpeakerProfilePage from './SpeakerDashboard/SpeakerProfilePage.tsx';
 
 import {
   UnauthenticatedRoutesWrapper,
@@ -34,6 +35,9 @@ import LoginSelectPage from './Home/LoginSelect.tsx';
 import SpeakerRegisterPage from './Authentication/SpeakerRegister.tsx';
 import TeacherRegisterPage from './Authentication/TeacherRegister.tsx';
 import AdminRegisterPage from './Authentication/AdminRegister.tsx';
+import SpeakerSubmitInfoPage from './Authentication/SpeakerSubmitInfo.tsx';
+import SpeakerDashboardPage from './SpeakerDashboard/SpeakerDashboardPage.tsx';
+import AccountSettingsPage from './AccountSettings/AccountSettingsPage.tsx';
 import { useAppSelector } from './util/redux/hooks.ts';
 import { selectUser } from './util/redux/userSlice.ts';
 
@@ -95,6 +99,19 @@ function App() {
                   <Route
                     path="/teacher-speaker-requests"
                     element={<TeacherRequestSpeakerPage />}
+                  />
+                  <Route
+                    path="/speaker-submit-info"
+                    element={<SpeakerSubmitInfoPage />}
+                  />
+                  <Route
+                    path="/speaker-dashboard"
+                    element={<SpeakerDashboardPage />}
+                  />
+                  <Route path="/profile" element={<SpeakerProfilePage />} />
+                  <Route
+                    path="/account-settings"
+                    element={<AccountSettingsPage />}
                   />
                 </Route>
                 <Route element={<AdminRoutesWrapper />}>
