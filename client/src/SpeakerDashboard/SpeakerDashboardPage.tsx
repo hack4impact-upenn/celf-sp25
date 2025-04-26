@@ -35,6 +35,7 @@ function SpeakerDashboardPage() {
           padding: 4,
           flexGrow: 1,
           backgroundColor: COLORS.background,
+          marginTop: '64px',
         }}
       >
         <Typography
@@ -72,13 +73,26 @@ function SpeakerDashboardPage() {
                 Complete your speaker profile to help educators find you and
                 request your expertise for their classrooms.
               </Typography>
-              <PrimaryButton
-                variant="contained"
-                onClick={handleNavigateToForm}
-                sx={{ mt: 2 }}
-              >
-                Complete Your Profile
-              </PrimaryButton>
+              <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                <PrimaryButton
+                  variant="contained"
+                  onClick={handleNavigateToForm}
+                >
+                  Complete Your Profile
+                </PrimaryButton>
+                <PrimaryButton
+                  variant="outlined"
+                  onClick={() => navigate('/profile')}
+                >
+                  View Profile
+                </PrimaryButton>
+                <PrimaryButton
+                  variant="outlined"
+                  onClick={() => navigate('/profile/edit')}
+                >
+                  Edit Profile
+                </PrimaryButton>
+              </Box>
             </Paper>
           </Grid>
 

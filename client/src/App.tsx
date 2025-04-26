@@ -16,6 +16,7 @@ import AdminAllSpeakerPage from './AdminDashboard/AdminAllSpeakerPage.tsx';
 import AllSpeakerFilterPageTest from './AdminDashboard/AllSpeakerFilterPageTest.tsx';
 import AdminRequestsPage from './AdminDashboard/AdminRequestsPage';
 import SpeakerProfilePage from './SpeakerDashboard/SpeakerProfilePage.tsx';
+import SpeakerEditProfilePage from './SpeakerDashboard/SpeakerEditProfilePage.tsx';
 
 import {
   UnauthenticatedRoutesWrapper,
@@ -109,6 +110,10 @@ function App() {
                     element={<SpeakerDashboardPage />}
                   />
                   <Route path="/profile" element={<SpeakerProfilePage />} />
+                  <Route
+                    path="/profile/edit"
+                    element={<SpeakerEditProfilePage />}
+                  />
                   <Route
                     path="/account-settings"
                     element={<AccountSettingsPage />}
