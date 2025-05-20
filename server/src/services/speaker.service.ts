@@ -8,39 +8,45 @@ import { User } from "../models/user.model.ts";
  * @param bio - string representing the speaker's bio
  * @param location - string representing the location
  * @param inperson - boolean indicating if available for in-person events
+ * @param virtual - boolean indicating if available for virtual events
+ * @param imageUrl - string representing the image URL
+ * @param industry - string array representing the industry focus
+ * @param grades - string array representing the grades
+ * @param city - string representing the city
+ * @param state - string representing the state
+ * @param coordinates - object representing the coordinates
+ * @param languages - string array representing the languages
  * @returns The created Speaker profile
  */
 const createSpeaker = async (
-  firstName: string,
-  lastName: string,
+  userId: string,
+  organization: string,
   bio: string,
-  email: string,
-  title: string,
-  organisation: string,
-  personalSite: string,
-  industryFocus: [],
-  areaOfExpertise: [],
-  ageGroup: [],
   location: string,
-  speakingFormat: string,
-  languages: [],
-  available: []
+  inperson: boolean,
+  virtual: boolean,
+  imageUrl: string | undefined,
+  industry: string[],
+  grades: string[],
+  city: string,
+  state: string,
+  coordinates: { lat: number; lng: number } | undefined,
+  languages: string[]
 ) => {
   const newSpeaker = new Speaker({
-    firstName,
-    lastName,
+    userId,
+    organization,
     bio,
-    email,
-    title,
-    organisation,
-    personalSite,
-    industryFocus,
-    areaOfExpertise,
-    ageGroup,
     location,
-    speakingFormat,
-    languages,
-    available
+    inperson,
+    virtual,
+    imageUrl,
+    industry,
+    grades,
+    city,
+    state,
+    coordinates,
+    languages
   });
   const speaker = await newSpeaker.save();
   return speaker;
@@ -52,7 +58,9 @@ const createSpeaker = async (
  * @returns The Speaker or null if not found
  */
 const getSpeakerByUserId = async (userId: string) => {
-  const speaker = await Speaker.findOne({ userId }).exec();
+  const speaker = await Speaker.findOne({ userId })
+    .populate('userId', 'firstName lastName email')
+    .exec();
   return speaker;
 };
 
@@ -62,7 +70,7 @@ const getSpeakerByUserId = async (userId: string) => {
  */
 const getAllSpeakers = async () => {
   const speakers = await Speaker.find({})
-    .populate("userId", "firstName lastName email")
+    .populate('userId', 'firstName lastName email')
     .exec();
   return speakers;
 };
@@ -74,9 +82,13 @@ const getAllSpeakers = async () => {
  * @returns The updated speaker
  */
 const updateSpeaker = async (userId: string, updateData: Partial<ISpeaker>) => {
-  const speaker = await Speaker.findOneAndUpdate({ userId }, updateData, {
-    new: true,
-  }).exec();
+  const speaker = await Speaker.findOneAndUpdate(
+    { userId },
+    updateData,
+    { new: true }
+  )
+    .populate('userId', 'firstName lastName email')
+    .exec();
   return speaker;
 };
 
@@ -90,11 +102,13 @@ const deleteSpeaker = async (userId: string) => {
   return speaker;
 };
 
+/**
+ * Gets filtered list of speakers based on provided criteria
+ */
 const getfilterSpeakeredList = async (filteredParams: Record<string, any>) => {
   const speakers = await Speaker.find(filteredParams)
-    .populate("userId", "firstName lastName email")
+    .populate('userId', 'firstName lastName email')
     .exec();
-  console.log(speakers);
   return speakers;
 };
 

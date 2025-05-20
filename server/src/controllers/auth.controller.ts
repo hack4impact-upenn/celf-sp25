@@ -150,12 +150,14 @@ const register = async (
     return;
   }
 
-  if (req.isAuthenticated()) {
+  // Only check if user is logged in if the request is not from an admin
+  const reqUser = req.user as IUser;
+  if (!reqUser?.admin && req.isAuthenticated()) {
     next(ApiError.badRequest("Already logged in."));
     return;
   }
+
   const lowercaseEmail = email.toLowerCase();
-  // Check if user exists
   const existingUser: IUser | null = await getUserByEmail(lowercaseEmail);
   if (existingUser) {
     next(
@@ -174,8 +176,11 @@ const register = async (
       lowercaseEmail,
       password
     );
-    // Don't need verification email if testing
-    if (process.env.NODE_ENV === "test") {
+    // If created by admin, automatically verify the user
+    if (reqUser?.admin) {
+      user!.verified = true;
+      await user?.save();
+    } else if (process.env.NODE_ENV === "test") {
       user!.verified = true;
       await user?.save();
     } else {
@@ -190,7 +195,7 @@ const register = async (
       email: user?.email,
     });
 
-    res.sendStatus(StatusCode.CREATED);
+    res.status(StatusCode.CREATED).send(user);
   } catch (err) {
     next(ApiError.internal("Unable to register user."));
   }

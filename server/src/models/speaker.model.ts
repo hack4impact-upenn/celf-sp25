@@ -1,80 +1,88 @@
 import mongoose from "mongoose";
 
 const SpeakerSchema = new mongoose.Schema({
-  firstName: {
-    type: String,
-    required: true,
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   },
-  lastName: {
+  organization: {
     type: String,
     required: true
   },
   bio: {
     type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-  },
-  title: {
-    type: String,
-    required: true
-  },
-  organisation: {
-    type: String,
-    required: true,
-  },
-  personalSite: {
-    type: String,
-    required: true
-  },
-  industryFocus: {
-    type: Array,
-    required: true
-  },
-  areaOfExpertise: {
-    type: Array,
-    required: true
-  },
-  ageGroup: {
-    type: String,
     required: true
   },
   location: {
     type: String,
-    required: true,
+    required: true
   },
-  speakingFormat: {
+  inperson: {
+    type: Boolean,
+    required: true,
+    default: false
+  },
+  virtual: {
+    type: Boolean,
+    required: true,
+    default: false
+  },
+  imageUrl: {
+    type: String,
+    required: false
+  },
+  industry: [{
+    type: String,
+    required: true
+  }],
+  grades: [{
     type: String,
     required: true,
+    enum: ['Elementary', 'Middle School', 'High School']
+  }],
+  city: {
+    type: String,
+    required: true
   },
-  languages: {
-    type: Array,
-    required: false
+  state: {
+    type: String,
+    required: true
   },
-  avaliability: {
-    type: Array,
+  coordinates: {
+    lat: {
+      type: Number,
+      required: false
+    },
+    lng: {
+      type: Number,
+      required: false
+    }
+  },
+  languages: [{
+    type: String,
     required: false
-  }
+  }]
 });
 
 interface ISpeaker extends mongoose.Document {
   _id: string;
-  firstName: string;
-  lastName: string;
+  userId: mongoose.Types.ObjectId;
+  organization: string;
   bio: string;
-  email: string;
-  title: string;
-  organisation: string;
-  personalSite: string;
-  industryFocus: [];
-  areaOfExpertise: [];
-  ageGroup: string;
   location: string;
-  speakingFormat: string;
-  languages: [];
-  available: [];
+  inperson: boolean;
+  virtual: boolean;
+  imageUrl?: string;
+  industry: string[];
+  grades: string[];
+  city: string;
+  state: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+  languages: string[];
 }
 
 const Speaker = mongoose.model<ISpeaker>("Speaker", SpeakerSchema);

@@ -36,7 +36,6 @@ const getSpeaker = async (
   next: express.NextFunction
 ) => {
   const { userId } = req.params;
-  console.log(userId);
   if (!userId) {
     next(ApiError.missingFields(["userId"]));
     return;
@@ -62,53 +61,65 @@ const createSpeakerProfile = async (
   res: express.Response,
   next: express.NextFunction
 ) => {
-  const {firstName, lastName, bio, email, title, 
-    organisation, personalSite, industryFocus, areaOfExpertise, 
-    ageGroup, location, speakingFormat, languages, available} = req.body;
+  const {
+    userId,
+    organization,
+    bio,
+    location,
+    inperson,
+    virtual,
+    imageUrl,
+    industry,
+    grades,
+    city,
+    state,
+    coordinates,
+    languages
+  } = req.body;
 
-  if (!firstName || !lastName || !email || !title || 
-    !organisation) {      // TODO: change fields depending on what you need
+  // Validate required fields
+  if (!userId || !organization || !bio || !location || !city || !state) {
     next(
       ApiError.missingFields([
-        "firstName",
-        "lastName",
+        "userId",
+        "organization",
         "bio",
-        "email",
-        "title",
-        "organisation",
-        "personalSite",
-        "industryFocus",
-        "areaOfExpertise",
-        "ageGroup",
         "location",
-        "speakingFormat"
+        "city",
+        "state"
       ])
     );
     return;
   }
 
-  try {
-    // const existingSpeaker = await getSpeakerByUserId(userId);
-    // if (existingSpeaker) {
-    //   next(ApiError.badRequest("Speaker profile already exists"));
-    //   return;
-    // }
+  // Validate arrays
+  if (!Array.isArray(industry) || !Array.isArray(grades)) {
+    next(ApiError.badRequest("Industry and grades must be arrays"));
+    return;
+  }
 
+  // Validate grades enum
+  const validGrades = ["Elementary", "Middle School", "High School"];
+  if (!grades.every(grade => validGrades.includes(grade))) {
+    next(ApiError.badRequest("Invalid grade values"));
+    return;
+  }
+
+  try {
     const speaker = await createSpeaker(
-      firstName,
-      lastName,
+      userId,
+      organization,
       bio,
-      email,
-      title,
-      organisation,
-      personalSite,
-      industryFocus,
-      areaOfExpertise,
-      ageGroup,
       location,
-      speakingFormat,
-      languages,
-      available
+      inperson || false,
+      virtual || false,
+      imageUrl,
+      industry,
+      grades,
+      city,
+      state,
+      coordinates,
+      languages || []
     );
     res.status(StatusCode.CREATED).json(speaker);
   } catch (error) {
@@ -130,6 +141,16 @@ const updateSpeakerProfile = async (
   if (!userId) {
     next(ApiError.missingFields(["userId"]));
     return;
+  }
+
+  // Validate grades if provided
+  if (updateData.grades) {
+    const validGrades = ["Elementary", "Middle School", "High School"];
+    if (!Array.isArray(updateData.grades) || 
+        !updateData.grades.every((grade: string) => validGrades.includes(grade))) {
+      next(ApiError.badRequest("Invalid grade values"));
+      return;
+    }
   }
 
   try {
@@ -171,29 +192,21 @@ const deleteSpeakerProfile = async (
   }
 };
 
+/**
+ * Filter speakers based on criteria
+ */
 const filterSpeaker = async (
   req: express.Request,
   res: express.Response,
   next: express.NextFunction
 ) => {
-  const { location, organization, inperson } = req.query;
-
-  const filterParams: Record<string, any> = {};
-
-  if (location) filterParams.location = location;
-  if (organization) filterParams.organization = organization;
-  if (inperson !== undefined) filterParams.inperson = inperson === "true";
-
+  const filterParams = req.body;
+  
   try {
-    const speakerList = await getfilterSpeakeredList(filterParams);
-    if (!speakerList || speakerList.length === 0) {
-      next(ApiError.notFound("No speakers found matching the criteria"));
-      return;
-    }
-    res.status(StatusCode.OK).json(speakerList);
+    const speakers = await getfilterSpeakeredList(filterParams);
+    res.status(StatusCode.OK).json(speakers);
   } catch (error) {
-    console.log(error);
-    next(ApiError.internal("Unable to fetch speakers"));
+    next(ApiError.internal("Unable to filter speakers"));
   }
 };
 
@@ -203,6 +216,6 @@ export {
   createSpeakerProfile,
   updateSpeakerProfile,
   deleteSpeakerProfile,
-  filterSpeaker,
+  filterSpeaker
 };
 

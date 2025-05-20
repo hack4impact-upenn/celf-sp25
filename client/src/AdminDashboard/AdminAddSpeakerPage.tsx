@@ -18,65 +18,39 @@ import { postData } from '../util/api.tsx';
 
 const industryFocuses = [
   'Clean Energy',
-  'Conservation',
-  'Sustainable Food Systems',
-  'Waste Management',
+  'Climate Policy',
+  'Biodiversity',
   'Environmental Justice',
-  'Climate Change Policy',
-  'Green Building & Architecture',
-  'Circular Economy',
-  'Community Organizing',
-  'Wildlife Protection',
-  'Marine Conservation',
+  'Food Systems',
+  'Waste Management',
   'Urban Planning',
+  'Outdoor Education',
   'Sustainable Agriculture',
-  'Water Resources',
-  'Transportation & Mobility',
-  'Public Health & Environment',
-  'Forestry',
-  'Environmental Education',
-  'Carbon Capture & Storage',
-  'Renewable Energy Finance',
-  'Environmental Technology',
-  'Ecotourism',
-  'Environmental Law & Policy',
-  'Government',
-  'Nonprofit & Advocacy',
+  'Marine Science',
+  'Air Quality',
+  'Community Advocacy',
+  'Green Technology',
+  'Corporate Sustainability',
+  'Public Service',
+  'Other',
 ];
 
 const areasOfExpertise = [
-  'Marine Biology',
   'Clean Energy',
-  'Circularity',
-  'Sustainable Food Systems',
-  'Environmental Education',
-  'Climate Science',
-  'Green Architecture',
-  'Urban Planning',
-  'Ecology',
-  'Water Conservation',
-  'Air Quality Monitoring',
-  'Wildlife Conservation',
-  'Environmental Policy',
-  'Community Engagement',
-  'Renewable Energy Engineering',
-  'Carbon Accounting',
+  'Climate Policy',
+  'Biodiversity',
   'Environmental Justice',
-  'Energy Systems',
-  'Composting',
-  'Soil Science',
-  'Forestry',
-  'Fisheries Management',
-  'Agricultural Technology',
-  'Waste Reduction',
-  'Sustainability Consulting',
-  'Public Health & Environment',
-  'Circular Economy Design',
-  'Geospatial Analysis (GIS)',
-  'Environmental Law',
-  'Climate Adaptation Strategies',
-  'Environmental Communication',
-  'Green Finance',
+  'Food Systems',
+  'Waste Management',
+  'Urban Planning',
+  'Outdoor Education',
+  'Sustainable Agriculture',
+  'Marine Science',
+  'Air Quality',
+  'Community Advocacy',
+  'Green Technology',
+  'Corporate Sustainability',
+  'Public Service',
   'Other',
 ];
 
@@ -165,33 +139,80 @@ function AdminUsersPage() {
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
-
-    const payload = {
-      firstName: formState.firstName,
-      lastName: formState.lastName,
-      email: formState.email,
-      title: formState.jobTitle,
-      organisation: formState.organization,
-      personalSite: formState.website,
-      bio: formState.bio,
-      location: formState.location,
-      speakingFormat: formState.speakingFormat,
-      ageGroup: formState.ageSpecialty,
-      industryFocus: formState.industryFocuses,
-      areaOfExpertise: formState.expertise,
-      languages: [], // TODO: add this in frontend
-      available: [], // TODO: add this in frontend
-    };
-
     e.preventDefault();
-  
-    const res = await postData('speaker/create', 
-      payload
-    );
-    if (res.error) {
-      throw new Error(
-        typeof res.error === 'string' ? res.error : JSON.stringify(res.error)
-      );
+
+    try {
+      // Create a user using the register endpoint
+      const userPayload = {
+        firstName: formState.firstName,
+        lastName: formState.lastName,
+        email: formState.email,
+        password: 'tempPassword123@', 
+      };
+
+      console.log('Creating user with payload:', userPayload);
+      const userResponse = await postData('auth/register', userPayload);
+      if (userResponse.error) {
+        throw new Error(userResponse.error.message);
+      }
+      console.log('User created:', userResponse.data);
+
+      const mappedGrades = formState.ageSpecialty
+        ? [formState.ageSpecialty].map((grade) => {
+            switch (grade) {
+              case 'elementary':
+                return 'Elementary';
+              case 'middle':
+                return 'Middle School';
+              case 'high school':
+                return 'High School';
+              case 'all grades':
+                return 'Elementary'; // Default to Elementary for all grades
+              default:
+                return 'Elementary';
+            }
+          })
+        : [];
+
+      // Parse location into city and state
+      const locationParts = formState.location
+        .split(',')
+        .map((part) => part.trim());
+      const city = locationParts[0] || 'Unknown';
+      const state = locationParts[1] || 'Unknown';
+
+      const speakerPayload = {
+        userId: userResponse.data._id,
+        organization: formState.organization || 'Unknown',
+        bio: formState.bio || 'No bio provided',
+        location: formState.location || 'Unknown',
+        inperson:
+          formState.speakingFormat === 'in-person' ||
+          formState.speakingFormat === 'both',
+        virtual:
+          formState.speakingFormat === 'virtual' ||
+          formState.speakingFormat === 'both',
+        industry:
+          formState.industryFocuses.length > 0
+            ? formState.industryFocuses
+            : ['Other'],
+        grades: mappedGrades,
+        city,
+        state,
+        languages: ['English'],
+      };
+
+      console.log('Creating speaker with payload:', speakerPayload);
+      const speakerResponse = await postData('speaker/create', speakerPayload);
+      if (speakerResponse.error) {
+        throw new Error(speakerResponse.error.message);
+      }
+      console.log('Speaker created:', speakerResponse.data);
+
+      // Reset form after successful submission
+      setFormState(initialFormState);
+    } catch (error) {
+      console.error('Error creating speaker:', error);
     }
   };
 

@@ -40,26 +40,31 @@ import SpeakerFilterPanel, {
   FilterState,
 } from '../components/SpeakerFilterPanel';
 import { SelectChangeEvent } from '@mui/material';
+import { getData } from '../util/api.tsx';
 
 interface Speaker {
-  id: string;
-  name: string;
+  _id: string;
+  userId: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  organization: string;
   bio: string;
-  organization?: string;
-  location?: string;
-  email?: string;
-  inperson?: boolean;
-  virtual?: boolean;
+  location: string;
+  inperson: boolean;
+  virtual: boolean;
   imageUrl?: string;
-  industry?: string[];
-  grades?: string[];
-  city?: string;
-  state?: string;
+  industry: string[];
+  grades: string[];
+  city: string;
+  state: string;
   coordinates?: {
     lat: number;
     lng: number;
   };
-  languages?: string[];
+  languages: string[];
 }
 
 interface BookingRequest {
@@ -218,6 +223,19 @@ const timezones = [
   { value: 'Pacific/Honolulu', label: 'Hawaii Time (HT)' },
 ];
 
+// Add a helper function to safely get speaker name
+const getSpeakerName = (speaker: Speaker): string => {
+  if (speaker.userId?.firstName && speaker.userId?.lastName) {
+    return `${speaker.userId.firstName} ${speaker.userId.lastName}`;
+  }
+  return 'Unnamed Speaker';
+};
+
+// Add a helper function to safely get speaker email
+const getSpeakerEmail = (speaker: Speaker): string => {
+  return speaker.userId?.email || 'No email provided';
+};
+
 function TeacherSearchSpeakerPage() {
   const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
   const [open, setOpen] = useState(false);
@@ -240,9 +258,30 @@ function TeacherSearchSpeakerPage() {
   const [bookingForm, setBookingForm] = useState<BookingFormState>(
     initialBookingFormState,
   );
+  const [speakers, setSpeakers] = useState<Speaker[]>([]);
+  const [filteredSpeakers, setFilteredSpeakers] = useState<Speaker[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  // Add filtered speakers state
-  const [filteredSpeakers, setFilteredSpeakers] = useState<Speaker[]>(speakers);
+  // Load speakers from backend
+  useEffect(() => {
+    const fetchSpeakers = async () => {
+      try {
+        const response = await getData('speaker/all');
+        if (response.error) {
+          throw new Error(response.error.message);
+        }
+        console.log('Fetched speakers:', response.data);
+        setSpeakers(response.data);
+        setFilteredSpeakers(response.data);
+      } catch (error) {
+        setError(
+          'Failed to fetch speakers: ' +
+            (error instanceof Error ? error.message : 'Unknown error'),
+        );
+      }
+    };
+    fetchSpeakers();
+  }, []);
 
   // Function to calculate distance between two points using Haversine formula
   const calculateDistance = (
@@ -265,7 +304,7 @@ function TeacherSearchSpeakerPage() {
     return distance;
   };
 
-  // Update handleSearch to filter speakers
+  // Update handleSearch to use safe name access
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     if (!query.trim()) {
@@ -275,13 +314,12 @@ function TeacherSearchSpeakerPage() {
 
     const lowercaseQuery = query.toLowerCase();
     const results = speakers.filter((speaker) => {
+      const fullName = getSpeakerName(speaker).toLowerCase();
       return (
-        speaker.name.toLowerCase().includes(lowercaseQuery) ||
-        (speaker.organization &&
-          speaker.organization.toLowerCase().includes(lowercaseQuery)) ||
-        speaker.bio.toLowerCase().includes(lowercaseQuery) ||
-        (speaker.location &&
-          speaker.location.toLowerCase().includes(lowercaseQuery))
+        fullName.includes(lowercaseQuery) ||
+        (speaker.organization || '').toLowerCase().includes(lowercaseQuery) ||
+        (speaker.bio || '').toLowerCase().includes(lowercaseQuery) ||
+        (speaker.location || '').toLowerCase().includes(lowercaseQuery)
       );
     });
 
@@ -316,7 +354,7 @@ function TeacherSearchSpeakerPage() {
         (speaker) =>
           speaker.industry &&
           newFilters.industry.some((industry) =>
-            speaker.industry?.includes(industry),
+            speaker.industry.includes(industry),
           ),
       );
     }
@@ -326,7 +364,7 @@ function TeacherSearchSpeakerPage() {
       result = result.filter(
         (speaker) =>
           speaker.grades &&
-          newFilters.grades.some((grade) => speaker.grades?.includes(grade)),
+          newFilters.grades.some((grade) => speaker.grades.includes(grade)),
       );
     }
 
@@ -386,7 +424,7 @@ function TeacherSearchSpeakerPage() {
         (speaker) =>
           speaker.languages &&
           newFilters.languages.some((language) =>
-            speaker.languages?.includes(language),
+            speaker.languages.includes(language),
           ),
       );
     }
@@ -492,16 +530,18 @@ function TeacherSearchSpeakerPage() {
               {filteredSpeakers.length > 0 ? (
                 filteredSpeakers.map((speaker) => (
                   <div
-                    key={speaker.id}
+                    key={speaker._id}
                     onClick={() => handleCardClick(speaker)}
                     style={{ cursor: 'pointer' }}
                   >
                     <SpeakerCard
-                      id={speaker.id}
-                      name={speaker.name}
-                      bio={speaker.bio}
-                      organization={speaker.organization || ''}
-                      location={speaker.location || ''}
+                      id={speaker._id}
+                      name={getSpeakerName(speaker)}
+                      bio={speaker.bio || 'No bio provided'}
+                      organization={
+                        speaker.organization || 'No organization provided'
+                      }
+                      location={speaker.location || 'No location provided'}
                       imageUrl={speaker.imageUrl}
                     />
                   </div>
@@ -535,7 +575,7 @@ function TeacherSearchSpeakerPage() {
           <>
             <StyledDialogTitle>
               <Typography variant="h5" component="div" sx={{ fontWeight: 600 }}>
-                {selectedSpeaker.name}
+                {getSpeakerName(selectedSpeaker)}
               </Typography>
               <Box>
                 <Button
@@ -552,296 +592,85 @@ function TeacherSearchSpeakerPage() {
                 </IconButton>
               </Box>
             </StyledDialogTitle>
-            <DialogContent sx={{ display: 'flex', p: 0 }}>
+            <DialogContent>
               <Box
                 sx={{
-                  width: showBookingForm ? '50%' : '100%',
-                  p: 3,
-                  transition: 'width 0.3s ease-in-out',
+                  display: 'flex',
+                  flexDirection: { xs: 'column', md: 'row' },
+                  gap: 4,
                 }}
               >
-                <Box
+                <CardMedia
+                  component="img"
+                  image={selectedSpeaker.imageUrl || DEFAULT_IMAGE}
+                  alt={getSpeakerName(selectedSpeaker)}
                   sx={{
-                    display: 'flex',
-                    flexDirection: { xs: 'column', md: 'row' },
-                    gap: 4,
+                    width: { xs: '100%', md: '40%' },
+                    height: 'auto',
+                    borderRadius: '8px',
+                    objectFit: 'cover',
+                    maxHeight: '400px',
                   }}
-                >
-                  <CardMedia
-                    component="img"
-                    image={selectedSpeaker.imageUrl || DEFAULT_IMAGE}
-                    alt={selectedSpeaker.name}
-                    sx={{
-                      width: { xs: '100%', md: '40%' },
-                      height: 'auto',
-                      borderRadius: '8px',
-                      objectFit: 'cover',
-                      maxHeight: '400px',
-                    }}
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = DEFAULT_IMAGE;
-                      target.onerror = null;
-                    }}
-                  />
-                  <Box sx={{ width: { xs: '100%', md: '60%' } }}>
-                    <Typography
-                      variant="h6"
-                      gutterBottom
-                      sx={{ color: '#3498db', fontWeight: 600 }}
-                    >
-                      {selectedSpeaker.organization || selectedSpeaker.name}
-                    </Typography>
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = DEFAULT_IMAGE;
+                    target.onerror = null;
+                  }}
+                />
+                <Box sx={{ width: { xs: '100%', md: '60%' } }}>
+                  <Typography
+                    variant="h6"
+                    gutterBottom
+                    sx={{ color: '#3498db', fontWeight: 600 }}
+                  >
+                    {selectedSpeaker.organization || 'No organization provided'}
+                  </Typography>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <EmailIcon sx={{ mr: 1, color: '#7f8c8d' }} />
-                      <Typography variant="body1">
-                        {selectedSpeaker.email || ''}
-                      </Typography>
-                    </Box>
-
-                    <Typography
-                      variant="subtitle1"
-                      gutterBottom
-                      sx={{ color: 'text.secondary', mb: 2 }}
-                    >
-                      {selectedSpeaker.city}, {selectedSpeaker.state}
-                    </Typography>
-
-                    <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
-                      {selectedSpeaker.inperson && (
-                        <Chip
-                          icon={<PersonIcon />}
-                          label="In-person"
-                          color="primary"
-                          variant="outlined"
-                        />
-                      )}
-                      {selectedSpeaker.virtual && (
-                        <Chip
-                          icon={<VideocamIcon />}
-                          label="Virtual"
-                          color="secondary"
-                          variant="outlined"
-                        />
-                      )}
-                    </Box>
-
-                    <Typography
-                      variant="h6"
-                      sx={{ mt: 2, mb: 1, fontWeight: 600 }}
-                    >
-                      About
-                    </Typography>
-                    <Typography variant="body1" paragraph>
-                      {selectedSpeaker.bio}
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <EmailIcon sx={{ mr: 1, color: '#7f8c8d' }} />
+                    <Typography variant="body1">
+                      {getSpeakerEmail(selectedSpeaker)}
                     </Typography>
                   </Box>
+
+                  <Typography
+                    variant="subtitle1"
+                    gutterBottom
+                    sx={{ color: 'text.secondary', mb: 2 }}
+                  >
+                    {selectedSpeaker.location || 'No location provided'}
+                  </Typography>
+
+                  <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
+                    {selectedSpeaker.inperson && (
+                      <Chip
+                        icon={<PersonIcon />}
+                        label="In-person"
+                        color="primary"
+                        variant="outlined"
+                      />
+                    )}
+                    {selectedSpeaker.virtual && (
+                      <Chip
+                        icon={<VideocamIcon />}
+                        label="Virtual"
+                        color="secondary"
+                        variant="outlined"
+                      />
+                    )}
+                  </Box>
+
+                  <Typography
+                    variant="h6"
+                    sx={{ mt: 2, mb: 1, fontWeight: 600 }}
+                  >
+                    About
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    {selectedSpeaker.bio || 'No bio provided'}
+                  </Typography>
                 </Box>
               </Box>
-
-              <Slide
-                direction="left"
-                in={showBookingForm}
-                mountOnEnter
-                unmountOnExit
-              >
-                <Paper
-                  elevation={0}
-                  sx={{
-                    width: '50%',
-                    p: 3,
-                    pb: 6,
-                    borderLeft: '1px solid #e0e0e0',
-                    backgroundColor: '#fafafa',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    height: '100%',
-                  }}
-                >
-                  <Box
-                    component="form"
-                    onSubmit={handleBookingSubmit}
-                    sx={{ flex: 1 }}
-                  >
-                    <Typography variant="h6" gutterBottom>
-                      Book Speaker
-                    </Typography>
-                    <Divider sx={{ my: 2 }} />
-
-                    <TextField
-                      fullWidth
-                      label="Event Name"
-                      name="eventName"
-                      value={bookingForm.eventName}
-                      onChange={handleBookingFormChange}
-                      required
-                      helperText="What is this event or session called?"
-                      sx={{ mb: 2 }}
-                    />
-
-                    <TextField
-                      fullWidth
-                      label="Event Purpose"
-                      name="eventPurpose"
-                      value={bookingForm.eventPurpose}
-                      onChange={handleBookingFormChange}
-                      required
-                      multiline
-                      rows={2}
-                      helperText="What's the goal or theme of the event?"
-                      sx={{ mb: 2 }}
-                    />
-
-                    <Grid container spacing={2} sx={{ mb: 2 }}>
-                      <Grid item xs={8}>
-                        <TextField
-                          fullWidth
-                          label="Proposed Date/Time"
-                          name="dateTime"
-                          value={bookingForm.dateTime}
-                          onChange={handleBookingFormChange}
-                          required
-                          type="datetime-local"
-                          InputLabelProps={{ shrink: true }}
-                          helperText="Include ideal date and time"
-                        />
-                      </Grid>
-                      <Grid item xs={4}>
-                        <FormControl fullWidth>
-                          <InputLabel>Time Zone</InputLabel>
-                          <Select
-                            value={bookingForm.timezone}
-                            onChange={handleSelectChange}
-                            name="timezone"
-                            label="Time Zone"
-                          >
-                            {timezones.map((tz) => (
-                              <MenuItem key={tz.value} value={tz.value}>
-                                {tz.label}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                      </Grid>
-                    </Grid>
-
-                    <FormGroup sx={{ mb: 2 }}>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ mb: 1 }}
-                      >
-                        Event Format*
-                      </Typography>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={bookingForm.isInPerson}
-                            onChange={handleCheckboxChange}
-                            name="isInPerson"
-                          />
-                        }
-                        label="In-person"
-                      />
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={bookingForm.isVirtual}
-                            onChange={handleCheckboxChange}
-                            name="isVirtual"
-                          />
-                        }
-                        label="Virtual"
-                      />
-                    </FormGroup>
-
-                    <TextField
-                      fullWidth
-                      label="Area of Expertise Requested"
-                      name="expertise"
-                      value={bookingForm.expertise}
-                      onChange={handleBookingFormChange}
-                      required
-                      helperText="What topic(s) would you like the speaker to focus on? (e.g. food systems, clean energy, sustainable fashion)"
-                      sx={{ mb: 2 }}
-                    />
-
-                    <TextField
-                      fullWidth
-                      label="Preferred Language"
-                      name="preferredLanguage"
-                      value={bookingForm.preferredLanguage}
-                      onChange={handleBookingFormChange}
-                      helperText="What language would you prefer the speaker to use?"
-                      sx={{ mb: 2 }}
-                    />
-
-                    <TextField
-                      fullWidth
-                      label="Location"
-                      name="location"
-                      value={bookingForm.location}
-                      onChange={handleBookingFormChange}
-                      required
-                      helperText="Where will this event take place (or be hosted virtually)?"
-                      sx={{ mb: 2 }}
-                    />
-
-                    <TextField
-                      fullWidth
-                      label="Goals / Notes"
-                      name="goals"
-                      value={bookingForm.goals}
-                      onChange={handleBookingFormChange}
-                      multiline
-                      rows={3}
-                      helperText="What do you hope students gain from this experience? Feel free to share curriculum connections, relevant projects, or speaker guidance."
-                      sx={{ mb: 2 }}
-                    />
-
-                    <TextField
-                      fullWidth
-                      label="Budget"
-                      name="budget"
-                      value={bookingForm.budget}
-                      onChange={handleBookingFormChange}
-                      helperText="If you have a budget to offer a speaker honorarium or travel reimbursement, please include details."
-                      sx={{ mb: 2 }}
-                    />
-
-                    <TextField
-                      fullWidth
-                      label="Engagement Format"
-                      name="engagementFormat"
-                      value={bookingForm.engagementFormat}
-                      onChange={handleBookingFormChange}
-                      required
-                      multiline
-                      rows={2}
-                      helperText="How do you envision the session running? (e.g. 30-min talk with Q&A, panel, presentation with slides, interactive workshop)"
-                      sx={{ mb: 2 }}
-                    />
-
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        gap: 1,
-                        mt: 'auto',
-                        pt: 2,
-                      }}
-                    >
-                      <Button onClick={handleCloseBookingForm} color="inherit">
-                        Cancel
-                      </Button>
-                      <Button type="submit" variant="contained" color="primary">
-                        Submit Booking Request
-                      </Button>
-                    </Box>
-                  </Box>
-                </Paper>
-              </Slide>
             </DialogContent>
           </>
         )}
