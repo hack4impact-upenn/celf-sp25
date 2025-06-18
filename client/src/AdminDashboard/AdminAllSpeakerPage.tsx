@@ -157,9 +157,6 @@ function AdminAllSpeakerPage() {
     languages: [],
   });
   const [editFormState, setEditFormState] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
     organization: '',
     bio: '',
     location: '',
@@ -368,18 +365,6 @@ function AdminAllSpeakerPage() {
     if (!speaker) return;
     setSelectedSpeaker(speaker);
     setEditFormState({
-      firstName:
-        typeof speaker.userId === 'object' && speaker.userId !== null
-          ? speaker.userId.firstName
-          : '',
-      lastName:
-        typeof speaker.userId === 'object' && speaker.userId !== null
-          ? speaker.userId.lastName
-          : '',
-      email:
-        typeof speaker.userId === 'object' && speaker.userId !== null
-          ? speaker.userId.email
-          : '',
       organization: speaker.organization,
       bio: speaker.bio,
       location: speaker.location,
@@ -435,12 +420,7 @@ function AdminAllSpeakerPage() {
         }
 
         // Get the userId string from the selected speaker
-        const userIdStr =
-          typeof selectedSpeaker.userId === 'object' &&
-          selectedSpeaker.userId !== null
-            ? selectedSpeaker.userId._id
-            : selectedSpeaker.userId;
-
+        const userIdStr = getUserIdString(selectedSpeaker.userId);
         if (!userIdStr) throw new Error('Speaker userId is missing');
 
         // Format the update data to match the speaker schema
@@ -515,9 +495,22 @@ function AdminAllSpeakerPage() {
           throw new Error(response.error.message);
         }
 
+        // Remove the deleted speaker from the local state
         setSpeakers(
-          speakers.filter((speaker) => speaker._id !== selectedSpeaker._id),
+          speakers.filter((speaker) => {
+            const speakerUserId = getUserIdString(speaker.userId);
+            return speakerUserId !== userIdStr;
+          }),
         );
+
+        // Also update filtered speakers
+        setFilteredSpeakers(
+          filteredSpeakers.filter((speaker) => {
+            const speakerUserId = getUserIdString(speaker.userId);
+            return speakerUserId !== userIdStr;
+          }),
+        );
+
         setSuccess('Speaker deleted successfully');
       }
       setDeleteOpen(false);
@@ -686,7 +679,12 @@ function AdminAllSpeakerPage() {
                   <CardMedia
                     component="img"
                     image={selectedSpeaker.imageUrl || DEFAULT_IMAGE}
-                    alt={`${selectedSpeaker.userId?.firstName} ${selectedSpeaker.userId?.lastName}`}
+                    alt={`${
+                      typeof selectedSpeaker.userId === 'object' &&
+                      selectedSpeaker.userId !== null
+                        ? `${selectedSpeaker.userId.firstName} ${selectedSpeaker.userId.lastName}`
+                        : 'Speaker'
+                    }`}
                     sx={{
                       width: { xs: '100%', md: '40%' },
                       height: 'auto',
@@ -694,7 +692,9 @@ function AdminAllSpeakerPage() {
                       objectFit: 'cover',
                       maxHeight: '400px',
                     }}
-                    onError={(e) => {
+                    onError={(
+                      e: React.SyntheticEvent<HTMLImageElement, Event>,
+                    ) => {
                       const target = e.target as HTMLImageElement;
                       target.src = DEFAULT_IMAGE;
                       target.onerror = null;
@@ -792,27 +792,6 @@ function AdminAllSpeakerPage() {
               }}
             >
               <TextField
-                label="First Name"
-                name="firstName"
-                value={editFormState.firstName}
-                onChange={handleEditFormChange}
-                fullWidth
-              />
-              <TextField
-                label="Last Name"
-                name="lastName"
-                value={editFormState.lastName}
-                onChange={handleEditFormChange}
-                fullWidth
-              />
-              <TextField
-                label="Email"
-                name="email"
-                value={editFormState.email}
-                onChange={handleEditFormChange}
-                fullWidth
-              />
-              <TextField
                 label="Organization"
                 name="organization"
                 value={editFormState.organization}
@@ -841,6 +820,68 @@ function AdminAllSpeakerPage() {
                 value={editFormState.imageUrl}
                 onChange={handleEditFormChange}
                 fullWidth
+              />
+              <TextField
+                label="Industry (comma-separated)"
+                name="industry"
+                value={editFormState.industry.join(', ')}
+                onChange={(e) => {
+                  const industries = e.target.value
+                    .split(',')
+                    .map((s) => s.trim())
+                    .filter((s) => s);
+                  setEditFormState((prev) => ({
+                    ...prev,
+                    industry: industries,
+                  }));
+                }}
+                fullWidth
+                helperText="Enter industries separated by commas"
+              />
+              <TextField
+                label="Grades (comma-separated)"
+                name="grades"
+                value={editFormState.grades.join(', ')}
+                onChange={(e) => {
+                  const grades = e.target.value
+                    .split(',')
+                    .map((s) => s.trim())
+                    .filter((s) => s);
+                  setEditFormState((prev) => ({ ...prev, grades: grades }));
+                }}
+                fullWidth
+                helperText="Enter grades separated by commas (Elementary, Middle School, High School)"
+              />
+              <TextField
+                label="City"
+                name="city"
+                value={editFormState.city}
+                onChange={handleEditFormChange}
+                fullWidth
+              />
+              <TextField
+                label="State"
+                name="state"
+                value={editFormState.state}
+                onChange={handleEditFormChange}
+                fullWidth
+              />
+              <TextField
+                label="Languages (comma-separated)"
+                name="languages"
+                value={editFormState.languages.join(', ')}
+                onChange={(e) => {
+                  const languages = e.target.value
+                    .split(',')
+                    .map((s) => s.trim())
+                    .filter((s) => s);
+                  setEditFormState((prev) => ({
+                    ...prev,
+                    languages: languages,
+                  }));
+                }}
+                fullWidth
+                helperText="Enter languages separated by commas"
               />
               <Box sx={{ mt: 2 }}>
                 <FormLabel component="legend">Speaking Format</FormLabel>

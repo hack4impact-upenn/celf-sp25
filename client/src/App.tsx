@@ -13,7 +13,6 @@ import TeacherRequestSpeakerPage from './TeacherPage/TeacherRequestSpeakerPage.t
 import AdminDashboardPage from './AdminDashboard/AdminDashboardPage.tsx';
 import AdminAddSpeakerPage from './AdminDashboard/AdminAddSpeakerPage.tsx';
 import AdminAllSpeakerPage from './AdminDashboard/AdminAllSpeakerPage.tsx';
-import AllSpeakerFilterPageTest from './AdminDashboard/AllSpeakerFilterPageTest.tsx';
 import AdminRequestsPage from './AdminDashboard/AdminRequestsPage';
 import SpeakerProfilePage from './SpeakerDashboard/SpeakerProfilePage.tsx';
 import SpeakerEditProfilePage from './SpeakerDashboard/SpeakerEditProfilePage.tsx';
@@ -56,7 +55,6 @@ function App() {
                 {/* <Route path="/home" element={<HomePage />} /> */}
                 {/* Routes accessed only if user is not authenticated */}
                 <Route element={<UnauthenticatedRoutesWrapper />}>
-                  {/* TODO: REMOVE TEST ROUTE */}
                   <Route path="/login-select" element={<LoginSelectPage />} />
                   <Route
                     path="/admin-register"

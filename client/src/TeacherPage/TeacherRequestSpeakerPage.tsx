@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { styled } from '@mui/system';
 import {
   Dialog,
@@ -12,6 +12,10 @@ import {
   Button,
   Collapse,
   Paper,
+  Alert,
+  CircularProgress,
+  Divider,
+  Grid,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import EmailIcon from '@mui/icons-material/Email';
@@ -24,74 +28,45 @@ import TopBar from '../components/top_bar/TopBar';
 import SearchBar from '../components/search_bar/SearchBar';
 import './TeacherPage.css';
 import { DEFAULT_IMAGE } from '../components/cards/SpeakerCard';
-import SpeakerFilterPanel, { FilterState } from '../components/SpeakerFilterPanel';
+import SpeakerFilterPanel, {
+  FilterState,
+} from '../components/SpeakerFilterPanel';
+import {
+  getTeacherRequests,
+  TeacherRequest,
+  Speaker,
+} from './teacherRequestApi';
+import { useAppSelector } from '../util/redux/hooks.ts';
 
-interface Speaker {
-  id: string;
-  name: string;
-  bio: string;
-  organization?: string;
-  location?: string;
-  email?: string;
-  inperson?: boolean;
-  virtual?: boolean;
-  imageUrl?: string;
-  industry?: string[];
-  grades?: string[];
-  city?: string;
-  state?: string;
-  coordinates?: {
-    lat: number;
-    lng: number;
-  };
-  languages?: string[];
-  bookingRequests?: BookingRequest[];
-}
+interface Request {
+  _id: string;
+  speaker: Speaker;
+  status:
+    | 'Pending Review'
+    | 'Pending Speaker Confirmation'
+    | 'Approved'
+    | 'Archived';
 
-interface BookingRequest {
-  id: string;
+  // Audience Information
+  gradeLevels: string[];
+  subjects: string[];
+  estimatedStudents: number;
+
+  // Event Details
   eventName: string;
   eventPurpose: string;
   dateTime: string;
   timezone: string;
   isInPerson: boolean;
   isVirtual: boolean;
+
+  // Speaker Preferences
   expertise: string;
   preferredLanguage: string;
   location: string;
   goals: string;
-  budget: string;
+  budget?: string;
   engagementFormat: string;
-  status: 'pending' | 'approved' | 'rejected' | 'upcoming' | 'archived';
-  teacherName: string;
-  teacherEmail: string;
-  industry?: string[];
-  grades?: string[];
-  city?: string;
-  state?: string;
-  coordinates?: {
-    lat: number;
-    lng: number;
-  };
-  languages?: string[];
-}
-
-interface Request {
-  id: string;
-  speaker: Speaker;
-  status: 'pending' | 'approved' | 'rejected' | 'upcoming' | 'archived';
-  date?: string;
-  notes?: string;
-}
-
-interface DetailedSpeaker extends Speaker {
-  organization: string;
-  location: string;
-  email: string;
-  inperson: boolean;
-  virtual: boolean;
-  imageUrl: string;
-  bookingRequests?: BookingRequest[];
 }
 
 const CardContainer = styled('div')({
@@ -144,247 +119,14 @@ const FilterPanelContainer = styled(Box)({
   padding: '16px',
 });
 
-// Test data with detailed information for speakers
-const speakersDetail: {
-  [key: string]: Omit<DetailedSpeaker, 'id' | 'name' | 'bio'>;
-} = {
-  speaker1: {
-    organization: 'Environmental Education Center',
-    location: 'New York, NY',
-    email: 'edward@xxx.org',
-    inperson: true,
-    virtual: false,
-    imageUrl:
-      'https://t3.ftcdn.net/jpg/02/99/04/20/360_F_299042079_vGBD7wIlSeNl7vOevWHiL93G4koMM967.jpg',
-    bookingRequests: [
-      {
-        id: '1',
-        eventName: 'Climate Change Workshop',
-        eventPurpose: 'Educate students about climate change impacts',
-        dateTime: '2024-04-15T14:00',
-        timezone: 'America/New_York',
-        isInPerson: true,
-        isVirtual: false,
-        expertise: 'Environmental Science',
-        preferredLanguage: 'English',
-        location: 'Room 101, Main Building',
-        goals: 'Students will learn about climate change impacts and solutions',
-        budget: '$500 honorarium',
-        engagementFormat: '1-hour interactive workshop with Q&A',
-        status: 'upcoming',
-        teacherName: 'John Smith',
-        teacherEmail: 'john@school.edu'
-      }
-    ]
-  },
-  speaker2: {
-    organization: 'Climate Research Institute',
-    location: 'Boston, MA',
-    email: 'khoi@xxx.org',
-    inperson: true,
-    virtual: true,
-    imageUrl:
-      'https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg',
-    bookingRequests: [
-      {
-        id: '2',
-        eventName: 'Sustainability Panel Discussion',
-        eventPurpose: 'Discuss sustainable practices in urban environments',
-        dateTime: '2024-05-20T10:00',
-        timezone: 'America/New_York',
-        isInPerson: false,
-        isVirtual: true,
-        expertise: 'Urban Sustainability',
-        preferredLanguage: 'English',
-        location: 'Virtual - Zoom',
-        goals: 'Students will learn about sustainable urban development',
-        budget: '$300 honorarium',
-        engagementFormat: '45-min panel discussion with Q&A',
-        status: 'pending',
-        teacherName: 'Sarah Johnson',
-        teacherEmail: 'sarah@school.edu'
-      }
-    ]
-  },
-  speaker3: {
-    organization: 'Sustainability Foundation',
-    location: 'San Francisco, CA',
-    email: 'evelyn@xxx.org',
-    inperson: false,
-    virtual: true,
-    imageUrl:
-      'https://media.istockphoto.com/id/1389348844/photo/studio-shot-of-a-beautiful-young-woman-smiling-while-standing-against-a-grey-background.jpg?s=612x612&w=0&k=20&c=anRTfD_CkOxRdyFtvsiPopOluzKbhBNEQdh4okZImQc=',
-    bookingRequests: [
-      {
-        id: '3',
-        eventName: 'Renewable Energy Talk',
-        eventPurpose: 'Introduction to renewable energy technologies',
-        dateTime: '2024-03-10T09:00',
-        timezone: 'America/Los_Angeles',
-        isInPerson: false,
-        isVirtual: true,
-        expertise: 'Renewable Energy',
-        preferredLanguage: 'English',
-        location: 'Virtual - Google Meet',
-        goals: 'Students will understand different types of renewable energy',
-        budget: '$400 honorarium',
-        engagementFormat: '1-hour presentation with interactive elements',
-        status: 'archived',
-        teacherName: 'Michael Brown',
-        teacherEmail: 'michael@school.edu'
-      }
-    ]
-  },
-  speaker4: {
-    organization: 'Marine Biology Lab',
-    location: 'Seattle, WA',
-    email: 'yeon@xxx.org',
-    inperson: true,
-    virtual: true,
-    imageUrl:
-      'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500',
-    bookingRequests: [
-      {
-        id: '4',
-        eventName: 'Ocean Conservation Workshop',
-        eventPurpose: 'Learn about marine conservation efforts',
-        dateTime: '2024-06-05T13:00',
-        timezone: 'America/Los_Angeles',
-        isInPerson: true,
-        isVirtual: true,
-        expertise: 'Marine Biology',
-        preferredLanguage: 'English',
-        location: 'Science Center, Room 203',
-        goals: 'Students will learn about marine ecosystems and conservation',
-        budget: '$600 honorarium',
-        engagementFormat: '2-hour workshop with hands-on activities',
-        status: 'upcoming',
-        teacherName: 'Emily Davis',
-        teacherEmail: 'emily@school.edu'
-      }
-    ]
-  },
-};
-
-const speakers: Speaker[] = [
-  { 
-    id: 'speaker1', 
-    name: 'Edward', 
-    bio: 'Expert in environmental education',
-    organization: 'Environmental Education Center',
-    location: 'New York, NY',
-    email: 'edward@xxx.org',
-    inperson: true,
-    virtual: false,
-    imageUrl: 'https://t3.ftcdn.net/jpg/02/99/04/20/360_F_299042079_vGBD7wIlSeNl7vOevWHiL93G4koMM967.jpg',
-    industry: ['Environmental', 'Education'],
-    grades: ['Elementary', 'Middle School'],
-    city: 'New York',
-    state: 'NY',
-    coordinates: {
-      lat: 40.7128,
-      lng: -74.0060
-    },
-    languages: ['English', 'Mandarin']
-  },
-  { 
-    id: 'speaker2', 
-    name: 'Khoi', 
-    bio: 'Climate change researcher',
-    organization: 'Climate Research Institute',
-    location: 'Boston, MA',
-    email: 'khoi@xxx.org',
-    inperson: true,
-    virtual: true,
-    imageUrl: 'https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg',
-    industry: ['Environment', 'Science', 'Technology'],
-    grades: ['High School'],
-    city: 'Boston',
-    state: 'MA',
-    coordinates: {
-      lat: 42.3601,
-      lng: -71.0589
-    },
-    languages: ['English', 'Vietnamese']
-  },
-  { 
-    id: 'speaker3', 
-    name: 'Evelyn', 
-    bio: 'Sustainability consultant',
-    organization: 'Sustainability Foundation',
-    location: 'San Francisco, CA',
-    email: 'evelyn@xxx.org',
-    inperson: false,
-    virtual: true,
-    imageUrl: 'https://media.istockphoto.com/id/1389348844/photo/studio-shot-of-a-beautiful-young-woman-smiling-while-standing-against-a-grey-background.jpg?s=612x612&w=0&k=20&c=anRTfD_CkOxRdyFtvsiPopOluzKbhBNEQdh4okZImQc=',
-    industry: ['Business', 'Sustainability'],
-    grades: ['Middle School', 'High School'],
-    city: 'San Francisco',
-    state: 'CA',
-    coordinates: {
-      lat: 37.7749,
-      lng: -122.4194
-    },
-    languages: ['English', 'Spanish']
-  },
-  { 
-    id: 'speaker4', 
-    name: 'Yeon', 
-    bio: 'Marine biology specialist',
-    organization: 'Marine Biology Lab',
-    location: 'Seattle, WA',
-    email: 'yeon@xxx.org',
-    inperson: true,
-    virtual: true,
-    imageUrl: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500',
-    industry: ['Science', 'Environment'],
-    grades: ['Elementary', 'Middle School', 'High School'],
-    city: 'Seattle',
-    state: 'WA',
-    coordinates: {
-      lat: 47.6062,
-      lng: -122.3321
-    },
-    languages: ['English', 'Korean']
-  }
-];
-
-const requests: Request[] = [
-  { 
-    id: '1', 
-    speaker: speakers[0], 
-    status: 'upcoming',
-    date: '2024-04-15',
-    notes: 'Request for environmental education workshop'
-  },
-  { 
-    id: '2', 
-    speaker: speakers[1], 
-    status: 'pending',
-    date: '2024-04-20',
-    notes: 'Request for technology presentation'
-  },
-  { 
-    id: '3', 
-    speaker: speakers[2], 
-    status: 'archived',
-    date: '2024-03-15',
-    notes: 'Completed research seminar'
-  },
-  { 
-    id: '4', 
-    speaker: speakers[3], 
-    status: 'upcoming',
-    date: '2024-04-25',
-    notes: 'Request for marine biology lecture'
-  }
-];
-
 function TeacherRequestSpeakerPage() {
-  const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
   const [open, setOpen] = useState(false);
   const [filterPanelOpen, setFilterPanelOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [requests, setRequests] = useState<Request[]>([]);
   const [filters, setFilters] = useState<FilterState>({
     industry: [],
     grades: [],
@@ -398,97 +140,156 @@ function TeacherRequestSpeakerPage() {
     languages: [],
   });
 
+  const user = useAppSelector((state) => state.user);
+
+  useEffect(() => {
+    fetchRequests();
+  }, []);
+
+  const fetchRequests = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const teacherRequests = await getTeacherRequests();
+
+      // Transform the data to match our Request interface
+      const transformedRequests: Request[] = teacherRequests.map((req) => ({
+        _id: req._id,
+        speaker: req.speakerId, // The backend now returns populated speaker data
+        status: req.status,
+        date: req.dateTime,
+        notes: req.eventPurpose,
+        eventName: req.eventName,
+        eventPurpose: req.eventPurpose,
+        dateTime: req.dateTime,
+        timezone: req.timezone,
+        isInPerson: req.isInPerson,
+        isVirtual: req.isVirtual,
+        expertise: req.expertise,
+        preferredLanguage: req.preferredLanguage,
+        location: req.location,
+        goals: req.goals,
+        budget: req.budget,
+        engagementFormat: req.engagementFormat,
+        gradeLevels: req.gradeLevels,
+        subjects: req.subjects,
+        estimatedStudents: req.estimatedStudents,
+      }));
+
+      setRequests(transformedRequests);
+    } catch (err) {
+      setError('Failed to load requests. Please try again.');
+      console.error('Error fetching requests:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Function to calculate distance between two points using Haversine formula
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ): number => {
     const R = 3958.8; // Earth's radius in miles
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distance = R * c;
     return distance;
   };
 
-  // Group and filter requests
   const getFilteredRequests = () => {
     let result = [...requests];
-    
-    // Apply search query filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(request => {
-        const speaker = request.speaker;
+
+    // Apply search filter
+    if (searchQuery.trim() !== '') {
+      const lowercaseQuery = searchQuery.toLowerCase();
+      result = result.filter((request) => {
+        const speakerName =
+          `${request.speaker.userId.firstName} ${request.speaker.userId.lastName}`.toLowerCase();
+        const organization = (request.speaker.organization || '').toLowerCase();
+        const bio = (request.speaker.bio || '').toLowerCase();
+        const location = (request.speaker.location || '').toLowerCase();
+
         return (
-          speaker.name.toLowerCase().includes(query) ||
-          (speaker.organization && speaker.organization.toLowerCase().includes(query)) ||
-          speaker.bio.toLowerCase().includes(query) ||
-          (speaker.location && speaker.location.toLowerCase().includes(query)) ||
-          (request.notes && request.notes.toLowerCase().includes(query))
+          speakerName.includes(lowercaseQuery) ||
+          organization.includes(lowercaseQuery) ||
+          bio.includes(lowercaseQuery) ||
+          location.includes(lowercaseQuery)
         );
       });
     }
-    
+
     // Apply industry filter
     if (filters.industry && filters.industry.length > 0) {
-      result = result.filter(request => 
-        request.speaker.industry && 
-        filters.industry.some(industry => 
-          request.speaker.industry?.includes(industry)
-        )
+      result = result.filter(
+        (request) =>
+          request.speaker.industry &&
+          filters.industry.some((industry) =>
+            request.speaker.industry.includes(industry),
+          ),
       );
     }
-    
+
     // Apply grade level filter
     if (filters.grades && filters.grades.length > 0) {
-      result = result.filter(request => 
-        request.speaker.grades && 
-        filters.grades.some(grade => 
-          request.speaker.grades?.includes(grade)
-        )
+      result = result.filter(
+        (request) =>
+          request.speaker.grades &&
+          filters.grades.some((grade) =>
+            request.speaker.grades.includes(grade),
+          ),
       );
     }
-    
+
     // Apply location filter
     if (filters.city && filters.city.trim() !== '') {
-      result = result.filter(request => 
-        request.speaker.city && 
-        request.speaker.city.toLowerCase() === filters.city.toLowerCase()
+      result = result.filter(
+        (request) =>
+          request.speaker.city &&
+          request.speaker.city.toLowerCase() === filters.city.toLowerCase(),
       );
     }
-    
+
     if (filters.state && filters.state.trim() !== '') {
-      result = result.filter(request => 
-        request.speaker.state && 
-        request.speaker.state.toLowerCase() === filters.state.toLowerCase()
+      result = result.filter(
+        (request) =>
+          request.speaker.state &&
+          request.speaker.state.toLowerCase() === filters.state.toLowerCase(),
       );
     }
-    
+
     // Apply radius filter if coordinates are available
     if (filters.radius && filters.radius > 0 && filters.userCoordinates) {
       const { lat: userLat, lng: userLng } = filters.userCoordinates;
-      
-      result = result.filter(request => {
+
+      result = result.filter((request) => {
         if (!request.speaker.coordinates) return true;
         const distance = calculateDistance(
-          userLat, 
-          userLng, 
-          request.speaker.coordinates.lat, 
-          request.speaker.coordinates.lng
+          userLat,
+          userLng,
+          request.speaker.coordinates.lat,
+          request.speaker.coordinates.lng,
         );
         return distance <= filters.radius;
       });
     }
-    
+
     // Apply format filter
     if (filters.formats) {
       // If both formats are unchecked, show all requests
       if (!filters.formats.inperson && !filters.formats.virtual) {
         // No filtering needed
       } else {
-        result = result.filter(request => {
+        result = result.filter((request) => {
           const speaker = request.speaker;
           if (filters.formats.inperson && !filters.formats.virtual) {
             return speaker.inperson === true;
@@ -501,17 +302,18 @@ function TeacherRequestSpeakerPage() {
         });
       }
     }
-    
+
     // Apply language filter
     if (filters.languages && filters.languages.length > 0) {
-      result = result.filter(request => 
-        request.speaker.languages && 
-        filters.languages.some(language => 
-          request.speaker.languages?.includes(language)
-        )
+      result = result.filter(
+        (request) =>
+          request.speaker.languages &&
+          filters.languages.some((language) =>
+            request.speaker.languages.includes(language),
+          ),
       );
     }
-    
+
     return result;
   };
 
@@ -519,15 +321,9 @@ function TeacherRequestSpeakerPage() {
     setSearchQuery(query);
   };
 
-  const handleCardClick = (speaker: Speaker) => {
-    const detailedInfo = speakersDetail[speaker.id];
-    if (detailedInfo) {
-      setSelectedSpeaker({
-        ...speaker,
-        ...detailedInfo,
-      });
-      setOpen(true);
-    }
+  const handleCardClick = (request: Request) => {
+    setSelectedRequest(request);
+    setOpen(true);
   };
 
   const handleClose = () => {
@@ -545,27 +341,27 @@ function TeacherRequestSpeakerPage() {
 
   const getStatusTitle = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'upcoming':
-        return 'Upcoming Sessions';
-      case 'pending':
-        return 'Pending Requests';
+      case 'pending review':
+        return 'Pending Review';
+      case 'pending speaker confirmation':
+        return 'Pending Speaker Confirmation';
+      case 'approved':
+        return 'Approved';
       case 'archived':
-        return 'Archived Requests';
+        return 'Archived';
       default:
-        return status.charAt(0).toUpperCase() + status.slice(1);
+        return capitalizeFirstLetter(status);
     }
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (status.toLowerCase()) {
+      case 'pending review':
+        return 'warning';
+      case 'pending speaker confirmation':
+        return 'info';
       case 'approved':
         return 'success';
-      case 'rejected':
-        return 'error';
-      case 'pending':
-        return 'warning';
-      case 'upcoming':
-        return 'info';
       case 'archived':
         return 'default';
       default:
@@ -596,82 +392,121 @@ function TeacherRequestSpeakerPage() {
       day: 'numeric',
       hour: 'numeric',
       minute: 'numeric',
-      timeZone: timezone
+      timeZone: timezone,
     });
   };
 
   // Define the order of status sections
-  const statusOrder = ['upcoming', 'pending', 'archived'];
+  const statusOrder = [
+    'pending review',
+    'pending speaker confirmation',
+    'approved',
+    'archived',
+  ];
+
+  if (loading) {
+    return (
+      <div className="flex-div">
+        <TopBar />
+        <Sidebar />
+        <div className="main-window">
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '50vh',
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-div">
       <TopBar />
       <Sidebar />
       <div className="main-window">
-        <div className="request-stack">
-          <SearchFilterContainer>
-            <Box sx={{ flexGrow: 1 }}>
-              <SearchBar
-                onSearch={handleSearch}
-                placeholder="Search requests..."
-              />
-            </Box>
-            <Button
-              variant="contained"
-              startIcon={<FilterListIcon />}
-              onClick={handleFilterPanelToggle}
-              sx={{
-                textTransform: 'none',
-                fontSize: '16px',
-                fontWeight: 500,
-                color: '#49454F',
-              }}
-            >
-              Filters
-            </Button>
-          </SearchFilterContainer>
+        <Typography variant="h4" sx={{ mb: 4, color: '#2c3e50' }}>
+          My Speaker Requests
+        </Typography>
 
-          <Collapse in={filterPanelOpen}>
-            <FilterPanelContainer>
-              <SpeakerFilterPanel
-                filters={filters}
-                onChange={handleFilterChange}
-              />
-            </FilterPanelContainer>
-          </Collapse>
+        {error && (
+          <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        )}
 
-          {Object.keys(groupedRequests).length > 0 ? (
-            statusOrder.map((status) => {
-              if (groupedRequests[status] && groupedRequests[status].length > 0) {
-                return (
-                  <Section key={status}>
-                    <SectionTitle>{getStatusTitle(status)}</SectionTitle>
-                    <CardContainer>
-                      {groupedRequests[status].map((request) => (
-                        <div
-                          key={request.id}
-                          onClick={() => handleCardClick(request.speaker)}
-                          style={{ cursor: 'pointer' }}
-                        >
-                          <SpeakerRequestCard
-                            id={request.id}
-                            speakerid={request.speaker.id}
-                            status={request.status}
-                          />
-                        </div>
-                      ))}
-                    </CardContainer>
-                  </Section>
-                );
-              }
-              return null;
-            })
-          ) : (
-            <Typography variant="body1" sx={{ p: 2 }}>
-              No requests match the current filters. Try adjusting your search or filters.
+        <SearchFilterContainer>
+          <Box sx={{ flexGrow: 1 }}>
+            <SearchBar
+              onSearch={handleSearch}
+              placeholder="Search requests..."
+            />
+          </Box>
+          <Button
+            variant="contained"
+            startIcon={<FilterListIcon />}
+            onClick={handleFilterPanelToggle}
+            sx={{
+              textTransform: 'none',
+              fontSize: '16px',
+              fontWeight: 500,
+              color: '#49454F',
+            }}
+          >
+            Filters
+          </Button>
+        </SearchFilterContainer>
+
+        <Collapse in={filterPanelOpen}>
+          <FilterPanelContainer>
+            <SpeakerFilterPanel
+              filters={filters}
+              onChange={handleFilterChange}
+            />
+          </FilterPanelContainer>
+        </Collapse>
+
+        {statusOrder.map((status) => {
+          const requestsInStatus = groupedRequests[status] || [];
+          if (requestsInStatus.length === 0) return null;
+
+          return (
+            <Section key={status}>
+              <SectionTitle>{getStatusTitle(status)}</SectionTitle>
+              <CardContainer>
+                {requestsInStatus.map((request) => (
+                  <div
+                    key={request._id}
+                    onClick={() => handleCardClick(request)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <SpeakerRequestCard
+                      id={request._id}
+                      speaker={request.speaker}
+                      status={request.status}
+                    />
+                  </div>
+                ))}
+              </CardContainer>
+            </Section>
+          );
+        })}
+
+        {getFilteredRequests().length === 0 && (
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <Typography variant="h6" color="text.secondary">
+              No requests found
             </Typography>
-          )}
-        </div>
+            <Typography variant="body2" color="text.secondary">
+              Try adjusting your search or filters
+            </Typography>
+          </Box>
+        )}
       </div>
 
       {/* Details Dialog */}
@@ -684,14 +519,16 @@ function TeacherRequestSpeakerPage() {
             borderRadius: '16px',
             width: '90%',
             maxWidth: '800px',
+            overflow: 'hidden',
           },
         }}
       >
-        {selectedSpeaker && (
+        {selectedRequest && (
           <>
             <StyledDialogTitle>
               <Typography variant="h5" component="div" sx={{ fontWeight: 600 }}>
-                {selectedSpeaker.name}
+                {selectedRequest.speaker.userId.firstName}{' '}
+                {selectedRequest.speaker.userId.lastName}
               </Typography>
               <IconButton onClick={handleClose} size="large">
                 <CloseIcon />
@@ -707,8 +544,8 @@ function TeacherRequestSpeakerPage() {
               >
                 <CardMedia
                   component="img"
-                  image={selectedSpeaker.imageUrl || DEFAULT_IMAGE}
-                  alt={selectedSpeaker.name}
+                  image={selectedRequest.speaker.imageUrl || DEFAULT_IMAGE}
+                  alt={`${selectedRequest.speaker.userId.firstName} ${selectedRequest.speaker.userId.lastName}`}
                   sx={{
                     width: { xs: '100%', md: '40%' },
                     height: 'auto',
@@ -728,13 +565,13 @@ function TeacherRequestSpeakerPage() {
                     gutterBottom
                     sx={{ color: '#3498db', fontWeight: 600 }}
                   >
-                    {selectedSpeaker.organization}
+                    {selectedRequest.speaker.organization}
                   </Typography>
 
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <EmailIcon sx={{ mr: 1, color: '#7f8c8d' }} />
                     <Typography variant="body1">
-                      {selectedSpeaker.email}
+                      {selectedRequest.speaker.userId.email}
                     </Typography>
                   </Box>
 
@@ -743,11 +580,11 @@ function TeacherRequestSpeakerPage() {
                     gutterBottom
                     sx={{ color: 'text.secondary', mb: 2 }}
                   >
-                    {selectedSpeaker.location}
+                    {selectedRequest.speaker.location}
                   </Typography>
 
                   <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
-                    {selectedSpeaker.inperson && (
+                    {selectedRequest.speaker.inperson && (
                       <Chip
                         icon={<PersonIcon />}
                         label="In-person"
@@ -755,7 +592,7 @@ function TeacherRequestSpeakerPage() {
                         variant="outlined"
                       />
                     )}
-                    {selectedSpeaker.virtual && (
+                    {selectedRequest.speaker.virtual && (
                       <Chip
                         icon={<VideocamIcon />}
                         label="Virtual"
@@ -772,99 +609,208 @@ function TeacherRequestSpeakerPage() {
                     About
                   </Typography>
                   <Typography variant="body1" paragraph>
-                    {selectedSpeaker.bio}
+                    {selectedRequest.speaker.bio}
                   </Typography>
 
-                  {selectedSpeaker.bookingRequests && selectedSpeaker.bookingRequests.length > 0 && (
-                    <>
-                      <Typography
-                        variant="h6"
-                        sx={{ mt: 4, mb: 2, fontWeight: 600 }}
-                      >
-                        Booking Requests
+                  {/* Request Details Section */}
+                  <Divider sx={{ my: 3 }} />
+
+                  <Typography
+                    variant="h6"
+                    sx={{ mb: 2, fontWeight: 600, color: '#2c3e50' }}
+                  >
+                    Request Details
+                  </Typography>
+
+                  <Box sx={{ mb: 2 }}>
+                    <Chip
+                      label={selectedRequest.status}
+                      color={
+                        selectedRequest.status === 'Approved'
+                          ? 'success'
+                          : selectedRequest.status === 'Pending Review'
+                          ? 'warning'
+                          : selectedRequest.status ===
+                            'Pending Speaker Confirmation'
+                          ? 'info'
+                          : 'default'
+                      }
+                      sx={{ mb: 2 }}
+                    />
+                  </Box>
+
+                  {/* Audience Information */}
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 2,
+                      color: '#2c3e50',
+                      borderBottom: '1px solid #bdc3c7',
+                      pb: 1,
+                    }}
+                  >
+                    Audience Information
+                  </Typography>
+                  <Grid container spacing={2} sx={{ mb: 3 }}>
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Grade Level(s)
                       </Typography>
-                      {selectedSpeaker.bookingRequests.map((request) => (
-                        <Paper
-                          key={request.id}
-                          elevation={0}
-                          sx={{
-                            p: 2,
-                            mb: 2,
-                            border: '1px solid #e0e0e0',
-                            borderRadius: '8px',
-                          }}
-                        >
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                              {request.eventName}
-                            </Typography>
-                            <Chip
-                              label={capitalizeFirstLetter(request.status)}
-                              color={getStatusColor(request.status)}
-                              size="small"
-                            />
-                          </Box>
-                          
-                          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                            {formatDateTime(request.dateTime, request.timezone)}
-                          </Typography>
-                          
-                          <Typography variant="body2" sx={{ mb: 1 }}>
-                            <strong>Purpose:</strong> {request.eventPurpose}
-                          </Typography>
-                          
-                          <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
-                            {request.isInPerson && (
-                              <Chip
-                                icon={<PersonIcon />}
-                                label="In-person"
-                                size="small"
-                                variant="outlined"
-                              />
-                            )}
-                            {request.isVirtual && (
-                              <Chip
-                                icon={<VideocamIcon />}
-                                label="Virtual"
-                                size="small"
-                                variant="outlined"
-                              />
-                            )}
-                          </Box>
-                          
-                          <Typography variant="body2" sx={{ mb: 1 }}>
-                            <strong>Location:</strong> {request.location}
-                          </Typography>
-                          
-                          <Typography variant="body2" sx={{ mb: 1 }}>
-                            <strong>Expertise Requested:</strong> {request.expertise}
-                          </Typography>
-                          
-                          <Typography variant="body2" sx={{ mb: 1 }}>
-                            <strong>Preferred Language:</strong> {request.preferredLanguage}
-                          </Typography>
-                          
-                          <Typography variant="body2" sx={{ mb: 1 }}>
-                            <strong>Goals:</strong> {request.goals}
-                          </Typography>
-                          
-                          <Typography variant="body2" sx={{ mb: 1 }}>
-                            <strong>Budget:</strong> {request.budget}
-                          </Typography>
-                          
-                          <Typography variant="body2" sx={{ mb: 1 }}>
-                            <strong>Engagement Format:</strong> {request.engagementFormat}
-                          </Typography>
-                          
-                          <Box sx={{ mt: 2, pt: 1, borderTop: '1px solid #e0e0e0' }}>
-                            <Typography variant="body2" color="text.secondary">
-                              Requested by: {request.teacherName} ({request.teacherEmail})
-                            </Typography>
-                          </Box>
-                        </Paper>
-                      ))}
-                    </>
-                  )}
+                      <Typography variant="body1">
+                        {selectedRequest.gradeLevels.join(', ')}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Subject(s)
+                      </Typography>
+                      <Typography variant="body1">
+                        {selectedRequest.subjects.join(', ')}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Estimated Students
+                      </Typography>
+                      <Typography variant="body1">
+                        {selectedRequest.estimatedStudents}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+
+                  {/* Event Details */}
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 2,
+                      color: '#2c3e50',
+                      borderBottom: '1px solid #bdc3c7',
+                      pb: 1,
+                    }}
+                  >
+                    Event Details
+                  </Typography>
+                  <Grid container spacing={2} sx={{ mb: 3 }}>
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Event Name
+                      </Typography>
+                      <Typography variant="body1">
+                        {selectedRequest.eventName}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Event Purpose
+                      </Typography>
+                      <Typography variant="body1">
+                        {selectedRequest.eventPurpose}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Date & Time
+                      </Typography>
+                      <Typography variant="body1">
+                        {selectedRequest.timezone
+                          ? formatDateTime(
+                              selectedRequest.dateTime,
+                              selectedRequest.timezone,
+                            )
+                          : new Date(selectedRequest.dateTime).toLocaleString()}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Event Location
+                      </Typography>
+                      <Typography variant="body1">
+                        {selectedRequest.location}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Format
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 1, mt: 0.5 }}>
+                        {selectedRequest.isInPerson && (
+                          <Chip
+                            icon={<PersonIcon />}
+                            label="In-person"
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                          />
+                        )}
+                        {selectedRequest.isVirtual && (
+                          <Chip
+                            icon={<VideocamIcon />}
+                            label="Virtual"
+                            size="small"
+                            color="secondary"
+                            variant="outlined"
+                          />
+                        )}
+                      </Box>
+                    </Grid>
+                  </Grid>
+
+                  {/* Speaker Preferences */}
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 2,
+                      color: '#2c3e50',
+                      borderBottom: '1px solid #bdc3c7',
+                      pb: 1,
+                    }}
+                  >
+                    Speaker Preferences
+                  </Typography>
+                  <Grid container spacing={2} sx={{ mb: 3 }}>
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Required Expertise
+                      </Typography>
+                      <Typography variant="body1">
+                        {selectedRequest.expertise}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Preferred Language
+                      </Typography>
+                      <Typography variant="body1">
+                        {selectedRequest.preferredLanguage}
+                      </Typography>
+                    </Grid>
+                    {selectedRequest.budget && (
+                      <Grid item xs={12} md={6}>
+                        <Typography variant="subtitle2" color="text.secondary">
+                          Budget Range
+                        </Typography>
+                        <Typography variant="body1">
+                          {selectedRequest.budget}
+                        </Typography>
+                      </Grid>
+                    )}
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Engagement Format
+                      </Typography>
+                      <Typography variant="body1">
+                        {selectedRequest.engagementFormat}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Goals & Objectives
+                      </Typography>
+                      <Typography variant="body1">
+                        {selectedRequest.goals}
+                      </Typography>
+                    </Grid>
+                  </Grid>
                 </Box>
               </Box>
             </DialogContent>

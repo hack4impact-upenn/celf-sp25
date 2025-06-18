@@ -10,6 +10,8 @@ import {
   FormLabel,
   SelectChangeEvent,
   Input,
+  Alert,
+  Snackbar,
 } from '@mui/material';
 import AdminSidebar from '../components/admin_sidebar/AdminSidebar';
 import TopBar from '../components/top_bar/TopBar';
@@ -67,7 +69,7 @@ interface SpeakerFormState {
   ageSpecialty: 'elementary' | 'middle' | 'high school' | 'all grades' | '';
   industryFocuses: string[];
   expertise: string[];
-  picture: Uint8Array | null;
+  picture: string | null;
 }
 
 const initialFormState: SpeakerFormState = {
@@ -89,6 +91,9 @@ const initialFormState: SpeakerFormState = {
 function AdminUsersPage() {
   const [formState, setFormState] =
     React.useState<SpeakerFormState>(initialFormState);
+  const [error, setError] = React.useState<string | null>(null);
+  const [success, setSuccess] = React.useState<string | null>(null);
+  const [loading, setLoading] = React.useState(false);
 
   // Update text/textarea fields
   const handleChange = (
@@ -125,21 +130,25 @@ function AdminUsersPage() {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const { name, value } = e.target;
-
-      const arrayBuffer = await file.arrayBuffer(); // read file as ArrayBuffer
-      const bytes = new Uint8Array(arrayBuffer); // convert to byte array
-
-      setFormState((prev) => ({
-        ...prev,
-        [name]: bytes,
-      }));
+      // Convert file to base64 data URL
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result as string;
+        setFormState((prev) => ({
+          ...prev,
+          picture: result,
+        }));
+      };
+      reader.readAsDataURL(file);
     }
   };
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setSuccess(null);
+    setLoading(true);
 
     try {
       // Create a user using the register endpoint
@@ -147,7 +156,7 @@ function AdminUsersPage() {
         firstName: formState.firstName,
         lastName: formState.lastName,
         email: formState.email,
-        password: 'tempPassword123@', 
+        password: 'tempPassword123@',
       };
 
       console.log('Creating user with payload:', userPayload);
@@ -192,6 +201,7 @@ function AdminUsersPage() {
         virtual:
           formState.speakingFormat === 'virtual' ||
           formState.speakingFormat === 'both',
+        imageUrl: formState.picture || undefined,
         industry:
           formState.industryFocuses.length > 0
             ? formState.industryFocuses
@@ -211,8 +221,16 @@ function AdminUsersPage() {
 
       // Reset form after successful submission
       setFormState(initialFormState);
+      setSuccess('Speaker created successfully!');
     } catch (error) {
       console.error('Error creating speaker:', error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : 'An error occurred while creating the speaker.',
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -226,6 +244,22 @@ function AdminUsersPage() {
         <Typography variant="h4" gutterBottom>
           Speaker Submission Form
         </Typography>
+
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        )}
+
+        {success && (
+          <Alert
+            severity="success"
+            sx={{ mb: 2 }}
+            onClose={() => setSuccess(null)}
+          >
+            {success}
+          </Alert>
+        )}
 
         <Box
           component="form"
@@ -363,9 +397,10 @@ function AdminUsersPage() {
             variant="contained"
             color="primary"
             type="submit"
+            disabled={loading}
             sx={{ alignSelf: 'flex-start' }}
           >
-            Submit
+            {loading ? 'Creating Speaker...' : 'Submit'}
           </Button>
         </Box>
       </Box>

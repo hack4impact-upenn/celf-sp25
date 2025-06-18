@@ -113,7 +113,7 @@ interface SpeakerInfoFormState {
   ageSpecialty: 'elementary' | 'middle' | 'high school' | 'all grades' | '';
   industryFocuses: string[];
   expertise: string[];
-  picture: File | null;
+  picture: string | null;
 }
 
 const initialFormState: SpeakerInfoFormState = {
@@ -140,7 +140,6 @@ function SpeakerSubmitInfoPage() {
   const [alertMessage, setAlertMessage] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -151,14 +150,12 @@ function SpeakerSubmitInfoPage() {
     }));
   };
 
-
   const handleRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormState((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
   };
-
 
   const handleSelectChange = (
     event: SelectChangeEvent<string[]>,
@@ -177,19 +174,23 @@ function SpeakerSubmitInfoPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setFormState((prev) => ({
-        ...prev,
-        picture: file,
-      }));
+      // Convert file to base64 data URL
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result as string;
+        setFormState((prev) => ({
+          ...prev,
+          picture: result,
+        }));
+      };
+      reader.readAsDataURL(file);
     }
   };
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-
       const payload = {
         title: formState.jobTitle,
         personalSite: formState.website,
@@ -200,9 +201,10 @@ function SpeakerSubmitInfoPage() {
         ageGroup: formState.ageSpecialty,
         industryFocus: formState.industryFocuses,
         areaOfExpertise: formState.expertise,
+        picture: formState.picture,
         available: [], // TODO: add availability feature
       };
-      
+
       const response = await postData('speaker/profile', payload);
 
       if (response.error) {

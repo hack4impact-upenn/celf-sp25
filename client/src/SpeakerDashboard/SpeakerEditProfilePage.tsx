@@ -43,7 +43,7 @@ function SpeakerEditProfilePage() {
   const [alertMessage, setAlertMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const response = useData<SpeakerProfile>(`/api/speakers/${user.email}`);
+  const response = useData(`/api/speakers/${user.email}`);
   const [formState, setFormState] = useState<SpeakerProfile>({
     picture: '',
     industry: [],
@@ -80,8 +80,16 @@ function SpeakerEditProfilePage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // TODO: Implement file upload logic
-      console.log('File selected:', file);
+      // Convert file to base64 data URL
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result as string;
+        setFormState((prev) => ({
+          ...prev,
+          picture: result,
+        }));
+      };
+      reader.readAsDataURL(file);
     }
   };
 

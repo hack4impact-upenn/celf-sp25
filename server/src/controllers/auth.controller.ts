@@ -136,17 +136,28 @@ const register = async (
   const emailRegex =
     /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/g;
 
-  const passwordRegex = /^[a-zA-Z0-9!?$%^*)(+=._-]{6,61}$/;
+  const passwordRegex = /^[a-zA-Z0-9!?$%^*)(+=._@#&-]{6,61}$/;
 
-  const nameRegex = /^[a-z ,.'-]+/i;
+  const nameRegex = /^[a-zA-Z\s,.'-]+$/;
 
-  if (
-    !email.match(emailRegex) ||
-    !password.match(passwordRegex) ||
-    !firstName.match(nameRegex) ||
-    !lastName.match(nameRegex)
-  ) {
-    next(ApiError.badRequest("Invalid email, password, or name."));
+  // Check each validation separately to provide specific error messages
+  if (!email.match(emailRegex)) {
+    next(ApiError.badRequest("Invalid email format. Please enter a valid email address."));
+    return;
+  }
+
+  if (!password.match(passwordRegex)) {
+    next(ApiError.badRequest("Invalid password format. Password must be 6-61 characters and contain only letters, numbers, and special characters."));
+    return;
+  }
+
+  if (!firstName.match(nameRegex)) {
+    next(ApiError.badRequest("Invalid first name format. Name can only contain letters, spaces, commas, periods, apostrophes, and hyphens."));
+    return;
+  }
+
+  if (!lastName.match(nameRegex)) {
+    next(ApiError.badRequest("Invalid last name format. Name can only contain letters, spaces, commas, periods, apostrophes, and hyphens."));
     return;
   }
 
@@ -351,17 +362,28 @@ const registerInvite = async (
   const emailRegex =
     /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/g;
 
-  const passwordRegex = /^[a-zA-Z0-9!?$%^*)(+=._-]{6,61}$/;
+  const passwordRegex = /^[a-zA-Z0-9!?$%^*)(+=._@#&-]{6,61}$/;
 
-  const nameRegex = /^[a-z ,.'-]+/i;
+  const nameRegex = /^[a-zA-Z\s,.'-]+$/;
 
-  if (
-    !email.match(emailRegex) ||
-    !password.match(passwordRegex) ||
-    !firstName.match(nameRegex) ||
-    !lastName.match(nameRegex)
-  ) {
-    next(ApiError.badRequest("Invalid email, password, or name."));
+  // Check each validation separately to provide specific error messages
+  if (!email.match(emailRegex)) {
+    next(ApiError.badRequest("Invalid email format. Please enter a valid email address."));
+    return;
+  }
+
+  if (!password.match(passwordRegex)) {
+    next(ApiError.badRequest("Invalid password format. Password must be 6-61 characters and contain only letters, numbers, and special characters."));
+    return;
+  }
+
+  if (!firstName.match(nameRegex)) {
+    next(ApiError.badRequest("Invalid first name format. Name can only contain letters, spaces, commas, periods, apostrophes, and hyphens."));
+    return;
+  }
+
+  if (!lastName.match(nameRegex)) {
+    next(ApiError.badRequest("Invalid last name format. Name can only contain letters, spaces, commas, periods, apostrophes, and hyphens."));
     return;
   }
 

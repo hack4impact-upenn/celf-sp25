@@ -23,6 +23,10 @@ import {
   FormGroup,
   FormControlLabel,
   Checkbox,
+  Alert,
+  Snackbar,
+  CircularProgress,
+  FormLabel,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import EmailIcon from '@mui/icons-material/Email';
@@ -41,6 +45,7 @@ import SpeakerFilterPanel, {
 } from '../components/SpeakerFilterPanel';
 import { SelectChangeEvent } from '@mui/material';
 import { getData } from '../util/api.tsx';
+import { createTeacherRequest } from './teacherRequestApi';
 
 interface Speaker {
   _id: string;
@@ -85,12 +90,20 @@ interface BookingRequest {
 }
 
 interface BookingFormState {
+  // Audience Information
+  gradeLevels: string[];
+  subjects: string[];
+  estimatedStudents: number;
+
+  // Event Details
   eventName: string;
   eventPurpose: string;
   dateTime: string;
   timezone: string;
   isInPerson: boolean;
   isVirtual: boolean;
+
+  // Speaker Preferences
   expertise: string;
   preferredLanguage: string;
   location: string;
@@ -149,62 +162,21 @@ const FilterPanelContainer = styled(Box)({
   padding: '16px',
 });
 
-// TODO: REMOVE THIS TEST DATA
-const speakers = [
-  {
-    id: '1',
-    name: 'David Vexler',
-    bio: 'PER biggest fan',
-    organization: 'Buffalo State University',
-    location: 'Buffalo, NY',
-    email: 'david@buffalo.com',
-    inperson: true,
-    virtual: false,
-    imageUrl:
-      'https://t3.ftcdn.net/jpg/02/99/04/20/360_F_299042079_vGBD7wIlSeNl7vOevWHiL93G4koMM967.jpg',
-  },
-  {
-    id: '2',
-    name: 'Khoi',
-    bio: 'hi pmtls',
-    organization: 'XXX Foundation',
-    location: 'Virginia, VA',
-    email: 'khoi@xxx.org',
-    inperson: true,
-    virtual: true,
-    imageUrl:
-      'https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg',
-  },
-  {
-    id: '3',
-    name: 'Edward',
-    bio: 'hello pmtls',
-    organization: 'YYY Foundation',
-    location: 'Hong Kong, Hong Kong',
-    email: 'edward@yyy.org',
-    inperson: false,
-    virtual: true,
-    imageUrl:
-      'https://media.istockphoto.com/id/1389348844/photo/studio-shot-of-a-beautiful-young-woman-smiling-while-standing-against-a-grey-background.jpg?s=612x612&w=0&k=20&c=anRTfD_CkOxRdyFtvsiPopOluzKbhBNEQdh4okZImQc=',
-    industry: ['Research', 'Technology'],
-    grades: ['Elementary', 'Middle School'],
-    city: 'Hong Kong',
-    state: 'Hong Kong',
-    coordinates: {
-      lat: 22.3193,
-      lng: 114.1694,
-    },
-    languages: ['English', 'Cantonese', 'Mandarin'],
-  },
-];
-
 const initialBookingFormState: BookingFormState = {
+  // Audience Information
+  gradeLevels: [],
+  subjects: [],
+  estimatedStudents: 0,
+
+  // Event Details
   eventName: '',
   eventPurpose: '',
   dateTime: '',
   timezone: 'America/New_York', // Default timezone
   isInPerson: false,
   isVirtual: false,
+
+  // Speaker Preferences
   expertise: '',
   preferredLanguage: '',
   location: '',
@@ -255,12 +227,15 @@ function TeacherSearchSpeakerPage() {
     languages: [],
     userCoordinates: undefined,
   });
+  const [speakers, setSpeakers] = useState<Speaker[]>([]);
+  const [filteredSpeakers, setFilteredSpeakers] = useState<Speaker[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [bookingForm, setBookingForm] = useState<BookingFormState>(
     initialBookingFormState,
   );
-  const [speakers, setSpeakers] = useState<Speaker[]>([]);
-  const [filteredSpeakers, setFilteredSpeakers] = useState<Speaker[]>([]);
-  const [error, setError] = useState<string | null>(null);
 
   // Load speakers from backend
   useEffect(() => {
@@ -462,15 +437,92 @@ function TeacherSearchSpeakerPage() {
     setShowBookingForm((prev) => !prev);
   };
 
-  const handleBookingSubmit = (e: React.FormEvent) => {
+  const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement booking submission logic
-    console.log('Booking form submitted:', bookingForm);
+
+    if (!selectedSpeaker) {
+      setError('No speaker selected');
+      return;
+    }
+
+    // Validate required fields
+    if (
+      !bookingForm.gradeLevels.length ||
+      !bookingForm.subjects.length ||
+      !bookingForm.estimatedStudents ||
+      !bookingForm.eventName ||
+      !bookingForm.eventPurpose ||
+      !bookingForm.dateTime ||
+      !bookingForm.expertise ||
+      !bookingForm.preferredLanguage ||
+      !bookingForm.location ||
+      !bookingForm.goals ||
+      !bookingForm.engagementFormat
+    ) {
+      setError('Please fill in all required fields');
+      return;
+    }
+
+    if (!bookingForm.isInPerson && !bookingForm.isVirtual) {
+      setError('Please select at least one format (In-person or Virtual)');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setError(null);
+
+      const requestData = {
+        // Audience Information
+        gradeLevels: bookingForm.gradeLevels,
+        subjects: bookingForm.subjects,
+        estimatedStudents: bookingForm.estimatedStudents,
+
+        // Event Details
+        eventName: bookingForm.eventName,
+        eventPurpose: bookingForm.eventPurpose,
+        dateTime: bookingForm.dateTime,
+        timezone: bookingForm.timezone,
+        isInPerson: bookingForm.isInPerson,
+        isVirtual: bookingForm.isVirtual,
+
+        // Speaker Preferences
+        expertise: bookingForm.expertise,
+        preferredLanguage: bookingForm.preferredLanguage,
+        location: bookingForm.location,
+        goals: bookingForm.goals,
+        budget: bookingForm.budget,
+        engagementFormat: bookingForm.engagementFormat,
+      };
+
+      await createTeacherRequest(selectedSpeaker._id, requestData);
+
+      setSuccess('Speaker request submitted successfully!');
+      setShowBookingForm(false);
+      setBookingForm(initialBookingFormState);
+      setOpen(false);
+    } catch (err) {
+      setError(
+        'Failed to submit request: ' +
+          (err instanceof Error ? err.message : 'Unknown error'),
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleCloseBookingForm = () => {
     setShowBookingForm(false);
     setBookingForm(initialBookingFormState);
+    setError(null);
+  };
+
+  const handleCloseError = () => {
+    setError(null);
+  };
+
+  const handleCloseSuccess = () => {
+    setSuccess(null);
   };
 
   const formatDateTime = (dateTime: string, timezone: string) => {
@@ -593,88 +645,416 @@ function TeacherSearchSpeakerPage() {
               </Box>
             </StyledDialogTitle>
             <DialogContent>
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: { xs: 'column', md: 'row' },
-                  gap: 4,
-                }}
-              >
-                <CardMedia
-                  component="img"
-                  image={selectedSpeaker.imageUrl || DEFAULT_IMAGE}
-                  alt={getSpeakerName(selectedSpeaker)}
-                  sx={{
-                    width: { xs: '100%', md: '40%' },
-                    height: 'auto',
-                    borderRadius: '8px',
-                    objectFit: 'cover',
-                    maxHeight: '400px',
-                  }}
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = DEFAULT_IMAGE;
-                    target.onerror = null;
-                  }}
-                />
-                <Box sx={{ width: { xs: '100%', md: '60%' } }}>
-                  <Typography
-                    variant="h6"
-                    gutterBottom
-                    sx={{ color: '#3498db', fontWeight: 600 }}
-                  >
-                    {selectedSpeaker.organization || 'No organization provided'}
+              {showBookingForm ? (
+                // Booking Form
+                <Box
+                  component="form"
+                  onSubmit={handleBookingSubmit}
+                  sx={{ mt: 2 }}
+                >
+                  <Typography variant="h6" gutterBottom sx={{ mb: 3 }}>
+                    Request Booking for {getSpeakerName(selectedSpeaker)}
                   </Typography>
 
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <EmailIcon sx={{ mr: 1, color: '#7f8c8d' }} />
-                    <Typography variant="body1">
-                      {getSpeakerEmail(selectedSpeaker)}
+                  {/* Audience Section */}
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 2,
+                      color: '#2c3e50',
+                      borderBottom: '2px solid #3498db',
+                      pb: 1,
+                    }}
+                  >
+                    Audience Information
+                  </Typography>
+                  <Grid container spacing={3} sx={{ mb: 4 }}>
+                    <Grid item xs={12} md={6}>
+                      <FormControl fullWidth required>
+                        <InputLabel>Grade Level(s)</InputLabel>
+                        <Select
+                          multiple
+                          name="gradeLevels"
+                          value={bookingForm.gradeLevels}
+                          onChange={(e) => {
+                            const value =
+                              typeof e.target.value === 'string'
+                                ? [e.target.value]
+                                : e.target.value;
+                            setBookingForm((prev) => ({
+                              ...prev,
+                              gradeLevels: value,
+                            }));
+                          }}
+                          label="Grade Level(s)"
+                        >
+                          <MenuItem value="Elementary">Elementary</MenuItem>
+                          <MenuItem value="Middle School">
+                            Middle School
+                          </MenuItem>
+                          <MenuItem value="High School">High School</MenuItem>
+                          <MenuItem value="K-5">K-5</MenuItem>
+                          <MenuItem value="6-8">6-8</MenuItem>
+                          <MenuItem value="9-12">9-12</MenuItem>
+                          <MenuItem value="K-12">K-12</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        required
+                        fullWidth
+                        label="Subject(s)"
+                        name="subjects"
+                        value={bookingForm.subjects.join(', ')}
+                        onChange={(e) => {
+                          const subjects = e.target.value
+                            .split(',')
+                            .map((s) => s.trim())
+                            .filter((s) => s);
+                          setBookingForm((prev) => ({ ...prev, subjects }));
+                        }}
+                        helperText="Separate multiple subjects with commas"
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        required
+                        fullWidth
+                        type="number"
+                        label="Estimated Number of Students"
+                        name="estimatedStudents"
+                        value={bookingForm.estimatedStudents}
+                        onChange={handleBookingFormChange}
+                        inputProps={{ min: 1 }}
+                      />
+                    </Grid>
+                  </Grid>
+
+                  {/* Event Details Section */}
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 2,
+                      color: '#2c3e50',
+                      borderBottom: '2px solid #3498db',
+                      pb: 1,
+                    }}
+                  >
+                    Event Details
+                  </Typography>
+                  <Grid container spacing={3} sx={{ mb: 4 }}>
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        required
+                        fullWidth
+                        label="Event Name"
+                        name="eventName"
+                        value={bookingForm.eventName}
+                        onChange={handleBookingFormChange}
+                        helperText="What is this event or session called?"
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        required
+                        fullWidth
+                        label="Event Purpose"
+                        name="eventPurpose"
+                        value={bookingForm.eventPurpose}
+                        onChange={handleBookingFormChange}
+                        helperText="What's the goal or theme?"
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        required
+                        fullWidth
+                        type="datetime-local"
+                        label="Proposed Date/Time"
+                        name="dateTime"
+                        value={bookingForm.dateTime}
+                        onChange={handleBookingFormChange}
+                        InputLabelProps={{ shrink: true }}
+                        helperText="Include ideal date and time (plus time zone). If flexible, note options."
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <FormControl fullWidth required>
+                        <InputLabel>Timezone</InputLabel>
+                        <Select
+                          name="timezone"
+                          value={bookingForm.timezone}
+                          onChange={handleSelectChange}
+                          label="Timezone"
+                        >
+                          {timezones.map((tz) => (
+                            <MenuItem key={tz.value} value={tz.value}>
+                              {tz.label}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <FormControl component="fieldset" required>
+                        <FormLabel component="legend">Event Format*</FormLabel>
+                        <FormGroup row>
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={bookingForm.isInPerson}
+                                onChange={handleCheckboxChange}
+                                name="isInPerson"
+                              />
+                            }
+                            label="In-person"
+                          />
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={bookingForm.isVirtual}
+                                onChange={handleCheckboxChange}
+                                name="isVirtual"
+                              />
+                            }
+                            label="Virtual"
+                          />
+                        </FormGroup>
+                      </FormControl>
+                    </Grid>
+                  </Grid>
+
+                  {/* Speaker Preferences Section */}
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 2,
+                      color: '#2c3e50',
+                      borderBottom: '2px solid #3498db',
+                      pb: 1,
+                    }}
+                  >
+                    Speaker Preferences
+                  </Typography>
+                  <Grid container spacing={3} sx={{ mb: 4 }}>
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        required
+                        fullWidth
+                        label="Area of Expertise Requested"
+                        name="expertise"
+                        value={bookingForm.expertise}
+                        onChange={handleBookingFormChange}
+                        helperText="What topic(s) would you like the speaker to focus on? (e.g. food systems, clean energy, sustainable fashion)"
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        required
+                        fullWidth
+                        label="Preferred Language"
+                        name="preferredLanguage"
+                        value={bookingForm.preferredLanguage}
+                        onChange={handleBookingFormChange}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        required
+                        fullWidth
+                        label="Event Location"
+                        name="location"
+                        value={bookingForm.location}
+                        onChange={handleBookingFormChange}
+                        helperText="Where will this event take place (or be hosted virtually)?"
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        label="Budget"
+                        name="budget"
+                        value={bookingForm.budget}
+                        onChange={handleBookingFormChange}
+                        placeholder="e.g., $500-1000"
+                        helperText="If you have a budget to offer a speaker honorarium or travel reimbursement, please include details."
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        required
+                        fullWidth
+                        multiline
+                        rows={3}
+                        label="Goals / Notes"
+                        name="goals"
+                        value={bookingForm.goals}
+                        onChange={handleBookingFormChange}
+                        helperText="What do you hope students gain from this experience? Feel free to share curriculum connections, relevant projects, or speaker guidance."
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        required
+                        fullWidth
+                        multiline
+                        rows={2}
+                        label="Engagement Format"
+                        name="engagementFormat"
+                        value={bookingForm.engagementFormat}
+                        onChange={handleBookingFormChange}
+                        placeholder="e.g., 30-min talk with Q&A, panel, presentation with slides, interactive workshop"
+                        helperText="How do you envision the session running?"
+                      />
+                    </Grid>
+                  </Grid>
+
+                  <Box
+                    sx={{
+                      mt: 3,
+                      display: 'flex',
+                      gap: 2,
+                      justifyContent: 'flex-end',
+                    }}
+                  >
+                    <Button
+                      variant="outlined"
+                      onClick={handleCloseBookingForm}
+                      disabled={submitting}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      disabled={submitting}
+                      startIcon={
+                        submitting ? <CircularProgress size={20} /> : null
+                      }
+                    >
+                      {submitting ? 'Submitting...' : 'Submit Request'}
+                    </Button>
+                  </Box>
+                </Box>
+              ) : (
+                // Speaker Details
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: { xs: 'column', md: 'row' },
+                    gap: 4,
+                  }}
+                >
+                  <CardMedia
+                    component="img"
+                    image={selectedSpeaker.imageUrl || DEFAULT_IMAGE}
+                    alt={getSpeakerName(selectedSpeaker)}
+                    sx={{
+                      width: { xs: '100%', md: '40%' },
+                      height: 'auto',
+                      borderRadius: '8px',
+                      objectFit: 'cover',
+                      maxHeight: '400px',
+                    }}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = DEFAULT_IMAGE;
+                      target.onerror = null;
+                    }}
+                  />
+                  <Box sx={{ width: { xs: '100%', md: '60%' } }}>
+                    <Typography
+                      variant="h6"
+                      gutterBottom
+                      sx={{ color: '#3498db', fontWeight: 600 }}
+                    >
+                      {selectedSpeaker.organization ||
+                        'No organization provided'}
+                    </Typography>
+
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                      <EmailIcon sx={{ mr: 1, color: '#7f8c8d' }} />
+                      <Typography variant="body1">
+                        {getSpeakerEmail(selectedSpeaker)}
+                      </Typography>
+                    </Box>
+
+                    <Typography
+                      variant="subtitle1"
+                      gutterBottom
+                      sx={{ color: 'text.secondary', mb: 2 }}
+                    >
+                      {selectedSpeaker.location || 'No location provided'}
+                    </Typography>
+
+                    <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
+                      {selectedSpeaker.inperson && (
+                        <Chip
+                          icon={<PersonIcon />}
+                          label="In-person"
+                          color="primary"
+                          variant="outlined"
+                        />
+                      )}
+                      {selectedSpeaker.virtual && (
+                        <Chip
+                          icon={<VideocamIcon />}
+                          label="Virtual"
+                          color="secondary"
+                          variant="outlined"
+                        />
+                      )}
+                    </Box>
+
+                    <Typography
+                      variant="h6"
+                      sx={{ mt: 2, mb: 1, fontWeight: 600 }}
+                    >
+                      About
+                    </Typography>
+                    <Typography variant="body1" paragraph>
+                      {selectedSpeaker.bio || 'No bio provided'}
                     </Typography>
                   </Box>
-
-                  <Typography
-                    variant="subtitle1"
-                    gutterBottom
-                    sx={{ color: 'text.secondary', mb: 2 }}
-                  >
-                    {selectedSpeaker.location || 'No location provided'}
-                  </Typography>
-
-                  <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
-                    {selectedSpeaker.inperson && (
-                      <Chip
-                        icon={<PersonIcon />}
-                        label="In-person"
-                        color="primary"
-                        variant="outlined"
-                      />
-                    )}
-                    {selectedSpeaker.virtual && (
-                      <Chip
-                        icon={<VideocamIcon />}
-                        label="Virtual"
-                        color="secondary"
-                        variant="outlined"
-                      />
-                    )}
-                  </Box>
-
-                  <Typography
-                    variant="h6"
-                    sx={{ mt: 2, mb: 1, fontWeight: 600 }}
-                  >
-                    About
-                  </Typography>
-                  <Typography variant="body1" paragraph>
-                    {selectedSpeaker.bio || 'No bio provided'}
-                  </Typography>
                 </Box>
-              </Box>
+              )}
             </DialogContent>
           </>
         )}
       </Dialog>
+
+      {/* Error Snackbar */}
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={handleCloseError}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleCloseError}
+          severity="error"
+          sx={{ width: '100%' }}
+        >
+          {error}
+        </Alert>
+      </Snackbar>
+
+      {/* Success Snackbar */}
+      <Snackbar
+        open={!!success}
+        autoHideDuration={6000}
+        onClose={handleCloseSuccess}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleCloseSuccess}
+          severity="success"
+          sx={{ width: '100%' }}
+        >
+          {success}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

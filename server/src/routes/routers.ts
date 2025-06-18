@@ -11,6 +11,7 @@ import adminRouter from "./admin.route.ts";
 import authRouter from "./auth.route.ts";
 import userRouter from "./user.route.ts";
 import speakerRouter from "./speaker.route.ts";
+import requestRouter from "./request.route.ts";
 
 const prefixToRouterMap: { prefix: string; router: Router }[] = [
   {
@@ -28,6 +29,10 @@ const prefixToRouterMap: { prefix: string; router: Router }[] = [
   {
     prefix: "/api/speaker",
     router: speakerRouter,
+  },
+  {
+    prefix: "/api/request",
+    router: requestRouter,
   },
 ];
 

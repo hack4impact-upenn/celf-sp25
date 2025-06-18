@@ -193,6 +193,81 @@ const deleteSpeakerProfile = async (
 };
 
 /**
+ * Submit a speaker profile (for speaker registration flow)
+ */
+const submitSpeakerProfile = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const {
+    title,
+    personalSite,
+    organisation,
+    bio,
+    location,
+    speakingFormat,
+    ageGroup,
+    industryFocus,
+    areaOfExpertise,
+    picture
+  } = req.body;
+
+  // Get userId from the authenticated user session
+  const userId = (req.user as any)?._id;
+  
+  if (!userId) {
+    next(ApiError.unauthorized("User not authenticated"));
+    return;
+  }
+
+  // Validate required fields
+  if (!organisation || !bio || !location) {
+    next(
+      ApiError.missingFields([
+        "organisation",
+        "bio",
+        "location"
+      ])
+    );
+    return;
+  }
+
+  // Parse location into city and state
+  const locationParts = location.split(',').map((part: string) => part.trim());
+  const city = locationParts[0] || 'Unknown';
+  const state = locationParts[1] || 'Unknown';
+
+  // Map speaking format to inperson/virtual
+  const inperson = speakingFormat === 'in-person' || speakingFormat === 'both';
+  const virtual = speakingFormat === 'virtual' || speakingFormat === 'both';
+
+  // Map age group to grades
+  const grades = ageGroup ? [ageGroup] : ['Elementary'];
+
+  try {
+    const speaker = await createSpeaker(
+      userId,
+      organisation,
+      bio,
+      location,
+      inperson,
+      virtual,
+      picture, // Use the uploaded image as imageUrl
+      industryFocus || ['Other'],
+      grades,
+      city,
+      state,
+      undefined, // coordinates
+      ['English'] // default language
+    );
+    res.status(StatusCode.CREATED).json(speaker);
+  } catch (error) {
+    next(ApiError.internal("Unable to create speaker profile"));
+  }
+};
+
+/**
  * Filter speakers based on criteria
  */
 const filterSpeaker = async (
@@ -201,7 +276,7 @@ const filterSpeaker = async (
   next: express.NextFunction
 ) => {
   const filterParams = req.body;
-  
+
   try {
     const speakers = await getfilterSpeakeredList(filterParams);
     res.status(StatusCode.OK).json(speakers);
@@ -216,6 +291,7 @@ export {
   createSpeakerProfile,
   updateSpeakerProfile,
   deleteSpeakerProfile,
+  submitSpeakerProfile,
   filterSpeaker
 };
 
