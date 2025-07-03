@@ -6,12 +6,14 @@ const removeSensitiveDataQuery = ["-verificationToken"];
  * Creates a new invite in the database.
  * @param email - string representing the email of the invited user
  * @param verificationToken - string representing verification token
+ * @param role - string representing the role of the invited user
  * @returns The created {@link Invite}
  */
-const createInvite = async (email: string, verificationToken: string) => {
+const createInvite = async (email: string, verificationToken: string, role: "teacher" | "admin" | "speaker" = "speaker") => {
   const newInvite = new Invite({
     email,
     verificationToken,
+    role,
   });
   const invite = await newInvite.save();
   return invite;
@@ -21,14 +23,16 @@ const createInvite = async (email: string, verificationToken: string) => {
  * Updates an existing invite in the database with a new verification token.
  * @param oldInvite {@link Invite} - string representing the email of the invited user
  * @param verificationToken - string representing verification token
+ * @param role - string representing the role of the invited user
  * @returns The created {@link Invite}
  */
-const updateInvite = async (oldInvite: IInvite, verificationToken: string) => {
+const updateInvite = async (oldInvite: IInvite, verificationToken: string, role: "teacher" | "admin" | "speaker" = "speaker") => {
   const { _id, email } = oldInvite;
   const newInvite = new Invite({
     _id,
     email,
     verificationToken,
+    role,
   });
   const invite = await Invite.findOneAndUpdate({ email }, newInvite).exec();
   return invite;

@@ -17,6 +17,7 @@ const COLORS = {
   lightGray: '#ebeff2', // Gray-subsection
   actionBlue: '#155da1', // Action button
   green: '#6BAD6A', // Green
+  lightBlue: '#e3f2fd', // Light Blue for cards
 
   // Other colors:
 };

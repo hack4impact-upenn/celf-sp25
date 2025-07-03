@@ -38,17 +38,35 @@ interface Speaker {
   languages: string[];
 }
 
+interface Teacher {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
 interface Request {
   id: string;
   speaker: Speaker;
+  teacher?: Teacher;
   status: string;
 }
 
-function SpeakerRequestCard({ id, speaker, status }: Request) {
+function SpeakerRequestCard({ id, speaker, teacher, status }: Request) {
+  console.log('SpeakerRequestCard - teacher data:', teacher);
+  
   const speakerName =
     speaker?.userId?.firstName && speaker?.userId?.lastName
       ? `${speaker.userId.firstName} ${speaker.userId.lastName}`
       : 'Unknown Speaker';
+
+  const teacherName = teacher
+    ? `${teacher.firstName} ${teacher.lastName}`
+    : 'Unknown Teacher';
+
+  const teacherEmail = teacher
+    ? teacher.email
+    : 'Unknown Email';
 
   const organization = speaker?.organization || 'Unknown Organization';
   const location = speaker?.location || 'Unknown Location';
@@ -85,7 +103,7 @@ function SpeakerRequestCard({ id, speaker, status }: Request) {
           target.onerror = null;
         }}
       />
-      <CardContent sx={{ flexGrow: 1, p: 2 }}>
+      <CardContent sx={{ flexGrow: 1, p: 2, pt: 3 }}>
         <Typography
           gutterBottom
           variant="h6"
@@ -96,6 +114,30 @@ function SpeakerRequestCard({ id, speaker, status }: Request) {
         </Typography>
         <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
           {organization} • {location}
+        </Typography>
+
+        {/* Teacher information (always show) */}
+        <Typography 
+          variant="body2" 
+          sx={{ 
+            color: 'text.secondary', 
+            mb: 0.5, 
+            fontSize: '0.875rem',
+            fontStyle: 'italic'
+          }}
+        >
+          Requested by: {teacherName}
+        </Typography>
+        <Typography 
+          variant="body2" 
+          sx={{ 
+            color: 'text.secondary', 
+            mb: 1, 
+            fontSize: '0.8rem',
+            fontStyle: 'italic'
+          }}
+        >
+          {teacherEmail}
         </Typography>
 
         {/* Format chips */}

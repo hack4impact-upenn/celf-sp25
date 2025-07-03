@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   FormControl,
@@ -14,10 +14,10 @@ import {
   Chip,
   Button,
 } from '@mui/material';
+import { getIndustryFocuses, IndustryFocus } from '../util/industryFocusApi.ts';
 
 const gradeOptions = ['Elementary', 'Middle School', 'High School'];
-const languageOptions = ['English', 'Spanish', 'Mandarin', 'French'];
-const industryOptions = ['STEM', 'Arts', 'Environment', 'Business'];
+const languageOptions = ['English', 'Spanish', 'Mandarin', 'French', 'Other'];
 
 export interface FilterState {
   industry: string[];
@@ -43,6 +43,23 @@ interface Props {
 
 export default function SpeakerFilterPanel({ filters, onChange }: Props) {
   const [localFilters, setLocalFilters] = useState<FilterState>(filters);
+  const [industryOptions, setIndustryOptions] = useState<string[]>([]);
+  const [loadingIndustry, setLoadingIndustry] = useState(false);
+  const [industryError, setIndustryError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoadingIndustry(true);
+    getIndustryFocuses()
+      .then((focuses) => {
+        setIndustryOptions(focuses.map((f) => f.name));
+        setIndustryError(null);
+      })
+      .catch((err) => {
+        setIndustryError('Failed to load industry focuses');
+        setIndustryOptions([]);
+      })
+      .finally(() => setLoadingIndustry(false));
+  }, []);
 
   const handleChange = (field: string, value: any) => {
     setLocalFilters({ ...localFilters, [field]: value });
@@ -69,6 +86,9 @@ export default function SpeakerFilterPanel({ filters, onChange }: Props) {
         {/* Industry */}
         <FormControl fullWidth>
           <FormLabel sx={{ mb: 1, fontWeight: 500, color: '#49454F' }}>Industry Focus</FormLabel>
+          {industryError && (
+            <Typography color="error" variant="body2" sx={{ mb: 1 }}>{industryError}</Typography>
+          )}
           <Select
             multiple
             value={localFilters.industry}
@@ -89,6 +109,7 @@ export default function SpeakerFilterPanel({ filters, onChange }: Props) {
               backgroundColor: '#fff',
               borderRadius: '8px',
             }}
+            disabled={loadingIndustry}
           >
             {industryOptions.map((option) => (
               <MenuItem key={option} value={option}>

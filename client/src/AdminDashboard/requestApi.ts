@@ -82,7 +82,20 @@ export async function getAllRequests(): Promise<Request[]> {
     if (response.error) {
       throw new Error(response.error);
     }
-    return response.data || [];
+    // Map teacherId.userId to teacher for frontend compatibility
+    return (response.data || []).map((req: any) => ({
+      ...req,
+      teacherId: req.teacherId, // keep the original
+      teacher: req.teacherId && req.teacherId.userId
+        ? {
+            _id: req.teacherId.userId._id,
+            firstName: req.teacherId.userId.firstName,
+            lastName: req.teacherId.userId.lastName,
+            email: req.teacherId.userId.email,
+          }
+        : undefined,
+      speaker: req.speakerId,
+    }));
   } catch (error) {
     console.error('Error fetching requests:', error);
     throw error;

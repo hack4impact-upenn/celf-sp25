@@ -56,11 +56,12 @@ function HomePage() {
   const [admin, setAdmin] = useState(user.admin);
 
   useEffect(() => {
+    console.log('User state:', user);
     if (user.admin) {
       navigator('/admin-dashboard', { replace: true });
-    } else if (user.role === 'speaker') {
+    } else if (user.role && user.role.toLowerCase() === 'speaker') {
       navigator('/speaker-dashboard', { replace: true });
-    } else {
+    } else if (user.role && user.role.toLowerCase() === 'teacher') {
       navigator('/teacher-search-speaker', { replace: true });
     }
   }, [user.admin, user.role, navigator]);

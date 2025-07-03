@@ -148,6 +148,7 @@ function AdminRequestsPage() {
           <SpeakerRequestCard
             id={request._id}
             speaker={request.speakerId}
+            teacher={request.teacherId}
             status={request.status}
           />
         </div>
@@ -399,6 +400,32 @@ function AdminRequestsPage() {
                     <Typography variant="body1" paragraph>
                       {selectedRequest.speakerId.bio}
                     </Typography>
+
+                    {/* Teacher Information */}
+                    <Typography
+                      variant="h6"
+                      sx={{ mt: 3, mb: 2, fontWeight: 600, color: '#2c3e50', borderBottom: '1px solid #bdc3c7', pb: 1 }}
+                    >
+                      Teacher Information
+                    </Typography>
+                    <Box sx={{ mb: 3 }}>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Teacher Name
+                      </Typography>
+                      <Typography variant="body1" sx={{ mb: 1 }}>
+                        {selectedRequest.teacherId
+                          ? `${selectedRequest.teacherId.firstName} ${selectedRequest.teacherId.lastName}`
+                          : 'Unknown Teacher'}
+                      </Typography>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Teacher Email
+                      </Typography>
+                      <Typography variant="body1">
+                        {selectedRequest.teacherId
+                          ? selectedRequest.teacherId.email
+                          : 'Unknown Email'}
+                      </Typography>
+                    </Box>
                   </Box>
 
                   {/* Request Details */}

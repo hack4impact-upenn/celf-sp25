@@ -13,7 +13,10 @@ const getAllRequests = async () => {
         select: 'firstName lastName email'
       }
     })
-    .populate('teacherId', 'firstName lastName email')
+    .populate({
+      path: 'teacherId',
+      select: 'firstName lastName email'
+    })
     .exec();
   return requests;
 };
@@ -30,7 +33,10 @@ const getRequestsByTeacherId = async (teacherId: string) => {
         select: 'firstName lastName email'
       }
     })
-    .populate('teacherId', 'firstName lastName email')
+    .populate({
+      path: 'teacherId',
+      select: 'firstName lastName email'
+    })
     .exec();
   return requests;
 };
@@ -47,7 +53,10 @@ const getRequestById = async (requestId: string) => {
         select: 'firstName lastName email'
       }
     })
-    .populate('teacherId', 'firstName lastName email')
+    .populate({
+      path: 'teacherId',
+      select: 'firstName lastName email'
+    })
     .exec();
   return request;
 };
@@ -81,12 +90,16 @@ const createRequest = async (
     engagementFormat: string;
   }
 ) => {
+  console.log('Creating request with teacherId:', teacherId);
+  
   const newRequest = new Request({
     speakerId,
     teacherId,
     ...requestData,
   });
   const request = await newRequest.save();
+  
+  console.log('Saved request:', request);
   
   // Populate the created request with related data
   const populatedRequest = await Request.findById(request._id)
@@ -97,8 +110,14 @@ const createRequest = async (
         select: 'firstName lastName email'
       }
     })
-    .populate('teacherId', 'firstName lastName email')
+    .populate({
+      path: 'teacherId',
+      select: 'firstName lastName email'
+    })
     .exec();
+    
+  console.log('Populated request:', populatedRequest);
+  console.log('Teacher data in populated request:', populatedRequest?.teacherId);
     
   return populatedRequest;
 };
@@ -119,7 +138,10 @@ const updateRequestStatus = async (requestId: string, status: IRequest["status"]
         select: 'firstName lastName email'
       }
     })
-    .populate('teacherId', 'firstName lastName email')
+    .populate({
+      path: 'teacherId',
+      select: 'firstName lastName email'
+    })
     .exec();
   return request;
 };

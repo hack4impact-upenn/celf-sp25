@@ -16,12 +16,19 @@ const InviteSchema = new mongoose.Schema({
     unique: true,
     sparse: true,
   },
+  role: {
+    type: String,
+    enum: ["teacher", "admin", "speaker"],
+    required: true,
+    default: "speaker",
+  },
 });
 
 interface IInvite extends mongoose.Document {
   _id: string;
   email: string;
   verificationToken: string;
+  role: "teacher" | "admin" | "speaker";
 }
 
 const Invite = mongoose.model<IInvite>("Invite", InviteSchema);

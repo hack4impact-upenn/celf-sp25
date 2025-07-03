@@ -7,6 +7,9 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
+import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
+import Typography from '@mui/material/Typography';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -32,12 +35,17 @@ interface MultiSelectProps {
   selectOptions: string[];
   handleChange: (e: SelectChangeEvent<string[]>) => void;
   value: string[];
+  loading?: boolean;
+  error?: string | null;
 }
+
 export default function MultiSelect({
   label,
   selectOptions,
   handleChange,
   value,
+  loading = false,
+  error = null,
 }: MultiSelectProps) {
   const theme = useTheme();
 
@@ -60,16 +68,32 @@ export default function MultiSelect({
             </Box>
           )}
           MenuProps={MenuProps}
+          disabled={loading || !!error}
         >
-          {selectOptions.map((name) => (
-            <MenuItem
-              key={name}
-              value={name}
-              style={getStyles(name, value, theme)}
-            >
-              {name}
-            </MenuItem>
-          ))}
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+              <CircularProgress size={24} />
+            </Box>
+          ) : error ? (
+            <Box sx={{ py: 2, px: 2 }}>
+              <Alert severity="error" sx={{ mb: 1 }}>
+                {error}
+              </Alert>
+              <Typography variant="body2" color="text.secondary">
+                Please refresh the page or try again later.
+              </Typography>
+            </Box>
+          ) : (
+            selectOptions.map((name) => (
+              <MenuItem
+                key={name}
+                value={name}
+                style={getStyles(name, value, theme)}
+              >
+                {name}
+              </MenuItem>
+            ))
+          )}
         </Select>
       </FormControl>
     </div>

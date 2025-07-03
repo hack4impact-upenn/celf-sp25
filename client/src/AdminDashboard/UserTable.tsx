@@ -11,12 +11,14 @@ import { useData } from '../util/api.tsx';
 import { useAppSelector } from '../util/redux/hooks.ts';
 import { selectUser } from '../util/redux/userSlice.ts';
 import { IUser } from '../util/types/user.ts';
+import Chip from '@mui/material/Chip';
 
 interface AdminDashboardRow {
   key: string;
   first: string;
   last: string;
   email: string;
+  userType: React.ReactNode;
   promote: React.ReactElement;
   remove: React.ReactElement;
 }
@@ -31,6 +33,7 @@ function UserTable() {
     { id: 'first', label: 'First Name' },
     { id: 'last', label: 'Last Name' },
     { id: 'email', label: 'Email' },
+    { id: 'userType', label: 'User Type' },
     { id: 'promote', label: 'Promote to Admin' },
     { id: 'remove', label: 'Remove User' },
   ];
@@ -41,12 +44,28 @@ function UserTable() {
     promote: React.ReactElement,
     remove: React.ReactElement,
   ): AdminDashboardRow {
-    const { _id, firstName, lastName, email } = user;
+    const { _id, firstName, lastName, email, admin, role } = user;
+    let userType = '';
+    if (admin) {
+      userType = 'admin';
+    } else if (role) {
+      userType = role;
+    } else {
+      userType = 'unknown';
+    }
+    // Capitalize first letter
+    const label = userType.charAt(0).toUpperCase() + userType.slice(1);
+    // Color code
+    let color: 'primary' | 'secondary' | 'success' | 'default' = 'default';
+    if (userType === 'admin') color = 'primary';
+    else if (userType === 'teacher') color = 'success';
+    else if (userType === 'speaker') color = 'secondary';
     return {
       key: _id,
       first: firstName,
       last: lastName,
       email,
+      userType: <Chip label={label} color={color} size="small" sx={{ fontWeight: 600, fontSize: '0.95em', borderRadius: '8px' }} />,
       promote,
       remove,
     };

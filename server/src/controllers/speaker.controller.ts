@@ -2,6 +2,7 @@ import express from "express";
 import ApiError from "../util/apiError.ts";
 import StatusCode from "../util/statusCode.ts";
 import { ISpeaker } from "../models/speaker.model.ts";
+import { User } from "../models/user.model.ts";
 import {
   createSpeaker,
   getSpeakerByUserId,
@@ -10,6 +11,7 @@ import {
   deleteSpeaker,
   getfilterSpeakeredList,
 } from "../services/speaker.service.ts";
+import { updateUser } from "../services/user.service.ts";
 
 /**
  * Get all speakers from the database
@@ -154,12 +156,28 @@ const updateSpeakerProfile = async (
   }
 
   try {
-    const speaker = await updateSpeaker(userId, updateData);
+    // Extract user data (firstName, lastName) from updateData
+    const { firstName, lastName, ...speakerUpdateData } = updateData;
+    
+    // Update speaker profile
+    const speaker = await updateSpeaker(userId, speakerUpdateData);
     if (!speaker) {
       next(ApiError.notFound("Speaker not found"));
       return;
     }
-    res.status(StatusCode.OK).json(speaker);
+
+    // Update user information if firstName or lastName is provided
+    if (firstName || lastName) {
+      const userUpdateData: any = {};
+      if (firstName !== undefined) userUpdateData.firstName = firstName;
+      if (lastName !== undefined) userUpdateData.lastName = lastName;
+      
+      await User.findByIdAndUpdate(userId, userUpdateData, { new: true });
+    }
+
+    // Return the updated speaker with populated user data
+    const updatedSpeaker = await getSpeakerByUserId(userId);
+    res.status(StatusCode.OK).json(updatedSpeaker);
   } catch (error) {
     next(ApiError.internal("Unable to update speaker profile"));
   }

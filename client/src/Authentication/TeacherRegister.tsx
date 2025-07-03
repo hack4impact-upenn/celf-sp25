@@ -137,7 +137,7 @@ function TeacherRegisterPage() {
   async function handleSubmit() {
     if (validateInputs()) {
       //TODO: turn to teacher specific register call
-      register(values.firstName, values.lastName, values.email, values.password)
+      register(values.firstName, values.lastName, values.email, values.password, 'teacher')
         .then(() => {
           setShowError('alert', true);
           setAlertTitle('');

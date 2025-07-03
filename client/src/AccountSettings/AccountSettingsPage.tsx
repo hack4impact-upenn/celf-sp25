@@ -62,6 +62,7 @@ function AccountSettingsPage() {
           padding: 4,
           flexGrow: 1,
           backgroundColor: COLORS.background,
+          mt: 8,
         }}
       >
         <Typography

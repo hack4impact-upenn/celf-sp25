@@ -89,16 +89,18 @@ function ProfileDropDown({ sx }: ProfileDropDownProps) {
           },
         }}
       >
-        <MenuItem
-          onClick={handleProfileClick}
-          sx={{
-            '&:hover': {
-              backgroundColor: COLORS.lightGray,
-            },
-          }}
-        >
-          Profile
-        </MenuItem>
+        {!user.admin && (
+          <MenuItem
+            onClick={handleProfileClick}
+            sx={{
+              '&:hover': {
+                backgroundColor: COLORS.lightGray,
+              },
+            }}
+          >
+            Profile
+          </MenuItem>
+        )}
         <MenuItem
           onClick={handleAccountSettingsClick}
           sx={{

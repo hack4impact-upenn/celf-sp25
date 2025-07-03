@@ -234,4 +234,42 @@ const inviteUser = async (
   }
 };
 
-export { getAllUsers, upgradePrivilege, deleteUser, verifyToken, inviteUser };
+const inviteAdmin = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const { email, firstName, lastName } = req.body;
+  if (!email || !firstName || !lastName) {
+    next(ApiError.missingFields(["email", "firstName", "lastName"]));
+    return;
+  }
+  const emailRegex =
+    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/g;
+  if (!email.match(emailRegex)) {
+    next(ApiError.badRequest(`Invalid email: ${email}`));
+    return;
+  }
+  const lowercaseEmail = email.toLowerCase();
+  const existingUser = await getUserByEmail(lowercaseEmail);
+  if (existingUser) {
+    next(ApiError.badRequest(`User with email ${lowercaseEmail} already exists`));
+    return;
+  }
+  const existingInvite = await getInviteByEmail(lowercaseEmail);
+  const verificationToken = crypto.randomBytes(32).toString("hex");
+  try {
+    if (existingInvite) {
+      await updateInvite(existingInvite, verificationToken, "admin");
+    } else {
+      await createInvite(lowercaseEmail, verificationToken, "admin");
+    }
+    // Send invite email (reuse emailInviteLink)
+    emailInviteLink(lowercaseEmail, verificationToken);
+    res.sendStatus(StatusCode.CREATED);
+  } catch (err: any) {
+    next(ApiError.internal(`Unable to invite admin: ${err.message}`));
+  }
+};
+
+export { getAllUsers, upgradePrivilege, deleteUser, verifyToken, inviteUser, inviteAdmin };

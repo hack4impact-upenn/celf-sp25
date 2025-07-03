@@ -26,13 +26,15 @@ const removeSensitiveDataQueryKeepPassword = [
  * @param lastName - string representing the last name of the user
  * @param email - string representing the email of the user
  * @param password - string representing the password of the user
+ * @param role - The role to set for the new user
  * @returns The created {@link User}
  */
 const createUser = async (
   firstName: string,
   lastName: string,
   email: string,
-  password: string
+  password: string,
+  role: 'teacher' | 'speaker' | 'admin' = 'speaker'
 ) => {
   const hashedPassword = await hash(password, passwordHashSaltRounds);
   if (!hashedPassword) {
@@ -44,6 +46,7 @@ const createUser = async (
     email,
     password: hashedPassword,
     admin: false,
+    role,
   });
   const user = await newUser.save();
   return user;

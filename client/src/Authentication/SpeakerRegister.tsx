@@ -139,7 +139,7 @@ function SpeakerRegisterPage() {
 
   async function handleSubmit() {
     if (validateInputs()) {
-      register(values.firstName, values.lastName, values.email, values.password)
+      register(values.firstName, values.lastName, values.email, values.password, 'speaker')
         .then(() => {
           setShowError('alert', true);
           setAlertTitle('');

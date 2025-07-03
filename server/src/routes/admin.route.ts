@@ -10,6 +10,7 @@ import {
   deleteUser,
   inviteUser,
   verifyToken,
+  inviteAdmin,
 } from "../controllers/admin.controller.ts";
 import { isAuthenticated } from "../controllers/auth.middleware.ts";
 import { approve } from "../controllers/auth.controller.ts";
@@ -64,5 +65,14 @@ router.post("/invite", isAuthenticated, isAdmin, inviteUser);
  * A GET route to verify the user invite is valid
  */
 router.get("/invite/:token", verifyToken);
+
+/**
+ * A POST route to invite a new admin
+ * Expects a JSON body with the following fields:
+ * - email (string)
+ * - firstName (string)
+ * - lastName (string)
+ */
+router.post("/invite-admin", isAuthenticated, isAdmin, inviteAdmin);
 
 export default router;

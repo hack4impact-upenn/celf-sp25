@@ -21,6 +21,8 @@ import {
   Collapse,
   Alert,
   Snackbar,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -39,6 +41,8 @@ import SpeakerFilterPanel, {
   FilterState,
 } from '../components/SpeakerFilterPanel';
 import { getData, putData, deleteData } from '../util/api.tsx';
+import MultiSelect from './MultiSelect';
+import { getIndustryFocuses, IndustryFocus } from '../util/industryFocusApi';
 
 // Updated Speaker interface with new fields for filtering
 interface Speaker {
@@ -136,6 +140,8 @@ const getUserIdString = (userId: Speaker['userId']): string | null => {
   return null;
 };
 
+const gradeOptions = ['Elementary', 'Middle School', 'High School'];
+
 function AdminAllSpeakerPage() {
   const [speakers, setSpeakers] = useState<Speaker[]>([]);
   const [open, setOpen] = useState(false);
@@ -157,6 +163,8 @@ function AdminAllSpeakerPage() {
     languages: [],
   });
   const [editFormState, setEditFormState] = useState({
+    firstName: '',
+    lastName: '',
     organization: '',
     bio: '',
     location: '',
@@ -165,13 +173,14 @@ function AdminAllSpeakerPage() {
     imageUrl: '',
     industry: [] as string[],
     grades: [] as string[],
-    city: '',
-    state: '',
     languages: [] as string[],
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [industryFocuses, setIndustryFocuses] = useState<IndustryFocus[]>([]);
+  const [loadingFocuses, setLoadingFocuses] = useState(true);
+  const [industryFocusError, setIndustryFocusError] = useState<string | null>(null);
 
   // Load speakers from backend
   useEffect(() => {
@@ -186,6 +195,22 @@ function AdminAllSpeakerPage() {
       setFilteredSpeakers(response.data);
     };
     fetchSpeakers();
+  }, []);
+
+  useEffect(() => {
+    // Fetch industry focuses for edit dialog
+    const fetchIndustryFocuses = async () => {
+      try {
+        const focuses = await getIndustryFocuses();
+        setIndustryFocuses(focuses);
+        setIndustryFocusError(null);
+      } catch (error) {
+        setIndustryFocusError('Failed to load industry focuses. Please try again later.');
+      } finally {
+        setLoadingFocuses(false);
+      }
+    };
+    fetchIndustryFocuses();
   }, []);
 
   // Function to calculate distance between two points using Haversine formula
@@ -364,7 +389,18 @@ function AdminAllSpeakerPage() {
   const handleEdit = (speaker: Speaker) => {
     if (!speaker) return;
     setSelectedSpeaker(speaker);
+    
+    // Extract firstName and lastName from the populated userId object
+    const firstName = typeof speaker.userId === 'object' && speaker.userId !== null 
+      ? speaker.userId.firstName 
+      : '';
+    const lastName = typeof speaker.userId === 'object' && speaker.userId !== null 
+      ? speaker.userId.lastName 
+      : '';
+    
     setEditFormState({
+      firstName,
+      lastName,
       organization: speaker.organization,
       bio: speaker.bio,
       location: speaker.location,
@@ -373,8 +409,6 @@ function AdminAllSpeakerPage() {
       imageUrl: speaker.imageUrl || '',
       industry: speaker.industry || [],
       grades: speaker.grades || [],
-      city: speaker.city || '',
-      state: speaker.state || '',
       languages: speaker.languages || ['English'],
     });
     setEditOpen(true);
@@ -423,8 +457,10 @@ function AdminAllSpeakerPage() {
         const userIdStr = getUserIdString(selectedSpeaker.userId);
         if (!userIdStr) throw new Error('Speaker userId is missing');
 
-        // Format the update data to match the speaker schema
+        // Format the update data to match the speaker schema and include user data
         const updateData = {
+          firstName: editFormState.firstName,
+          lastName: editFormState.lastName,
           organization: editFormState.organization,
           bio: editFormState.bio,
           location: editFormState.location,
@@ -433,8 +469,6 @@ function AdminAllSpeakerPage() {
           imageUrl: editFormState.imageUrl,
           industry: editFormState.industry,
           grades: editFormState.grades,
-          city: editFormState.city,
-          state: editFormState.state,
           languages: editFormState.languages,
         };
 
@@ -791,6 +825,22 @@ function AdminAllSpeakerPage() {
                 flexDirection: 'column',
               }}
             >
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <TextField
+                  label="First Name"
+                  name="firstName"
+                  value={editFormState.firstName}
+                  onChange={handleEditFormChange}
+                  sx={{ flex: 1 }}
+                />
+                <TextField
+                  label="Last Name"
+                  name="lastName"
+                  value={editFormState.lastName}
+                  onChange={handleEditFormChange}
+                  sx={{ flex: 1 }}
+                />
+              </Box>
               <TextField
                 label="Organization"
                 name="organization"
@@ -821,68 +871,65 @@ function AdminAllSpeakerPage() {
                 onChange={handleEditFormChange}
                 fullWidth
               />
-              <TextField
-                label="Industry (comma-separated)"
-                name="industry"
-                value={editFormState.industry.join(', ')}
-                onChange={(e) => {
-                  const industries = e.target.value
-                    .split(',')
-                    .map((s) => s.trim())
-                    .filter((s) => s);
+              <MultiSelect
+                label="Industry Focus"
+                selectOptions={industryFocuses.map(focus => focus.name)}
+                handleChange={(e) => {
+                  const {
+                    target: { value },
+                  } = e;
                   setEditFormState((prev) => ({
                     ...prev,
-                    industry: industries,
+                    industry: typeof value === 'string' ? value.split(',') : value,
                   }));
                 }}
-                fullWidth
-                helperText="Enter industries separated by commas"
+                value={editFormState.industry}
+                loading={loadingFocuses}
+                error={industryFocusError}
               />
-              <TextField
-                label="Grades (comma-separated)"
-                name="grades"
-                value={editFormState.grades.join(', ')}
-                onChange={(e) => {
-                  const grades = e.target.value
-                    .split(',')
-                    .map((s) => s.trim())
-                    .filter((s) => s);
-                  setEditFormState((prev) => ({ ...prev, grades: grades }));
-                }}
-                fullWidth
-                helperText="Enter grades separated by commas (Elementary, Middle School, High School)"
-              />
-              <TextField
-                label="City"
-                name="city"
-                value={editFormState.city}
-                onChange={handleEditFormChange}
-                fullWidth
-              />
-              <TextField
-                label="State"
-                name="state"
-                value={editFormState.state}
-                onChange={handleEditFormChange}
-                fullWidth
-              />
-              <TextField
-                label="Languages (comma-separated)"
-                name="languages"
-                value={editFormState.languages.join(', ')}
-                onChange={(e) => {
-                  const languages = e.target.value
-                    .split(',')
-                    .map((s) => s.trim())
-                    .filter((s) => s);
+              <MultiSelect
+                label="Grades"
+                selectOptions={gradeOptions}
+                handleChange={(e) => {
+                  const {
+                    target: { value },
+                  } = e;
                   setEditFormState((prev) => ({
                     ...prev,
-                    languages: languages,
+                    grades: typeof value === 'string' ? value.split(',') : value,
                   }));
                 }}
-                fullWidth
-                helperText="Enter languages separated by commas"
+                value={editFormState.grades}
               />
+              <FormControl fullWidth>
+                <FormLabel component="legend">Languages</FormLabel>
+                <Select
+                  multiple
+                  value={editFormState.languages}
+                  onChange={(e) => {
+                    const {
+                      target: { value },
+                    } = e;
+                    setEditFormState((prev) => ({
+                      ...prev,
+                      languages: typeof value === 'string' ? value.split(',') : value,
+                    }));
+                  }}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {selected.map((value) => (
+                        <Chip key={value} label={value} size="small" />
+                      ))}
+                    </Box>
+                  )}
+                >
+                  {['English', 'Spanish', 'Mandarin', 'French', 'Other'].map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
               <Box sx={{ mt: 2 }}>
                 <FormLabel component="legend">Speaking Format</FormLabel>
                 <FormControlLabel

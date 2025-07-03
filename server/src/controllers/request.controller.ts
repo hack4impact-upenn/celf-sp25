@@ -132,6 +132,9 @@ const createRequestHandler = async (
   // Get teacherId from the authenticated user session
   const teacherId = (req.user as any)?._id;
   
+  console.log('Creating request - teacherId:', teacherId);
+  console.log('User from request:', req.user);
+  
   if (!speakerId || !teacherId) {
     next(ApiError.missingFields(["speakerId", "teacherId"]));
     return;

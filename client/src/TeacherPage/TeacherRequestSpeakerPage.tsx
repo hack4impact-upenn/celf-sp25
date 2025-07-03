@@ -35,12 +35,14 @@ import {
   getTeacherRequests,
   TeacherRequest,
   Speaker,
+  Teacher,
 } from './teacherRequestApi';
 import { useAppSelector } from '../util/redux/hooks.ts';
 
 interface Request {
   _id: string;
   speaker: Speaker;
+  teacher?: Teacher;
   status:
     | 'Pending Review'
     | 'Pending Speaker Confirmation'
@@ -152,30 +154,37 @@ function TeacherRequestSpeakerPage() {
       setError(null);
       const teacherRequests = await getTeacherRequests();
 
-      // Transform the data to match our Request interface
-      const transformedRequests: Request[] = teacherRequests.map((req) => ({
-        _id: req._id,
-        speaker: req.speakerId, // The backend now returns populated speaker data
-        status: req.status,
-        date: req.dateTime,
-        notes: req.eventPurpose,
-        eventName: req.eventName,
-        eventPurpose: req.eventPurpose,
-        dateTime: req.dateTime,
-        timezone: req.timezone,
-        isInPerson: req.isInPerson,
-        isVirtual: req.isVirtual,
-        expertise: req.expertise,
-        preferredLanguage: req.preferredLanguage,
-        location: req.location,
-        goals: req.goals,
-        budget: req.budget,
-        engagementFormat: req.engagementFormat,
-        gradeLevels: req.gradeLevels,
-        subjects: req.subjects,
-        estimatedStudents: req.estimatedStudents,
-      }));
+      console.log('Raw teacher requests from backend:', teacherRequests);
 
+      // Transform the data to match our Request interface
+      const transformedRequests: Request[] = teacherRequests.map((req) => {
+        console.log('Processing request:', req._id, 'Teacher data:', req.teacherId);
+        return {
+          _id: req._id,
+          speaker: req.speakerId, // The backend now returns populated speaker data
+          teacher: req.teacherId, // Include teacher data
+          status: req.status,
+          date: req.dateTime,
+          notes: req.eventPurpose,
+          eventName: req.eventName,
+          eventPurpose: req.eventPurpose,
+          dateTime: req.dateTime,
+          timezone: req.timezone,
+          isInPerson: req.isInPerson,
+          isVirtual: req.isVirtual,
+          expertise: req.expertise,
+          preferredLanguage: req.preferredLanguage,
+          location: req.location,
+          goals: req.goals,
+          budget: req.budget,
+          engagementFormat: req.engagementFormat,
+          gradeLevels: req.gradeLevels,
+          subjects: req.subjects,
+          estimatedStudents: req.estimatedStudents,
+        };
+      });
+
+      console.log('Transformed requests:', transformedRequests);
       setRequests(transformedRequests);
     } catch (err) {
       setError('Failed to load requests. Please try again.');
@@ -488,6 +497,7 @@ function TeacherRequestSpeakerPage() {
                     <SpeakerRequestCard
                       id={request._id}
                       speaker={request.speaker}
+                      teacher={request.teacher}
                       status={request.status}
                     />
                   </div>
@@ -537,6 +547,7 @@ function TeacherRequestSpeakerPage() {
             <DialogContent>
               <Box
                 sx={{
+                  mt: 4,
                   display: 'flex',
                   flexDirection: { xs: 'column', md: 'row' },
                   gap: 4,
@@ -638,6 +649,41 @@ function TeacherRequestSpeakerPage() {
                       sx={{ mb: 2 }}
                     />
                   </Box>
+
+                  {/* Teacher Information */}
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 2,
+                      color: '#2c3e50',
+                      borderBottom: '1px solid #bdc3c7',
+                      pb: 1,
+                    }}
+                  >
+                    Teacher Information
+                  </Typography>
+                  <Grid container spacing={2} sx={{ mb: 3 }}>
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Teacher Name
+                      </Typography>
+                      <Typography variant="body1">
+                        {selectedRequest.teacher
+                          ? `${selectedRequest.teacher.firstName} ${selectedRequest.teacher.lastName}`
+                          : 'Unknown Teacher'}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Teacher Email
+                      </Typography>
+                      <Typography variant="body1">
+                        {selectedRequest.teacher
+                          ? selectedRequest.teacher.email
+                          : 'Unknown Email'}
+                      </Typography>
+                    </Grid>
+                  </Grid>
 
                   {/* Audience Information */}
                   <Typography

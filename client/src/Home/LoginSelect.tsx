@@ -8,21 +8,23 @@ import ScreenGrid from '../components/ScreenGrid.tsx';
 const ItemButton = styled(Box)(({ theme }) => ({
   backgroundColor: COLORS.primaryBlue,
   width: '100%',
-  height: 100,
-  borderRadius: '12px',
+  minHeight: 110,
+  borderRadius: '18px',
   transition: 'transform 0.2s ease, box-shadow 0.2s ease',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  padding: theme.spacing(2),
+  padding: theme.spacing(3, 2),
   color: COLORS.white,
   cursor: 'pointer',
-  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+  boxShadow: '0px 6px 24px rgba(0, 0, 0, 0.10)',
+  fontSize: '1.1rem',
+  marginBottom: theme.spacing(2.5),
 
   '&:hover': {
-    transform: 'translateY(-4px)',
-    boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.15)',
+    transform: 'translateY(-4px) scale(1.03)',
+    boxShadow: '0px 12px 32px rgba(0, 0, 0, 0.16)',
     backgroundColor: COLORS.primaryDark,
   },
 }));
@@ -55,11 +57,15 @@ function LoginSelectPage() {
         <Paper
           elevation={3}
           sx={{
-            padding: 4,
-            borderRadius: 2,
+            padding: { xs: 2, sm: 4 },
+            borderRadius: 4,
             width: '100%',
-            maxWidth: 600,
+            maxWidth: 500,
             background: COLORS.white,
+            boxShadow: '0 8px 32px rgba(44, 62, 80, 0.10)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
           }}
         >
           <Box sx={{ width: '100%' }}>
@@ -96,34 +102,24 @@ function LoginSelectPage() {
                   Select your role to get started
                 </Typography>
               </Grid>
-              <Grid container spacing={2} sx={{ width: '100%', px: 0 }}>
-                <Grid xs={12}>
+              <Grid container direction="column" alignItems="center" sx={{ width: '100%', mt: 2 }}>
+                <Grid xs={12} sx={{ width: '90%' }}>
                   <ItemButton onClick={() => handleClick('Teacher')}>
-                    <Typography variant="h6" sx={{ fontWeight: 500 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.2rem' }}>
                       Teacher
                     </Typography>
-                    <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                    <Typography variant="body2" sx={{ opacity: 0.85, mt: 0.5 }}>
                       Register as a teacher to view and request speakers
                     </Typography>
                   </ItemButton>
                 </Grid>
-                <Grid xs={12}>
+                <Grid xs={12} sx={{ width: '90%' }}>
                   <ItemButton onClick={() => handleClick('Speaker')}>
-                    <Typography variant="h6" sx={{ fontWeight: 500 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.2rem' }}>
                       Speaker
                     </Typography>
-                    <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                    <Typography variant="body2" sx={{ opacity: 0.85, mt: 0.5 }}>
                       Register as a speaker to share your expertise
-                    </Typography>
-                  </ItemButton>
-                </Grid>
-                <Grid xs={12}>
-                  <ItemButton onClick={() => handleClick('Admin')}>
-                    <Typography variant="h6" sx={{ fontWeight: 500 }}>
-                      Admin
-                    </Typography>
-                    <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                      Register as an administrator
                     </Typography>
                   </ItemButton>
                 </Grid>

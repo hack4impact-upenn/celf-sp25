@@ -12,6 +12,7 @@ import authRouter from "./auth.route.ts";
 import userRouter from "./user.route.ts";
 import speakerRouter from "./speaker.route.ts";
 import requestRouter from "./request.route.ts";
+import industryFocusRouter from "./industryFocus.route.ts";
 
 const prefixToRouterMap: { prefix: string; router: Router }[] = [
   {
@@ -33,6 +34,10 @@ const prefixToRouterMap: { prefix: string; router: Router }[] = [
   {
     prefix: "/api/request",
     router: requestRouter,
+  },
+  {
+    prefix: "/api/industry-focus",
+    router: industryFocusRouter,
   },
 ];
 

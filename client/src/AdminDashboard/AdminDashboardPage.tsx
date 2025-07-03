@@ -5,10 +5,10 @@ import SpeakerCard from '../components/cards/SpeakerCard.tsx';
 import AdminSidebar from '../components/admin_sidebar/AdminSidebar.tsx';
 import TopBar from '../components/top_bar/TopBar.tsx';
 import './AdminDashboard.css';
-import { Typography, Grid } from '@mui/material';
+import { Typography, Grid, Box } from '@mui/material';
 import ScreenGrid from '../components/ScreenGrid.tsx';
 import UserTable from './UserTable.tsx';
-import InviteUserButton from '../components/buttons/InviteUserButton.tsx';
+import InviteAdminButton from '../components/buttons/InviteAdminButton.tsx';
 
 function AdminDashboardPage() {
   return (
@@ -18,21 +18,19 @@ function AdminDashboardPage() {
 
       <div className="main-window">
         {/* The parent Grid has a custom class for width & centering */}
-        <Grid container direction="column" spacing={4} className="admin-grid">
+        <Grid container direction="column" spacing={2} className="admin-grid">
           <Grid item>
             <Typography variant="h2" align="center">
               Welcome to the Admin Dashboard
             </Typography>
           </Grid>
 
-          {/* "invite-button-grid" class to align the button on the right */}
-          <Grid item container className="invite-button-grid">
-            <InviteUserButton />
-          </Grid>
-
           <Grid item>
             {/* "table-container" class for sizing & optional centering */}
             <div className="table-container">
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+                <InviteAdminButton />
+              </Box>
               <UserTable />
             </div>
           </Grid>

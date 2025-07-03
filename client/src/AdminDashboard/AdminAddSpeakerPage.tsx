@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   TextField,
@@ -12,49 +12,22 @@ import {
   Input,
   Alert,
   Snackbar,
+  CircularProgress,
+  Select,
+  MenuItem,
+  Chip,
+  FormControl,
+  Checkbox,
 } from '@mui/material';
 import AdminSidebar from '../components/admin_sidebar/AdminSidebar';
 import TopBar from '../components/top_bar/TopBar';
 import MultiSelect from './MultiSelect';
 import { postData } from '../util/api.tsx';
+import { getIndustryFocuses, IndustryFocus } from '../util/industryFocusApi';
 
-const industryFocuses = [
-  'Clean Energy',
-  'Climate Policy',
-  'Biodiversity',
-  'Environmental Justice',
-  'Food Systems',
-  'Waste Management',
-  'Urban Planning',
-  'Outdoor Education',
-  'Sustainable Agriculture',
-  'Marine Science',
-  'Air Quality',
-  'Community Advocacy',
-  'Green Technology',
-  'Corporate Sustainability',
-  'Public Service',
-  'Other',
-];
-
-const areasOfExpertise = [
-  'Clean Energy',
-  'Climate Policy',
-  'Biodiversity',
-  'Environmental Justice',
-  'Food Systems',
-  'Waste Management',
-  'Urban Planning',
-  'Outdoor Education',
-  'Sustainable Agriculture',
-  'Marine Science',
-  'Air Quality',
-  'Community Advocacy',
-  'Green Technology',
-  'Corporate Sustainability',
-  'Public Service',
-  'Other',
-];
+const languageOptions = ['English', 'Spanish', 'Mandarin', 'French', 'Other'];
+const speakingFormatOptions = ['In-Person', 'Virtual'];
+const gradeOptions = ['Elementary School', 'Middle School', 'High School'];
 
 interface SpeakerFormState {
   firstName: string;
@@ -65,10 +38,10 @@ interface SpeakerFormState {
   location: string;
   jobTitle: string;
   website: string;
-  speakingFormat: 'in-person' | 'virtual' | 'both' | '';
-  ageSpecialty: 'elementary' | 'middle' | 'high school' | 'all grades' | '';
+  speakingFormats: string[];
+  gradeSpecialties: string[];
   industryFocuses: string[];
-  expertise: string[];
+  languages: string[];
   picture: string | null;
 }
 
@@ -79,12 +52,12 @@ const initialFormState: SpeakerFormState = {
   organization: '',
   bio: '',
   location: '',
-  speakingFormat: '',
+  speakingFormats: [],
   jobTitle: '',
   website: '',
-  ageSpecialty: '',
+  gradeSpecialties: [],
   industryFocuses: [],
-  expertise: [],
+  languages: [],
   picture: null,
 };
 
@@ -94,6 +67,27 @@ function AdminUsersPage() {
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
+  const [industryFocuses, setIndustryFocuses] = useState<IndustryFocus[]>([]);
+  const [loadingFocuses, setLoadingFocuses] = useState(true);
+  const [industryFocusError, setIndustryFocusError] = useState<string | null>(null);
+
+  // Fetch industry focuses on component mount
+  useEffect(() => {
+    const fetchIndustryFocuses = async () => {
+      try {
+        const focuses = await getIndustryFocuses();
+        setIndustryFocuses(focuses);
+        setIndustryFocusError(null);
+      } catch (error) {
+        console.error('Failed to fetch industry focuses:', error);
+        setIndustryFocusError('Failed to load industry focuses. Please try again later.');
+      } finally {
+        setLoadingFocuses(false);
+      }
+    };
+
+    fetchIndustryFocuses();
+  }, []);
 
   // Update text/textarea fields
   const handleChange = (
@@ -106,13 +100,26 @@ function AdminUsersPage() {
     }));
   };
 
-  // Update radio button for speaking format
-  const handleRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Update checkbox selections for speaking formats
+  const handleSpeakingFormatChange = (format: string) => {
     setFormState((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value as 'in-person' | 'virtual' | 'both',
+      speakingFormats: prev.speakingFormats.includes(format)
+        ? prev.speakingFormats.filter(f => f !== format)
+        : [...prev.speakingFormats, format],
     }));
   };
+
+  // Update checkbox selections for grade specialties
+  const handleGradeSpecialtyChange = (grade: string) => {
+    setFormState((prev) => ({
+      ...prev,
+      gradeSpecialties: prev.gradeSpecialties.includes(grade)
+        ? prev.gradeSpecialties.filter(g => g !== grade)
+        : [...prev.gradeSpecialties, grade],
+    }));
+  };
+
   const handleSelectChange = (
     event: SelectChangeEvent<string | string[]>,
     name: string,
@@ -146,17 +153,17 @@ function AdminUsersPage() {
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(null);
     setLoading(true);
+    setError(null);
 
     try {
-      // Create a user using the register endpoint
+      // Create user first
       const userPayload = {
         firstName: formState.firstName,
         lastName: formState.lastName,
         email: formState.email,
-        password: 'tempPassword123@',
+        password: 'tempPassword123!', // This will be changed by the user
+        role: 'speaker',
       };
 
       console.log('Creating user with payload:', userPayload);
@@ -166,41 +173,36 @@ function AdminUsersPage() {
       }
       console.log('User created:', userResponse.data);
 
-      const mappedGrades = formState.ageSpecialty
-        ? [formState.ageSpecialty].map((grade) => {
-            switch (grade) {
-              case 'elementary':
-                return 'Elementary';
-              case 'middle':
-                return 'Middle School';
-              case 'high school':
-                return 'High School';
-              case 'all grades':
-                return 'Elementary'; // Default to Elementary for all grades
-              default:
-                return 'Elementary';
-            }
-          })
-        : [];
-
       // Parse location into city and state
-      const locationParts = formState.location
-        .split(',')
-        .map((part) => part.trim());
+      const locationParts = formState.location.split(',').map((part) => part.trim());
       const city = locationParts[0] || 'Unknown';
       const state = locationParts[1] || 'Unknown';
+
+      // Map grade specialties to the expected format
+      const mappedGrades = formState.gradeSpecialties.map(grade => {
+        switch (grade) {
+          case 'Elementary School':
+            return 'Elementary';
+          case 'Middle School':
+            return 'Middle School';
+          case 'High School':
+            return 'High School';
+          default:
+            return grade;
+        }
+      });
+
+      // Map speaking formats to inperson/virtual booleans
+      const inperson = formState.speakingFormats.includes('In-Person');
+      const virtual = formState.speakingFormats.includes('Virtual');
 
       const speakerPayload = {
         userId: userResponse.data._id,
         organization: formState.organization || 'Unknown',
         bio: formState.bio || 'No bio provided',
         location: formState.location || 'Unknown',
-        inperson:
-          formState.speakingFormat === 'in-person' ||
-          formState.speakingFormat === 'both',
-        virtual:
-          formState.speakingFormat === 'virtual' ||
-          formState.speakingFormat === 'both',
+        inperson,
+        virtual,
         imageUrl: formState.picture || undefined,
         industry:
           formState.industryFocuses.length > 0
@@ -209,7 +211,7 @@ function AdminUsersPage() {
         grades: mappedGrades,
         city,
         state,
-        languages: ['English'],
+        languages: formState.languages.length > 0 ? formState.languages : ['English'],
       };
 
       console.log('Creating speaker with payload:', speakerPayload);
@@ -322,16 +324,33 @@ function AdminUsersPage() {
           />
           <MultiSelect
             label="Industry Focus"
-            selectOptions={industryFocuses}
+            selectOptions={industryFocuses.map(focus => focus.name)}
             handleChange={(e) => handleSelectChange(e, 'industryFocuses')}
             value={formState.industryFocuses}
+            loading={loadingFocuses}
+            error={industryFocusError}
           />
-          <MultiSelect
-            label="Areas of Expertise"
-            selectOptions={areasOfExpertise}
-            handleChange={(e) => handleSelectChange(e, 'expertise')}
-            value={formState.expertise}
-          />
+          <FormControl fullWidth>
+            <FormLabel component="legend">Languages</FormLabel>
+            <Select
+              multiple
+              value={formState.languages}
+              onChange={(e) => handleSelectChange(e, 'languages')}
+              renderValue={(selected) => (
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                  {selected.map((value) => (
+                    <Chip key={value} label={value} size="small" />
+                  ))}
+                </Box>
+              )}
+            >
+              {languageOptions.map((option) => (
+                <MenuItem key={option} value={option}>
+                  {option}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <TextField
             label="Location (optional)"
             name="location"
@@ -339,65 +358,52 @@ function AdminUsersPage() {
             onChange={handleChange}
           />
 
-          <FormLabel component="legend">
-            Preferred Speaking Format (optional)
-          </FormLabel>
-          <RadioGroup
-            row
-            name="speakingFormat"
-            value={formState.speakingFormat}
-            onChange={handleRadioChange}
-          >
-            <FormControlLabel
-              value="in-person"
-              control={<Radio />}
-              label="In-Person"
-            />
-            <FormControlLabel
-              value="virtual"
-              control={<Radio />}
-              label="Virtual"
-            />
-            <FormControlLabel value="both" control={<Radio />} label="Both" />
-          </RadioGroup>
+          <FormControl component="fieldset">
+            <FormLabel component="legend">
+              Preferred Speaking Format (optional)
+            </FormLabel>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              {speakingFormatOptions.map((format) => (
+                <FormControlLabel
+                  key={format}
+                  control={
+                    <Checkbox
+                      checked={formState.speakingFormats.includes(format)}
+                      onChange={() => handleSpeakingFormatChange(format)}
+                    />
+                  }
+                  label={format}
+                />
+              ))}
+            </Box>
+          </FormControl>
 
-          <FormLabel component="legend">
-            Age/Grade Specialty (optional)
-          </FormLabel>
-          <RadioGroup
-            row
-            name="ageSpecialty"
-            value={formState.ageSpecialty}
-            onChange={handleRadioChange}
-          >
-            <FormControlLabel
-              value="elementary"
-              control={<Radio />}
-              label="Elementary School"
-            />
-            <FormControlLabel
-              value="middle"
-              control={<Radio />}
-              label="Middle School"
-            />
-            <FormControlLabel
-              value="high school"
-              control={<Radio />}
-              label="High School"
-            />
-            <FormControlLabel
-              value="all grades"
-              control={<Radio />}
-              label="All Grades"
-            />
-          </RadioGroup>
+          <FormControl component="fieldset">
+            <FormLabel component="legend">
+              Age/Grade Specialty (optional)
+            </FormLabel>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              {gradeOptions.map((grade) => (
+                <FormControlLabel
+                  key={grade}
+                  control={
+                    <Checkbox
+                      checked={formState.gradeSpecialties.includes(grade)}
+                      onChange={() => handleGradeSpecialtyChange(grade)}
+                    />
+                  }
+                  label={grade}
+                />
+              ))}
+            </Box>
+          </FormControl>
           <Typography variant="subtitle1">Profile Picture</Typography>
           <input type="file" onChange={handleFileChange} name="picture" />
           <Button
             variant="contained"
             color="primary"
             type="submit"
-            disabled={loading}
+            disabled={loading || !!industryFocusError}
             sx={{ alignSelf: 'flex-start' }}
           >
             {loading ? 'Creating Speaker...' : 'Submit'}

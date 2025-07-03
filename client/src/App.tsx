@@ -14,6 +14,7 @@ import AdminDashboardPage from './AdminDashboard/AdminDashboardPage.tsx';
 import AdminAddSpeakerPage from './AdminDashboard/AdminAddSpeakerPage.tsx';
 import AdminAllSpeakerPage from './AdminDashboard/AdminAllSpeakerPage.tsx';
 import AdminRequestsPage from './AdminDashboard/AdminRequestsPage';
+import AdminIndustryFocusPage from './AdminDashboard/AdminIndustryFocusPage.tsx';
 import SpeakerProfilePage from './SpeakerDashboard/SpeakerProfilePage.tsx';
 import SpeakerEditProfilePage from './SpeakerDashboard/SpeakerEditProfilePage.tsx';
 
@@ -30,7 +31,6 @@ import LoginPage from './Authentication/LoginPage.tsx';
 import EmailResetPasswordPage from './Authentication/EmailResetPasswordPage.tsx';
 import ResetPasswordPage from './Authentication/ResetPasswordPage.tsx';
 import AlertPopup from './components/AlertPopup.tsx';
-import InviteRegisterPage from './Authentication/InviteRegisterPage.tsx';
 import LoginSelectPage from './Home/LoginSelect.tsx';
 import SpeakerRegisterPage from './Authentication/SpeakerRegister.tsx';
 import TeacherRegisterPage from './Authentication/TeacherRegister.tsx';
@@ -85,7 +85,6 @@ function App() {
                   />
                 </Route>
 
-                <Route path="/invite/:token" element={<InviteRegisterPage />} />
                 {/* Remove or import SearchSpeaker component */}
                 {/* <Route path="/search" element={<SearchSpeakerPage />} /> */}
                 {/* Routes accessed only if user is authenticated */}
@@ -133,6 +132,10 @@ function App() {
                   <Route
                     path="/admin-requests"
                     element={<AdminRequestsPage />}
+                  />
+                  <Route
+                    path="/admin-industry-focus"
+                    element={<AdminIndustryFocusPage />}
                   />
                 </Route>
 

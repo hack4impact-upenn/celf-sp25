@@ -42,6 +42,7 @@ async function verifyAccount(verificationToken: string) {
  * @param lastName
  * @param email
  * @param password
+ * @param role
  * @throws An {@link Error} with a `messsage` field describing the issue in verifying
  */
 async function register(
@@ -49,14 +50,17 @@ async function register(
   lastName: string,
   email: string,
   password: string,
+  role?: string,
 ) {
   const lowercaseEmail = email.toLowerCase();
-  const res = await postData('auth/register', {
+  const payload: any = {
     firstName,
     lastName,
     email: lowercaseEmail,
     password,
-  });
+  };
+  if (role) payload.role = role;
+  const res = await postData('auth/register', payload);
   if (res.error) {
     throw Error(res.error.message);
   }

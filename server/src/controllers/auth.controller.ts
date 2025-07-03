@@ -126,7 +126,7 @@ const register = async (
   res: express.Response,
   next: express.NextFunction
 ) => {
-  const { firstName, lastName, email, password } = req.body;
+  const { firstName, lastName, email, password, role } = req.body;
   if (!firstName || !lastName || !email || !password) {
     next(
       ApiError.missingFields(["firstName", "lastName", "email", "password"])
@@ -185,7 +185,8 @@ const register = async (
       firstName,
       lastName,
       lowercaseEmail,
-      password
+      password,
+      role === 'teacher' ? 'teacher' : 'speaker'
     );
     // If created by admin, automatically verify the user
     if (reqUser?.admin) {
@@ -419,6 +420,10 @@ const registerInvite = async (
       lowercaseEmail,
       password
     );
+    user!.role = invite.role;
+    if (invite.role === "admin") {
+      user!.admin = true;
+    }
     user!.verified = true;
     await user?.save();
     await removeInviteByToken(inviteToken);

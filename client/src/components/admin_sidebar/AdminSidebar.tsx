@@ -56,6 +56,15 @@ const Sidebar = () => {
           <span>Speaker Requests</span>
         </button>
       </div>
+
+      <div className="sidebar-card">
+        <button
+          className="sidebar-button"
+          onClick={() => handleNavigation('/admin-industry-focus')}
+        >
+          <span>Industry Focuses</span>
+        </button>
+      </div>
     </div>
   );
 };

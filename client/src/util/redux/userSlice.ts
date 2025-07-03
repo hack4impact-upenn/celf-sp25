@@ -7,6 +7,7 @@ export interface UserState {
   firstName: string | null;
   lastName: string | null;
   admin: boolean | null;
+  role: string | null;
 }
 
 interface Payload {
@@ -14,12 +15,15 @@ interface Payload {
   firstName: string;
   lastName: string;
   admin: boolean;
+  role: string;
 }
 
 const initialState = {
   email: null,
   firstName: null,
   lastName: null,
+  admin: null,
+  role: null,
 } as UserState;
 
 /**
@@ -34,6 +38,7 @@ const userSlice = createSlice({
       state.firstName = action.payload.firstName;
       state.lastName = action.payload.lastName;
       state.admin = action.payload.admin;
+      state.role = action.payload.role;
     },
     toggleAdmin: (state) => {
       state.admin = !state.admin;
@@ -43,6 +48,7 @@ const userSlice = createSlice({
       state.firstName = null;
       state.lastName = null;
       state.admin = null;
+      state.role = null;
     },
   },
 });

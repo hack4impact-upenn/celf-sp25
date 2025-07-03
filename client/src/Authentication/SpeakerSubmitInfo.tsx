@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   TextField,
@@ -16,79 +16,18 @@ import {
   Chip,
   SelectChangeEvent,
   useTheme,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { postData } from '../util/api.tsx';
+import { getIndustryFocuses, IndustryFocus } from '../util/industryFocusApi';
 import ScreenGrid from '../components/ScreenGrid.tsx';
 import AlertDialog from '../components/AlertDialog.tsx';
 import PrimaryButton from '../components/buttons/PrimaryButton.tsx';
 import COLORS from '../assets/colors.ts';
 
 // same as admin side
-const industryFocuses = [
-  'Clean Energy',
-  'Conservation',
-  'Sustainable Food Systems',
-  'Waste Management',
-  'Environmental Justice',
-  'Climate Change Policy',
-  'Green Building & Architecture',
-  'Circular Economy',
-  'Community Organizing',
-  'Wildlife Protection',
-  'Marine Conservation',
-  'Urban Planning',
-  'Sustainable Agriculture',
-  'Water Resources',
-  'Transportation & Mobility',
-  'Public Health & Environment',
-  'Forestry',
-  'Environmental Education',
-  'Carbon Capture & Storage',
-  'Renewable Energy Finance',
-  'Environmental Technology',
-  'Ecotourism',
-  'Environmental Law & Policy',
-  'Government',
-  'Nonprofit & Advocacy',
-];
-
-const areasOfExpertise = [
-  'Marine Biology',
-  'Clean Energy',
-  'Circularity',
-  'Sustainable Food Systems',
-  'Environmental Education',
-  'Climate Science',
-  'Green Architecture',
-  'Urban Planning',
-  'Ecology',
-  'Water Conservation',
-  'Air Quality Monitoring',
-  'Wildlife Conservation',
-  'Environmental Policy',
-  'Community Engagement',
-  'Renewable Energy Engineering',
-  'Carbon Accounting',
-  'Environmental Justice',
-  'Energy Systems',
-  'Composting',
-  'Soil Science',
-  'Forestry',
-  'Fisheries Management',
-  'Agricultural Technology',
-  'Waste Reduction',
-  'Sustainability Consulting',
-  'Public Health & Environment',
-  'Circular Economy Design',
-  'Geospatial Analysis (GIS)',
-  'Environmental Law',
-  'Climate Adaptation Strategies',
-  'Environmental Communication',
-  'Green Finance',
-  'Other',
-];
-
 const languageOptions = ['English', 'Spanish', 'Mandarin', 'French', 'Other'];
 
 // MultiSelect menu props
@@ -112,7 +51,7 @@ interface SpeakerInfoFormState {
   speakingFormat: 'in-person' | 'virtual' | 'both' | '';
   ageSpecialty: 'elementary' | 'middle' | 'high school' | 'all grades' | '';
   industryFocuses: string[];
-  expertise: string[];
+  languages: string[];
   picture: string | null;
 }
 
@@ -125,7 +64,7 @@ const initialFormState: SpeakerInfoFormState = {
   speakingFormat: '',
   ageSpecialty: '',
   industryFocuses: [],
-  expertise: [],
+  languages: [],
   picture: null,
 };
 
@@ -139,6 +78,26 @@ function SpeakerSubmitInfoPage() {
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [industryFocuses, setIndustryFocuses] = useState<IndustryFocus[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch industry focuses on component mount
+  useEffect(() => {
+    const fetchIndustryFocuses = async () => {
+      try {
+        const focuses = await getIndustryFocuses();
+        setIndustryFocuses(focuses);
+      } catch (error) {
+        console.error('Failed to fetch industry focuses:', error);
+        setError('Failed to load industry focuses. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchIndustryFocuses();
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -200,9 +159,9 @@ function SpeakerSubmitInfoPage() {
         speakingFormat: formState.speakingFormat,
         ageGroup: formState.ageSpecialty,
         industryFocus: formState.industryFocuses,
-        areaOfExpertise: formState.expertise,
+        languages: formState.languages.length > 0 ? formState.languages : ['English'],
+        areaOfExpertise: [], // TODO: add availability feature
         picture: formState.picture,
-        available: [], // TODO: add availability feature
       };
 
       const response = await postData('speaker/profile', payload);
@@ -359,49 +318,64 @@ function SpeakerSubmitInfoPage() {
                 <FormLabel component="legend" sx={{ mb: 1 }}>
                   Industry Focus
                 </FormLabel>
-                <Select
-                  fullWidth
-                  multiple
-                  value={formState.industryFocuses}
-                  onChange={(e) => handleSelectChange(e, 'industryFocuses')}
-                  input={<OutlinedInput />}
-                  renderValue={(selected) => (
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                      {selected.map((value) => (
-                        <Chip key={value} label={value} />
-                      ))}
-                    </Box>
-                  )}
-                  MenuProps={MenuProps}
-                  sx={{ mb: 2 }}
-                >
-                  {industryFocuses.map((name) => (
-                    <MenuItem
-                      key={name}
-                      value={name}
-                      style={{
-                        fontWeight:
-                          formState.industryFocuses.indexOf(name) === -1
-                            ? theme.typography.fontWeightRegular
-                            : theme.typography.fontWeightMedium,
-                      }}
-                    >
-                      {name}
-                    </MenuItem>
-                  ))}
-                </Select>
+                {loading ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+                    <CircularProgress size={24} />
+                  </Box>
+                ) : error ? (
+                  <Box sx={{ py: 2 }}>
+                    <Alert severity="error" sx={{ mb: 2 }}>
+                      {error}
+                    </Alert>
+                    <Typography variant="body2" color="text.secondary">
+                      Please refresh the page or try again later to load industry focuses.
+                    </Typography>
+                  </Box>
+                ) : (
+                  <Select
+                    fullWidth
+                    multiple
+                    value={formState.industryFocuses}
+                    onChange={(e) => handleSelectChange(e, 'industryFocuses')}
+                    input={<OutlinedInput />}
+                    renderValue={(selected) => (
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                        {selected.map((value) => (
+                          <Chip key={value} label={value} />
+                        ))}
+                      </Box>
+                    )}
+                    MenuProps={MenuProps}
+                    sx={{ mb: 2 }}
+                  >
+                    {industryFocuses.map((focus) => (
+                      <MenuItem
+                        key={focus._id}
+                        value={focus.name}
+                        style={{
+                          fontWeight:
+                            formState.industryFocuses.indexOf(focus.name) === -1
+                              ? theme.typography.fontWeightRegular
+                              : theme.typography.fontWeightMedium,
+                        }}
+                      >
+                        {focus.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                )}
               </Grid>
 
-              {/* Areas of Expertise MultiSelect */}
+              {/* Languages MultiSelect */}
               <Grid item sx={{ width: '100%' }}>
                 <FormLabel component="legend" sx={{ mb: 1 }}>
-                  Areas of Expertise
+                  Languages
                 </FormLabel>
                 <Select
                   fullWidth
                   multiple
-                  value={formState.expertise}
-                  onChange={(e) => handleSelectChange(e, 'expertise')}
+                  value={formState.languages}
+                  onChange={(e) => handleSelectChange(e, 'languages')}
                   input={<OutlinedInput />}
                   renderValue={(selected) => (
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
@@ -413,18 +387,18 @@ function SpeakerSubmitInfoPage() {
                   MenuProps={MenuProps}
                   sx={{ mb: 2 }}
                 >
-                  {areasOfExpertise.map((name) => (
+                  {languageOptions.map((option) => (
                     <MenuItem
-                      key={name}
-                      value={name}
+                      key={option}
+                      value={option}
                       style={{
                         fontWeight:
-                          formState.expertise.indexOf(name) === -1
+                          formState.languages.indexOf(option) === -1
                             ? theme.typography.fontWeightRegular
                             : theme.typography.fontWeightMedium,
                       }}
                     >
-                      {name}
+                      {option}
                     </MenuItem>
                   ))}
                 </Select>
@@ -515,6 +489,7 @@ function SpeakerSubmitInfoPage() {
                   type="submit"
                   variant="contained"
                   onClick={handleSubmit}
+                  disabled={loading || !!error}
                   sx={{
                     height: 48,
                     fontSize: '1rem',
