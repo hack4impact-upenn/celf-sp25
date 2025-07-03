@@ -10,6 +10,7 @@ import NotFoundPage from './NotFound/NotFoundPage.tsx';
 import HomePage from './Home/HomePage.tsx';
 import TeacherSearchSpeakerPage from './TeacherPage/TeacherSearchSpeakerPage.tsx';
 import TeacherRequestSpeakerPage from './TeacherPage/TeacherRequestSpeakerPage.tsx';
+import TeacherProfilePage from './TeacherPage/TeacherProfilePage.tsx';
 import AdminDashboardPage from './AdminDashboard/AdminDashboardPage.tsx';
 import AdminAddSpeakerPage from './AdminDashboard/AdminAddSpeakerPage.tsx';
 import AdminAllSpeakerPage from './AdminDashboard/AdminAllSpeakerPage.tsx';
@@ -97,6 +98,10 @@ function App() {
                   <Route
                     path="/teacher-speaker-requests"
                     element={<TeacherRequestSpeakerPage />}
+                  />
+                  <Route
+                    path="/teacher-profile"
+                    element={<TeacherProfilePage />}
                   />
                   <Route
                     path="/speaker-submit-info"

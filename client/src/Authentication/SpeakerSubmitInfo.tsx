@@ -26,6 +26,7 @@ import ScreenGrid from '../components/ScreenGrid.tsx';
 import AlertDialog from '../components/AlertDialog.tsx';
 import PrimaryButton from '../components/buttons/PrimaryButton.tsx';
 import COLORS from '../assets/colors.ts';
+import TopBar from '../components/top_bar/TopBar.tsx';
 
 // same as admin side
 const languageOptions = ['English', 'Spanish', 'Mandarin', 'French', 'Other'];
@@ -195,26 +196,25 @@ function SpeakerSubmitInfoPage() {
   };
 
   return (
-    <ScreenGrid>
+    <div style={{ minHeight: '100vh', background: '#E6FAFC', display: 'flex', flexDirection: 'column' }}>
+      <TopBar />
       <Box
         sx={{
-          background: `linear-gradient(135deg, ${COLORS.background} 0%, ${COLORS.white} 100%)`,
-          minHeight: '100vh',
-          width: '100%',
           display: 'flex',
-          alignItems: 'center',
           justifyContent: 'center',
-          padding: 4,
+          alignItems: 'flex-start',
+          minHeight: '80vh',
+          pt: 10,
         }}
       >
         <Paper
-          elevation={3}
+          elevation={2}
           sx={{
-            padding: 4,
-            borderRadius: 2,
             width: '100%',
-            maxWidth: 700,
-            background: COLORS.white,
+            maxWidth: 900,
+            p: 3,
+            borderRadius: 2,
+            backgroundColor: COLORS.white,
           }}
         >
           <Box sx={{ width: '100%' }}>
@@ -511,7 +511,7 @@ function SpeakerSubmitInfoPage() {
         message={alertMessage}
         onClose={handleAlertClose}
       />
-    </ScreenGrid>
+    </div>
   );
 }
 

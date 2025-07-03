@@ -41,7 +41,11 @@ function ProfileDropDown({ sx }: ProfileDropDownProps) {
 
   const handleProfileClick = () => {
     handleClose();
-    navigate('/profile');
+    if (user.role === 'teacher') {
+      navigate('/teacher-profile');
+    } else {
+      navigate('/profile');
+    }
   };
 
   const handleAccountSettingsClick = () => {
