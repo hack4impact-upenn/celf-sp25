@@ -2,7 +2,7 @@
  * A file for defining functions used to interact with the backend server
  * for authentication purposes.
  */
-import { postData } from '../util/api.tsx';
+import { postData, deleteData } from '../util/api.tsx';
 
 /**
  * Sends a request to the server to log in a user
@@ -126,6 +126,18 @@ async function registerInvite(
   }
 }
 
+/**
+ * Sends a request to the server to delete the current user's account
+ * @throws An {@link Error} with a `message` field describing the issue in deleting the account
+ */
+async function deleteAccount() {
+  const res = await deleteData('user/me');
+  if (res.error) {
+    throw Error(res.error.message);
+  }
+  return res.data;
+}
+
 export {
   register,
   loginUser,
@@ -133,4 +145,5 @@ export {
   sendResetPasswordEmail,
   resetPassword,
   registerInvite,
+  deleteAccount,
 };

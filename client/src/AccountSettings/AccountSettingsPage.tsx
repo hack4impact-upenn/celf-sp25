@@ -7,18 +7,25 @@ import {
   Grid,
   Button,
   Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Alert,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useAppSelector } from '../util/redux/hooks.ts';
-import { selectUser } from '../util/redux/userSlice.ts';
+import { useAppSelector, useAppDispatch } from '../util/redux/hooks.ts';
+import { selectUser, logout as logoutAction } from '../util/redux/userSlice.ts';
 import ScreenGrid from '../components/ScreenGrid.tsx';
 import TopBar from '../components/top_bar/TopBar.tsx';
 import PrimaryButton from '../components/buttons/PrimaryButton.tsx';
 import AlertDialog from '../components/AlertDialog.tsx';
 import COLORS from '../assets/colors.ts';
+import { deleteAccount } from '../Authentication/api.ts';
 
 function AccountSettingsPage() {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const user = useAppSelector(selectUser);
   const [formState, setFormState] = useState({
     firstName: user.firstName || '',
@@ -31,6 +38,8 @@ function AccountSettingsPage() {
   const [showAlert, setShowAlert] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -50,6 +59,31 @@ function AccountSettingsPage() {
 
   const handleAlertClose = () => {
     setShowAlert(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      setDeleteLoading(true);
+      await deleteAccount();
+      setShowDeleteDialog(false);
+      setAlertTitle('Success');
+      setAlertMessage('Your account has been deleted successfully.');
+      setShowAlert(true);
+      
+      // Logout and redirect to login page
+      dispatch(logoutAction());
+      navigate('/login', { replace: true });
+    } catch (err) {
+      setAlertTitle('Error');
+      setAlertMessage(err instanceof Error ? err.message : 'Failed to delete account');
+      setShowAlert(true);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setShowDeleteDialog(false);
   };
 
   return (
@@ -197,6 +231,47 @@ function AccountSettingsPage() {
             </Grid>
           </form>
         </Paper>
+
+        {/* Delete Account Section */}
+        <Paper
+          elevation={2}
+          sx={{
+            p: 3,
+            borderRadius: 2,
+            backgroundColor: COLORS.white,
+            mt: 3,
+            border: `2px solid ${COLORS.accentOrange}`,
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{ color: COLORS.accentOrange, mb: 2, fontWeight: 'bold' }}
+          >
+            Delete Account
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{ color: COLORS.gray, mb: 2 }}
+          >
+            Once you delete your account, there is no going back. Please be certain.
+          </Typography>
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={() => setShowDeleteDialog(true)}
+            sx={{
+              borderColor: COLORS.accentOrange,
+              color: COLORS.accentOrange,
+              '&:hover': {
+                borderColor: COLORS.accentOrange,
+                backgroundColor: COLORS.accentOrange,
+                color: COLORS.white,
+              },
+            }}
+          >
+            Delete My Account
+          </Button>
+        </Paper>
       </Box>
 
       {/* success/error messages */}
@@ -206,6 +281,44 @@ function AccountSettingsPage() {
         message={alertMessage}
         onClose={handleAlertClose}
       />
+
+      {/* Delete Account Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onClose={handleCloseDeleteDialog}>
+        <DialogTitle sx={{ color: COLORS.accentOrange, fontWeight: 'bold' }}>
+          Delete Account
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ mb: 2 }}>
+            Are you sure you want to delete your account? This action cannot be undone.
+          </Typography>
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            This will permanently delete your account and all associated data.
+          </Alert>
+          <Typography variant="body2" color="text.secondary">
+            You will be logged out immediately after account deletion.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} disabled={deleteLoading}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDeleteAccount}
+            color="error"
+            variant="contained"
+            disabled={deleteLoading}
+            sx={{
+              backgroundColor: COLORS.accentOrange,
+              '&:hover': {
+                backgroundColor: COLORS.accentOrange,
+                opacity: 0.8,
+              },
+            }}
+          >
+            {deleteLoading ? 'Deleting...' : 'Delete Account'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
