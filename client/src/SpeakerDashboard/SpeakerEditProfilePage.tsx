@@ -98,9 +98,15 @@ function SpeakerEditProfilePage() {
 
   useEffect(() => {
     if (response?.data) {
-      setFormState(response.data);
+      setFormState(prevState => ({
+        ...response.data,
+        // Preserve user data from Redux
+        firstName: user.firstName || prevState.firstName,
+        lastName: user.lastName || prevState.lastName,
+        email: user.email || prevState.email,
+      }));
     }
-  }, [response]);
+  }, [response, user.firstName, user.lastName, user.email]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
