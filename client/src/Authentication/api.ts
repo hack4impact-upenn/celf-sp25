@@ -43,6 +43,11 @@ async function verifyAccount(verificationToken: string) {
  * @param email
  * @param password
  * @param role
+ * @param school (optional) School for teacher registration
+ * @param gradeLevel (optional) Grade level for teacher registration
+ * @param location (optional) Location for teacher registration
+ * @param subjects (optional) Subjects taught for teacher registration
+ * @param bio (optional) Bio for teacher registration
  * @throws An {@link Error} with a `messsage` field describing the issue in verifying
  */
 async function register(
@@ -51,6 +56,11 @@ async function register(
   email: string,
   password: string,
   role?: string,
+  school?: string,
+  gradeLevel?: string,
+  location?: string,
+  subjects?: string[],
+  bio?: string,
 ) {
   const lowercaseEmail = email.toLowerCase();
   const payload: any = {
@@ -60,6 +70,11 @@ async function register(
     password,
   };
   if (role) payload.role = role;
+  if (school) payload.school = school;
+  if (gradeLevel) payload.gradeLevel = gradeLevel;
+  if (location) payload.location = location;
+  if (subjects) payload.subjects = subjects;
+  if (bio) payload.bio = bio;
   const res = await postData('auth/register', payload);
   if (res.error) {
     throw Error(res.error.message);

@@ -6,9 +6,6 @@ import {
   Button,
   FormControl,
   FormLabel,
-  FormGroup,
-  FormControlLabel,
-  Checkbox,
   Select,
   MenuItem,
   Alert,
@@ -19,6 +16,7 @@ import {
   Chip,
   SelectChangeEvent,
   Divider,
+  InputLabel,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../util/redux/hooks.ts';
@@ -47,20 +45,28 @@ const subjectOptions = [
 const gradeOptions = ['Elementary', 'Middle School', 'High School'];
 
 interface TeacherProfile {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
   school?: string;
   grade?: string;
   subjects?: string[];
   bio?: string;
+  location?: string;
   city?: string;
   state?: string;
   picture?: string;
 }
 
 const initialFormState: TeacherProfile = {
+  firstName: '',
+  lastName: '',
+  email: '',
   school: '',
   grade: '',
   subjects: [],
   bio: '',
+  location: '',
   city: '',
   state: '',
   picture: '',
@@ -79,11 +85,34 @@ function TeacherProfilePage() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await getData(`/api/teachers/${user.email}`);
+        // First get all teachers to find the current user's teacher profile
+        const response = await getData('teacher/all');
         if (response.error) {
           setError('Failed to load profile data');
         } else {
-          setFormState(response.data || initialFormState);
+          // Find the teacher profile that matches the current user's email
+          const teachers = response.data || [];
+          const currentTeacher = teachers.find((teacher: any) => 
+            teacher.userId?.email === user.email
+          );
+          
+          if (currentTeacher) {
+            setFormState({
+              ...currentTeacher,
+              // Preserve user data from the populated userId field
+              firstName: currentTeacher.userId?.firstName || user.firstName || '',
+              lastName: currentTeacher.userId?.lastName || user.lastName || '',
+              email: currentTeacher.userId?.email || user.email || '',
+            });
+          } else {
+            // No teacher profile found, use user data for names
+            setFormState({
+              ...initialFormState,
+              firstName: user.firstName || '',
+              lastName: user.lastName || '',
+              email: user.email || '',
+            });
+          }
         }
       } catch (err) {
         setError('Failed to load profile data');
@@ -111,15 +140,6 @@ function TeacherProfilePage() {
     }));
   };
 
-  const handleSubjectChange = (subject: string) => {
-    setFormState(prev => ({
-      ...prev,
-      subjects: prev.subjects?.includes(subject)
-        ? prev.subjects.filter(s => s !== subject)
-        : [...(prev.subjects || []), subject],
-    }));
-  };
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -140,10 +160,29 @@ function TeacherProfilePage() {
     setSaving(true);
     setError(null);
 
+    // Validate required fields
+    const requiredFields = [];
+    if (!formState.location || formState.location.trim() === '') {
+      requiredFields.push('Location');
+    }
+    if (!formState.bio || formState.bio.trim() === '') {
+      requiredFields.push('Bio');
+    }
+    if (!formState.subjects || formState.subjects.length === 0) {
+      requiredFields.push('Subjects');
+    }
+
+    if (requiredFields.length > 0) {
+      setError(`Please fill in the following required fields: ${requiredFields.join(', ')}`);
+      setSaving(false);
+      return;
+    }
+
     try {
-      const response = await putData(`/api/teachers/${user.email}`, formState);
-      if (response.error) {
-        setError(response.error.message || 'Failed to update profile');
+      const updateResponse = await putData('teacher/profile', formState);
+      
+      if (updateResponse.error) {
+        setError(updateResponse.error.message || 'Failed to update profile');
       } else {
         setSuccess('Profile updated successfully!');
         setTimeout(() => {
@@ -207,6 +246,49 @@ function TeacherProfilePage() {
           </Typography>
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3}>
+              {/* Personal Information Section */}
+              <Grid item xs={12}>
+                <Typography variant="h6" sx={{ color: COLORS.primaryDark, mb: 2 }}>Personal Information</Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="First Name"
+                      name="firstName"
+                      value={formState.firstName || ''}
+                      onChange={handleChange}
+                      required
+                      size="medium"
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Last Name"
+                      name="lastName"
+                      value={formState.lastName || ''}
+                      onChange={handleChange}
+                      required
+                      size="medium"
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Email"
+                      name="email"
+                      type="email"
+                      value={formState.email || ''}
+                      onChange={handleChange}
+                      required
+                      disabled
+                      size="medium"
+                    />
+                  </Grid>
+                </Grid>
+              </Grid>
+              <Grid item xs={12}><Divider sx={{ my: 2 }} /></Grid>
+              
               {/* Profile Picture Section */}
               <Grid item xs={12}>
                 <Typography
@@ -254,17 +336,14 @@ function TeacherProfilePage() {
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <FormControl fullWidth required>
-                      <FormLabel component="legend">Grade Level</FormLabel>
+                      <InputLabel>Grade Level</InputLabel>
                       <Select
                         name="grade"
                         value={formState.grade || ''}
                         onChange={handleSelectChange}
-                        displayEmpty
+                        label="Grade Level"
                         size="medium"
                       >
-                        <MenuItem value="" disabled>
-                          Select Grade Level
-                        </MenuItem>
                         {gradeOptions.map((grade) => (
                           <MenuItem key={grade} value={grade}>
                             {grade}
@@ -279,34 +358,36 @@ function TeacherProfilePage() {
               {/* Subjects Section */}
               <Grid item xs={12}>
                 <Typography variant="h6" sx={{ color: COLORS.primaryDark, mb: 2 }}>Subjects Taught</Typography>
-                <FormGroup row sx={{ gap: 2 }}>
-                  {subjectOptions.map((subject) => (
-                    <FormControlLabel
-                      key={subject}
-                      control={
-                        <Checkbox
-                          checked={formState.subjects?.includes(subject) || false}
-                          onChange={() => handleSubjectChange(subject)}
-                          size="medium"
-                        />
-                      }
-                      label={subject}
-                    />
-                  ))}
-                </FormGroup>
-                {formState.subjects && formState.subjects.length > 0 && (
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
-                    {formState.subjects.map((subject) => (
-                      <Chip
-                        key={subject}
-                        label={subject}
-                        size="small"
-                        color="primary"
-                        variant="outlined"
-                      />
+                <FormControl fullWidth required>
+                  <InputLabel>Select Subjects</InputLabel>
+                  <Select
+                    multiple
+                    value={formState.subjects || []}
+                    onChange={(e) => {
+                      const value = typeof e.target.value === 'string' ? [e.target.value] : e.target.value;
+                      setFormState(prev => ({
+                        ...prev,
+                        subjects: value,
+                      }));
+                    }}
+                    label="Select Subjects"
+                    renderValue={(selected) => (
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                        {selected.map((value) => (
+                          <Chip key={value} label={value} size="small" color="primary" />
+                        ))}
+                      </Box>
+                    )}
+                    size="medium"
+                    required
+                  >
+                    {subjectOptions.map((subject) => (
+                      <MenuItem key={subject} value={subject}>
+                        {subject}
+                      </MenuItem>
                     ))}
-                  </Box>
-                )}
+                  </Select>
+                </FormControl>
               </Grid>
               <Grid item xs={12}><Divider sx={{ my: 2 }} /></Grid>
               {/* Bio Section */}
@@ -322,6 +403,7 @@ function TeacherProfilePage() {
                   rows={4}
                   placeholder="Tell us about yourself, your teaching experience, and what you're passionate about..."
                   size="medium"
+                  required
                 />
               </Grid>
               <Grid item xs={12}><Divider sx={{ my: 2 }} /></Grid>
@@ -329,26 +411,16 @@ function TeacherProfilePage() {
               <Grid item xs={12}>
                 <Typography variant="h6" sx={{ color: COLORS.primaryDark, mb: 2 }}>Location</Typography>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} md={6}>
+                  <Grid item xs={12}>
                     <TextField
                       fullWidth
-                      label="City"
-                      name="city"
-                      value={formState.city || ''}
+                      label="Location (City, State)"
+                      name="location"
+                      value={formState.location || ''}
                       onChange={handleChange}
-                      required
+                      placeholder="e.g., Philadelphia, PA"
                       size="medium"
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      fullWidth
-                      label="State"
-                      name="state"
-                      value={formState.state || ''}
-                      onChange={handleChange}
                       required
-                      size="medium"
                     />
                   </Grid>
                 </Grid>

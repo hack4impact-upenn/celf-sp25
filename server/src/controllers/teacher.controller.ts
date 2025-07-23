@@ -60,10 +60,10 @@ const createTeacherProfile = async (
   res: express.Response,
   next: express.NextFunction
 ) => {
-  const { userId, school, location } = req.body;
+  const { userId, school, gradeLevel, location, subjects, bio } = req.body;
 
-  if (!userId || !school || !location) {
-    next(ApiError.missingFields(["userId", "school", "location"]));
+  if (!userId || !school || !gradeLevel || !location || !subjects || !bio) {
+    next(ApiError.missingFields(["userId", "school", "gradeLevel", "location", "subjects", "bio"]));
     return;
   }
 
@@ -74,7 +74,12 @@ const createTeacherProfile = async (
       return;
     }
 
-    const teacher = await createTeacher(userId, school, location);
+    // Parse city and state from location
+    const locationParts = location.split(',').map((part: string) => part.trim());
+    const city = locationParts[0] || '';
+    const state = locationParts[1] || '';
+
+    const teacher = await createTeacher(userId, school, gradeLevel, city, state, subjects, bio);
     res.status(StatusCode.CREATED).json(teacher);
   } catch (error) {
     next(ApiError.internal("Unable to create teacher profile"));
@@ -94,6 +99,22 @@ const updateTeacherProfile = async (
 
   if (!userId) {
     next(ApiError.missingFields(["userId"]));
+    return;
+  }
+
+  // Validate required fields
+  if (updateData.location !== undefined && (!updateData.location || updateData.location.trim() === '')) {
+    next(ApiError.badRequest("Location is required and cannot be empty"));
+    return;
+  }
+
+  if (updateData.bio !== undefined && (!updateData.bio || updateData.bio.trim() === '')) {
+    next(ApiError.badRequest("Bio is required and cannot be empty"));
+    return;
+  }
+
+  if (updateData.subjects !== undefined && (!updateData.subjects || !Array.isArray(updateData.subjects) || updateData.subjects.length === 0)) {
+    next(ApiError.badRequest("At least one subject must be selected"));
     return;
   }
 

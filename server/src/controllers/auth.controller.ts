@@ -27,6 +27,7 @@ import {
 } from "../services/invite.service.ts";
 import { IInvite } from "../models/invite.model.ts";
 import mixpanel from "../config/configMixpanel.ts";
+import { createTeacher } from "../services/teacher.service.ts";
 
 /**
  * A controller function to login a user and create a session with Passport.
@@ -126,13 +127,24 @@ const register = async (
   res: express.Response,
   next: express.NextFunction
 ) => {
-  const { firstName, lastName, email, password, role } = req.body;
+  const { firstName, lastName, email, password, role, school, gradeLevel, location, subjects, bio } = req.body;
   if (!firstName || !lastName || !email || !password) {
     next(
       ApiError.missingFields(["firstName", "lastName", "email", "password"])
     );
     return;
   }
+
+  // If role is teacher, validate additional required fields
+  if (role === 'teacher') {
+    if (!school || !gradeLevel || !location || !subjects || !bio) {
+      next(
+        ApiError.missingFields(["school", "gradeLevel", "location", "subjects", "bio"])
+      );
+      return;
+    }
+  }
+
   const emailRegex =
     /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/g;
 
@@ -188,7 +200,17 @@ const register = async (
       password,
       role === 'teacher' ? 'teacher' : 'speaker'
     );
-    
+
+    // Create teacher profile if role is teacher
+    if (role === 'teacher' && user) {
+      // Parse city and state from location
+      const locationParts = location.split(',').map((part: string) => part.trim());
+      const city = locationParts[0] || '';
+      const state = locationParts[1] || '';
+
+      await createTeacher(user._id, school, gradeLevel, city, state, subjects, bio);
+    }
+
     // If created by admin, automatically verify the user
     if (reqUser?.admin) {
       user!.verified = true;

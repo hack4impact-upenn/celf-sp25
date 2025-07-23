@@ -11,12 +11,20 @@ import { User } from "../models/user.model.ts";
 const createTeacher = async (
   userId: string,
   school: string,
-  location: string
+  gradeLevel: string,
+  city: string,
+  state: string,
+  subjects: string[],
+  bio: string
 ) => {
   const newTeacher = new Teacher({
     userId,
     school,
-    location,
+    gradeLevel,
+    city,
+    state,
+    subjects,
+    bio,
   });
   const teacher = await newTeacher.save();
   return teacher;
