@@ -34,6 +34,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import EventIcon from '@mui/icons-material/Event';
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import SearchBar from '../components/search_bar/SearchBar';
 import SpeakerCard from '../components/cards/SpeakerCard';
 import Sidebar from '../components/teacher_sidebar/Sidebar';
@@ -115,18 +116,26 @@ interface BookingFormState {
 
 // Styled components
 const CardContainer = styled('div')({
-  display: 'flex',
-  flexWrap: 'wrap',
+  display: 'grid',
+  gridTemplateColumns: 'repeat(3, 1fr)',
   gap: '20px',
-  justifyContent: 'flex-start',
+  padding: '20px',
+  width: '100%',
+  boxSizing: 'border-box',
+  maxWidth: '1200px',
+  margin: '0 auto',
 });
 
 const Section = styled('div')({
   marginBottom: '40px',
+  maxWidth: '1200px',
+  margin: '0 auto',
+  padding: '0 20px',
 });
 
 const SectionTitle = styled('h2')({
   textAlign: 'left',
+  padding: '0 20px',
 });
 
 const StyledDialogTitle = styled(DialogTitle)({
@@ -139,9 +148,12 @@ const StyledDialogTitle = styled(DialogTitle)({
 
 const SearchFilterContainer = styled(Box)({
   display: 'flex',
-  gap: '16px',
-  marginBottom: '24px',
+  marginBottom: '40px',
   alignItems: 'center',
+  position: 'relative',
+  maxWidth: '1200px',
+  margin: '0 auto',
+  padding: '0 20px',
   '& .MuiButton-root': {
     height: '56px',
     backgroundColor: '#E4E4E4',
@@ -149,6 +161,8 @@ const SearchFilterContainer = styled(Box)({
     boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
     borderRadius: '20px',
     padding: '8px 24px',
+    position: 'absolute',
+    right: '20px',
     '&:hover': {
       backgroundColor: '#D0D0D0',
     },
@@ -156,7 +170,7 @@ const SearchFilterContainer = styled(Box)({
 });
 
 const FilterPanelContainer = styled(Box)({
-  marginBottom: '24px',
+  marginBottom: '40px',
   backgroundColor: '#E4E4E4',
   borderRadius: '20px',
   boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
@@ -554,25 +568,13 @@ function TeacherSearchSpeakerPage() {
             <SectionTitle>Available Speakers</SectionTitle>
 
             <SearchFilterContainer>
-              <Box sx={{ flexGrow: 1 }}>
+              <Box sx={{ width: '100%' }}>
                 <SearchBar
                   onSearch={handleSearch}
                   placeholder="Search speakers..."
+                  onFilterClick={handleFilterPanelToggle}
                 />
               </Box>
-              <Button
-                variant="contained"
-                startIcon={<FilterListIcon />}
-                onClick={handleFilterPanelToggle}
-                sx={{
-                  textTransform: 'none',
-                  fontSize: '16px',
-                  fontWeight: 500,
-                  color: '#49454F',
-                }}
-              >
-                Filters
-              </Button>
             </SearchFilterContainer>
 
             <Collapse in={filterPanelOpen}>
@@ -590,7 +592,7 @@ function TeacherSearchSpeakerPage() {
                   <div
                     key={speaker._id}
                     onClick={() => handleCardClick(speaker)}
-                    style={{ cursor: 'pointer' }}
+                    style={{ cursor: 'pointer', width: '100%' }}
                   >
                     <SpeakerCard
                       id={speaker._id}

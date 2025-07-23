@@ -1,5 +1,7 @@
 import React from 'react';
 import { styled } from '@mui/system';
+import { Button } from '@mui/material';
+import FilterListIcon from '@mui/icons-material/FilterList';
 
 const Wrapper = styled('div')({
   display: 'flex',
@@ -12,7 +14,7 @@ const Container = styled('div')({
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'center',
-  gap: '4px',
+  gap: '0px',
   width: '720px',
   minWidth: '360px',
   maxWidth: '720px',
@@ -38,7 +40,7 @@ const TrailingIconWrapper = styled('div')({
   flexDirection: 'row',
   justifyContent: 'flex-end',
   alignItems: 'center',
-  width: '48px',
+  width: 'auto',
   height: '48px',
   cursor: 'pointer',
 });
@@ -57,25 +59,66 @@ const Input = styled('input')({
   paddingLeft: '0.5rem',
 });
 
+interface SearchBarProps {
+  onSearch: (query: string) => void;
+  placeholder: string;
+  onFilterClick?: () => void;
+}
+
 function SearchBar({
   onSearch,
   placeholder,
-}: {
-  onSearch: (query: string) => void;
-  placeholder: string;
-}) {
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.value) {
-      onSearch(event.target.value);
+  onFilterClick,
+}: SearchBarProps) {
+  const [searchQuery, setSearchQuery] = React.useState('');
+
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      onSearch(searchQuery);
     }
+  };
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
   };
 
   return (
     <Wrapper>
       <Container>
         <LeadingIconWrapper>{/* Icon */}</LeadingIconWrapper>
-        <Input type="text" placeholder={placeholder} onChange={handleSearch} />
-        <TrailingIconWrapper>{/* Icon */}</TrailingIconWrapper>
+        <Input 
+          type="text" 
+          placeholder={placeholder} 
+          value={searchQuery}
+          onChange={handleChange}
+          onKeyPress={handleKeyPress}
+        />
+        <TrailingIconWrapper>
+          {onFilterClick && (
+            <Button
+              variant="contained"
+              startIcon={<FilterListIcon />}
+              onClick={onFilterClick}
+              sx={{
+                height: '40px',
+                backgroundColor: '#E4E4E4',
+                border: 'none',
+                boxShadow: 'none',
+                borderRadius: '20px',
+                padding: '8px 16px',
+                textTransform: 'none',
+                fontSize: '16px',
+                fontWeight: 500,
+                color: '#49454F',
+                '&:hover': {
+                  backgroundColor: '#D0D0D0',
+                },
+              }}
+            >
+              Filters
+            </Button>
+          )}
+        </TrailingIconWrapper>
       </Container>
     </Wrapper>
   );

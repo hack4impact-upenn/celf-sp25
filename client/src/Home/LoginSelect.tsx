@@ -6,14 +6,14 @@ import COLORS from '../assets/colors.ts';
 import ScreenGrid from '../components/ScreenGrid.tsx';
 
 const ItemButton = styled(Box)(({ theme }) => ({
-  backgroundColor: COLORS.primaryBlue,
+  backgroundColor: 'white',
   width: '100%',
   minHeight: 110,
   borderRadius: '18px',
   transition: 'transform 0.2s ease, box-shadow 0.2s ease',
   display: 'flex',
   flexDirection: 'column',
-  alignItems: 'center',
+  alignItems: 'flex-start',
   justifyContent: 'center',
   padding: theme.spacing(3, 2),
   color: COLORS.white,
@@ -69,14 +69,14 @@ function LoginSelectPage() {
           }}
         >
           <Box sx={{ width: '100%' }}>
-            <Grid container direction="column" alignItems="center" spacing={3}>
-              <Grid sx={{ mb: 3 }}>
+            <Grid container direction="column" alignItems="center" spacing={4}>
+              <Grid sx={{ mb: 2 }}>
                 <Box
                   component="img"
                   src="/images/celf-logo.png"
                   alt="CELF Logo"
                   sx={{
-                    height: 80,
+                    height: 100,
                     width: 'auto',
                     objectFit: 'contain',
                   }}
@@ -88,7 +88,7 @@ function LoginSelectPage() {
                   textAlign="center"
                   sx={{
                     color: COLORS.primaryDark,
-                    fontWeight: 'bold',
+                    fontWeight: 600,
                     mb: 1,
                   }}
                 >
@@ -97,7 +97,10 @@ function LoginSelectPage() {
                 <Typography
                   variant="subtitle1"
                   textAlign="center"
-                  sx={{ color: COLORS.gray }}
+                  sx={{ 
+                    color: COLORS.gray,
+                    mb: 3
+                  }}
                 >
                   Select your role to get started
                 </Typography>
@@ -131,6 +134,8 @@ function LoginSelectPage() {
                   sx={{
                     color: COLORS.primaryBlue,
                     textDecoration: 'none',
+                    fontSize: '1rem',
+                    fontWeight: 500,
                     '&:hover': {
                       textDecoration: 'underline',
                     },
