@@ -150,6 +150,63 @@ function SpeakerSubmitInfoPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Frontend validation
+    if (!formState.jobTitle.trim()) {
+      setAlertTitle('Error');
+      setAlertMessage('Job Title is required');
+      setShowAlert(true);
+      return;
+    }
+
+    if (!formState.organization.trim()) {
+      setAlertTitle('Error');
+      setAlertMessage('Organization is required');
+      setShowAlert(true);
+      return;
+    }
+
+    if (!formState.bio.trim()) {
+      setAlertTitle('Error');
+      setAlertMessage('Bio is required');
+      setShowAlert(true);
+      return;
+    }
+
+    if (!formState.location.trim()) {
+      setAlertTitle('Error');
+      setAlertMessage('Location is required');
+      setShowAlert(true);
+      return;
+    }
+
+    if (!formState.speakingFormat) {
+      setAlertTitle('Error');
+      setAlertMessage('Please select a speaking format');
+      setShowAlert(true);
+      return;
+    }
+
+    if (!formState.ageSpecialty) {
+      setAlertTitle('Error');
+      setAlertMessage('Please select an age/grade specialty');
+      setShowAlert(true);
+      return;
+    }
+
+    if (formState.industryFocuses.length === 0) {
+      setAlertTitle('Error');
+      setAlertMessage('Please select at least one industry focus');
+      setShowAlert(true);
+      return;
+    }
+
+    if (formState.languages.length === 0) {
+      setAlertTitle('Error');
+      setAlertMessage('Please select at least one language');
+      setShowAlert(true);
+      return;
+    }
+
     try {
       const payload = {
         title: formState.jobTitle,
@@ -191,7 +248,7 @@ function SpeakerSubmitInfoPage() {
   const handleAlertClose = () => {
     setShowAlert(false);
     if (isSubmitted) {
-      navigate('/speaker/dashboard'); // Navigate to speaker dashboard after successful submission
+      navigate('/speaker-dashboard'); // Navigate to speaker dashboard after successful submission
     }
   };
 
@@ -260,6 +317,7 @@ function SpeakerSubmitInfoPage() {
                   name="jobTitle"
                   value={formState.jobTitle}
                   onChange={handleChange}
+                  required
                   sx={{ mb: 2 }}
                 />
               </Grid>
@@ -297,6 +355,7 @@ function SpeakerSubmitInfoPage() {
                   value={formState.bio}
                   onChange={handleChange}
                   placeholder="Share your background, expertise, and what inspires you about environmental education"
+                  required
                   sx={{ mb: 2 }}
                 />
               </Grid>
@@ -304,18 +363,18 @@ function SpeakerSubmitInfoPage() {
               <Grid item sx={{ width: '100%' }}>
                 <TextField
                   fullWidth
-                  label="Location"
+                  label="Location (City, State)"
                   name="location"
                   value={formState.location}
                   onChange={handleChange}
-                  placeholder="City, State"
+                  required
                   sx={{ mb: 2 }}
                 />
               </Grid>
 
               {/* Industry Focus MultiSelect */}
               <Grid item sx={{ width: '100%' }}>
-                <FormLabel component="legend" sx={{ mb: 1 }}>
+                <FormLabel component="legend" sx={{ mb: 1 }} required>
                   Industry Focus
                 </FormLabel>
                 {loading ? (
@@ -368,7 +427,7 @@ function SpeakerSubmitInfoPage() {
 
               {/* Languages MultiSelect */}
               <Grid item sx={{ width: '100%' }}>
-                <FormLabel component="legend" sx={{ mb: 1 }}>
+                <FormLabel component="legend" sx={{ mb: 1 }} required>
                   Languages
                 </FormLabel>
                 <Select
@@ -406,7 +465,7 @@ function SpeakerSubmitInfoPage() {
 
               {/* Speaking Format Radio Group */}
               <Grid item sx={{ width: '100%' }}>
-                <FormLabel component="legend" sx={{ mb: 1 }}>
+                <FormLabel component="legend" sx={{ mb: 1 }} required>
                   Preferred Speaking Format
                 </FormLabel>
                 <RadioGroup
@@ -436,7 +495,7 @@ function SpeakerSubmitInfoPage() {
 
               {/* Age/Grade Specialty Radio Group */}
               <Grid item sx={{ width: '100%' }}>
-                <FormLabel component="legend" sx={{ mb: 1 }}>
+                <FormLabel component="legend" sx={{ mb: 1 }} required>
                   Age/Grade Specialty
                 </FormLabel>
                 <RadioGroup

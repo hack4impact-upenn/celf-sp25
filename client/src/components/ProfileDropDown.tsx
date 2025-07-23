@@ -93,7 +93,7 @@ function ProfileDropDown({ sx }: ProfileDropDownProps) {
           },
         }}
       >
-        {!user.admin && (
+        {!user.admin && user.role !== 'speaker' && (
           <MenuItem
             onClick={handleProfileClick}
             sx={{

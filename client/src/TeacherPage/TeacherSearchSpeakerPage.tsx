@@ -102,6 +102,7 @@ interface BookingFormState {
   timezone: string;
   isInPerson: boolean;
   isVirtual: boolean;
+  additionalInfo?: string;
 
   // Speaker Preferences
   expertise: string;
@@ -175,6 +176,7 @@ const initialBookingFormState: BookingFormState = {
   timezone: 'America/New_York', // Default timezone
   isInPerson: false,
   isVirtual: false,
+  additionalInfo: '',
 
   // Speaker Preferences
   expertise: '',
@@ -194,6 +196,9 @@ const timezones = [
   { value: 'America/Anchorage', label: 'Alaska Time (AKT)' },
   { value: 'Pacific/Honolulu', label: 'Hawaii Time (HT)' },
 ];
+
+// Add language options at the top of the file
+const languageOptions = ['English', 'Spanish', 'Mandarin', 'French', 'Other'];
 
 // Add a helper function to safely get speaker name
 const getSpeakerName = (speaker: Speaker): string => {
@@ -485,6 +490,7 @@ function TeacherSearchSpeakerPage() {
         timezone: bookingForm.timezone,
         isInPerson: bookingForm.isInPerson,
         isVirtual: bookingForm.isVirtual,
+        additionalInfo: bookingForm.additionalInfo,
 
         // Speaker Preferences
         expertise: bookingForm.expertise,
@@ -706,13 +712,9 @@ function TeacherSearchSpeakerPage() {
                         fullWidth
                         label="Subject(s)"
                         name="subjects"
-                        value={bookingForm.subjects.join(', ')}
+                        value={bookingForm.subjects[0] || ''}
                         onChange={(e) => {
-                          const subjects = e.target.value
-                            .split(',')
-                            .map((s) => s.trim())
-                            .filter((s) => s);
-                          setBookingForm((prev) => ({ ...prev, subjects }));
+                          setBookingForm((prev) => ({ ...prev, subjects: [e.target.value] }));
                         }}
                         helperText="Separate multiple subjects with commas"
                       />
@@ -796,9 +798,29 @@ function TeacherSearchSpeakerPage() {
                         </Select>
                       </FormControl>
                     </Grid>
+                    {/* Additional Information Field */}
+                    <Grid item xs={12}>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{ mt: 2, mb: 1, fontWeight: 500 }}
+                      >
+                        Other Scheduling Considerations (optional)
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        multiline
+                        minRows={2}
+                        maxRows={4}
+                        label="Additional Information"
+                        name="additionalInfo"
+                        value={bookingForm.additionalInfo || ''}
+                        onChange={handleBookingFormChange}
+                        placeholder="Share any other details, constraints, or requests for scheduling."
+                      />
+                    </Grid>
                     <Grid item xs={12}>
                       <FormControl component="fieldset" required>
-                        <FormLabel component="legend">Event Format*</FormLabel>
+                        <FormLabel component="legend">Event Format</FormLabel>
                         <FormGroup row>
                           <FormControlLabel
                             control={
@@ -850,14 +872,21 @@ function TeacherSearchSpeakerPage() {
                       />
                     </Grid>
                     <Grid item xs={12} md={6}>
-                      <TextField
-                        required
-                        fullWidth
-                        label="Preferred Language"
-                        name="preferredLanguage"
-                        value={bookingForm.preferredLanguage}
-                        onChange={handleBookingFormChange}
-                      />
+                      <FormControl fullWidth required>
+                        <InputLabel>Preferred Language</InputLabel>
+                        <Select
+                          name="preferredLanguage"
+                          value={bookingForm.preferredLanguage}
+                          label="Preferred Language"
+                          onChange={handleSelectChange}
+                        >
+                          {languageOptions.map((option) => (
+                            <MenuItem key={option} value={option}>
+                              {option}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
                     </Grid>
                     <Grid item xs={12} md={6}>
                       <TextField

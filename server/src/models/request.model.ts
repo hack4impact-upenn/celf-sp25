@@ -18,6 +18,7 @@ export interface IRequest extends mongoose.Document {
   timezone: string;
   isInPerson: boolean;
   isVirtual: boolean;
+  additionalInfo?: string;
   
   // Speaker Preferences
   expertise: string;
@@ -92,6 +93,10 @@ const RequestSchema = new mongoose.Schema(
       type: Boolean,
       required: true,
       default: false,
+    },
+    additionalInfo: {
+      type: String,
+      required: false,
     },
     
     // Speaker Preferences

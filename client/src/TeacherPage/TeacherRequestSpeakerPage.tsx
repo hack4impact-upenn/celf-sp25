@@ -22,6 +22,8 @@ import EmailIcon from '@mui/icons-material/Email';
 import PersonIcon from '@mui/icons-material/Person';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import SpeakerRequestCard from '../components/cards/SpeakerRequestCard';
 import Sidebar from '../components/teacher_sidebar/Sidebar';
 import TopBar from '../components/top_bar/TopBar';
@@ -69,6 +71,7 @@ interface Request {
   goals: string;
   budget?: string;
   engagementFormat: string;
+  additionalInfo?: string; // Added for additional scheduling considerations
 }
 
 const CardContainer = styled('div')({
@@ -124,11 +127,11 @@ const FilterPanelContainer = styled(Box)({
 function TeacherRequestSpeakerPage() {
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
   const [open, setOpen] = useState(false);
-  const [filterPanelOpen, setFilterPanelOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [requests, setRequests] = useState<Request[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterPanelOpen, setFilterPanelOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     industry: [],
     grades: [],
@@ -141,6 +144,7 @@ function TeacherRequestSpeakerPage() {
     },
     languages: [],
   });
+  const [showArchived, setShowArchived] = useState(false);
 
   const user = useAppSelector((state) => state.user);
 
@@ -181,6 +185,7 @@ function TeacherRequestSpeakerPage() {
           gradeLevels: req.gradeLevels,
           subjects: req.subjects,
           estimatedStudents: req.estimatedStudents,
+          additionalInfo: req.additionalInfo, // Include additionalInfo
         };
       });
 
@@ -483,6 +488,42 @@ function TeacherRequestSpeakerPage() {
         {statusOrder.map((status) => {
           const requestsInStatus = groupedRequests[status] || [];
           if (requestsInStatus.length === 0) return null;
+
+          // Special handling for archived section
+          if (status === 'archived') {
+            return (
+              <Section key={status}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                  <SectionTitle>{getStatusTitle(status)}</SectionTitle>
+                  <Button
+                    onClick={() => setShowArchived(!showArchived)}
+                    endIcon={showArchived ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    {showArchived ? 'Hide' : 'Show'} Archived
+                  </Button>
+                </Box>
+                <Collapse in={showArchived}>
+                  <CardContainer>
+                    {requestsInStatus.map((request) => (
+                      <div
+                        key={request._id}
+                        onClick={() => handleCardClick(request)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <SpeakerRequestCard
+                          id={request._id}
+                          speaker={request.speaker}
+                          teacher={request.teacher}
+                          status={request.status}
+                        />
+                      </div>
+                    ))}
+                  </CardContainer>
+                </Collapse>
+              </Section>
+            );
+          }
 
           return (
             <Section key={status}>
@@ -856,6 +897,26 @@ function TeacherRequestSpeakerPage() {
                         {selectedRequest.goals}
                       </Typography>
                     </Grid>
+                    {/* Move Additional Info to end of Event Details section */}
+                    {selectedRequest.additionalInfo && (
+                      <Grid item xs={12}>
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            mb: 2,
+                            color: '#2c3e50',
+                            borderBottom: '1px solid #bdc3c7',
+                            pb: 1,
+                            mt: 2,
+                          }}
+                        >
+                          Other Scheduling Considerations
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {selectedRequest.additionalInfo}
+                        </Typography>
+                      </Grid>
+                    )}
                   </Grid>
                 </Box>
               </Box>

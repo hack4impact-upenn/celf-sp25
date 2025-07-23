@@ -5,6 +5,7 @@ import { IRequest } from "../models/request.model.ts";
 import {
   getAllRequests,
   getRequestsByTeacherId,
+  getRequestsBySpeakerId,
   getRequestById,
   createRequest,
   updateRequestStatus,
@@ -72,6 +73,28 @@ const getCurrentUserRequestsHandler = async (
 };
 
 /**
+ * Get requests by speaker ID
+ */
+const getRequestsBySpeakerIdHandler = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const { speakerId } = req.params;
+  if (!speakerId) {
+    next(ApiError.missingFields(["speakerId"]));
+    return;
+  }
+
+  try {
+    const requests = await getRequestsBySpeakerId(speakerId);
+    res.status(StatusCode.OK).json(requests);
+  } catch (error) {
+    next(ApiError.internal("Unable to retrieve requests"));
+  }
+};
+
+/**
  * Get a request by its ID
  */
 const getRequestByIdHandler = async (
@@ -119,6 +142,7 @@ const createRequestHandler = async (
     timezone,
     isInPerson,
     isVirtual,
+    additionalInfo,
     
     // Speaker Preferences
     expertise,
@@ -170,6 +194,7 @@ const createRequestHandler = async (
       timezone,
       isInPerson,
       isVirtual,
+      additionalInfo,
       expertise,
       preferredLanguage,
       location,
@@ -242,6 +267,7 @@ export {
   getAllRequestsHandler,
   getRequestsByTeacherIdHandler,
   getCurrentUserRequestsHandler,
+  getRequestsBySpeakerIdHandler,
   getRequestByIdHandler,
   createRequestHandler,
   updateRequestStatusHandler,

@@ -19,11 +19,14 @@ import {
   IconButton,
   Chip,
   Divider,
+  Collapse,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import EmailIcon from '@mui/icons-material/Email';
 import PersonIcon from '@mui/icons-material/Person';
 import VideocamIcon from '@mui/icons-material/Videocam';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import AdminSidebar from '../components/admin_sidebar/AdminSidebar';
 import TopBar from '../components/top_bar/TopBar';
 import SpeakerRequestCard from '../components/cards/SpeakerRequestCard';
@@ -70,6 +73,7 @@ function AdminRequestsPage() {
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
   const [open, setOpen] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
 
   useEffect(() => {
     fetchRequests();
@@ -268,20 +272,31 @@ function AdminRequestsPage() {
         </Section>
 
         <Section>
-          <SectionTitle>Archived</SectionTitle>
-          <CardContainer>
-            {requests
-              .filter((req) => req.status === 'Archived')
-              .map((request) => (
-                <RequestCard key={request._id} request={request} />
-              ))}
-            {requests.filter((req) => req.status === 'Archived').length ===
-              0 && (
-              <Typography variant="body1" color="text.secondary">
-                No archived requests
-              </Typography>
-            )}
-          </CardContainer>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+            <SectionTitle>Archived</SectionTitle>
+            <Button
+              onClick={() => setShowArchived(!showArchived)}
+              endIcon={showArchived ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+              sx={{ textTransform: 'none' }}
+            >
+              {showArchived ? 'Hide' : 'Show'} Archived
+            </Button>
+          </Box>
+          <Collapse in={showArchived}>
+            <CardContainer>
+              {requests
+                .filter((req) => req.status === 'Archived')
+                .map((request) => (
+                  <RequestCard key={request._id} request={request} />
+                ))}
+              {requests.filter((req) => req.status === 'Archived').length ===
+                0 && (
+                <Typography variant="body1" color="text.secondary">
+                  No archived requests
+                </Typography>
+              )}
+            </CardContainer>
+          </Collapse>
         </Section>
 
         {/* Request Details Dialog */}
@@ -634,6 +649,26 @@ function AdminRequestsPage() {
                           {selectedRequest.goals}
                         </Typography>
                       </Grid>
+                      {/* Move Additional Info to end of Event Details section */}
+                      {selectedRequest.additionalInfo && (
+                        <Grid item xs={12}>
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              mb: 2,
+                              color: '#2c3e50',
+                              borderBottom: '1px solid #bdc3c7',
+                              pb: 1,
+                              mt: 2,
+                            }}
+                          >
+                            Other Scheduling Considerations
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {selectedRequest.additionalInfo}
+                          </Typography>
+                        </Grid>
+                      )}
                     </Grid>
 
                     {/* Status Update Section */}

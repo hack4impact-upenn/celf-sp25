@@ -188,6 +188,7 @@ const register = async (
       password,
       role === 'teacher' ? 'teacher' : 'speaker'
     );
+    
     // If created by admin, automatically verify the user
     if (reqUser?.admin) {
       user!.verified = true;

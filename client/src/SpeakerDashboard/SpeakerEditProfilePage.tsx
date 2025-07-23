@@ -12,6 +12,12 @@ import {
   FormControlLabel,
   Radio,
   CircularProgress,
+  Select,
+  MenuItem,
+  Chip,
+  SelectChangeEvent,
+  Checkbox,
+  Divider,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../util/redux/hooks.ts';
@@ -21,12 +27,22 @@ import TopBar from '../components/top_bar/TopBar.tsx';
 import PrimaryButton from '../components/buttons/PrimaryButton.tsx';
 import AlertDialog from '../components/AlertDialog.tsx';
 import COLORS from '../assets/colors.ts';
-import { useData } from '../util/api.tsx';
+import { useData, putData } from '../util/api.tsx';
+import { getIndustryFocuses, IndustryFocus } from '../util/industryFocusApi';
+
+const languageOptions = ['English', 'Spanish', 'Mandarin', 'French', 'Other'];
+const gradeOptions = ['Elementary', 'Middle School', 'High School'];
 
 interface SpeakerProfile {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
   picture?: string;
+  organization?: string;
+  jobTitle?: string;
+  website?: string;
   industry?: string[];
-  ageSpecialty?: string;
+  grades?: string[];
   bio?: string;
   city?: string;
   state?: string;
@@ -42,12 +58,20 @@ function SpeakerEditProfilePage() {
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [industryFocuses, setIndustryFocuses] = useState<IndustryFocus[]>([]);
+  const [loadingFocuses, setLoadingFocuses] = useState(true);
 
-  const response = useData(`/api/speakers/${user.email}`);
+  const response = useData('speaker/profile');
   const [formState, setFormState] = useState<SpeakerProfile>({
+    firstName: user.firstName || '',
+    lastName: user.lastName || '',
+    email: user.email || '',
     picture: '',
+    organization: '',
+    jobTitle: '',
+    website: '',
     industry: [],
-    ageSpecialty: '',
+    grades: [],
     bio: '',
     city: '',
     state: '',
@@ -55,6 +79,22 @@ function SpeakerEditProfilePage() {
     inperson: false,
     virtual: false,
   });
+
+  // Fetch industry focuses on component mount
+  useEffect(() => {
+    const fetchIndustryFocuses = async () => {
+      try {
+        const focuses = await getIndustryFocuses();
+        setIndustryFocuses(focuses);
+      } catch (error) {
+        console.error('Failed to fetch industry focuses:', error);
+      } finally {
+        setLoadingFocuses(false);
+      }
+    };
+
+    fetchIndustryFocuses();
+  }, []);
 
   useEffect(() => {
     if (response?.data) {
@@ -70,10 +110,27 @@ function SpeakerEditProfilePage() {
     }));
   };
 
-  const handleRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormState((prev) => ({
+  const handleSelectChange = (e: SelectChangeEvent<string | string[]>) => {
+    const { name, value } = e.target as { name: string; value: string | string[] };
+    setFormState(prev => ({
       ...prev,
-      ageSpecialty: e.target.value,
+      [name]: typeof value === 'string' ? value.split(',') : value,
+    }));
+  };
+
+  const handleGradeChange = (grade: string) => {
+    setFormState(prev => ({
+      ...prev,
+      grades: prev.grades?.includes(grade)
+        ? prev.grades.filter(g => g !== grade)
+        : [...(prev.grades || []), grade],
+    }));
+  };
+
+  const handleFormatChange = (format: 'inperson' | 'virtual') => {
+    setFormState(prev => ({
+      ...prev,
+      [format]: !prev[format],
     }));
   };
 
@@ -98,11 +155,18 @@ function SpeakerEditProfilePage() {
     setLoading(true);
 
     try {
-      // TODO: Implement profile update API call
-      setAlertTitle('Success');
-      setAlertMessage('Your profile has been updated successfully!');
+      const response = await putData('speaker/profile', formState);
+      if (response.error) {
+        setAlertTitle('Error');
+        setAlertMessage(response.error.message || 'Failed to update profile. Please try again.');
+      } else {
+        setAlertTitle('Success');
+        setAlertMessage('Your profile has been updated successfully!');
+        setTimeout(() => {
+          navigate('/home');
+        }, 2000);
+      }
       setShowAlert(true);
-      navigate('/profile');
     } catch (error) {
       setAlertTitle('Error');
       setAlertMessage('Failed to update profile. Please try again.');
@@ -172,6 +236,40 @@ function SpeakerEditProfilePage() {
         >
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3}>
+              {/* Name Fields */}
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="First Name"
+                  name="firstName"
+                  value={formState.firstName || ''}
+                  onChange={handleChange}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Last Name"
+                  name="lastName"
+                  value={formState.lastName || ''}
+                  onChange={handleChange}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Email"
+                  name="email"
+                  type="email"
+                  value={formState.email || ''}
+                  onChange={handleChange}
+                  required
+                  disabled
+                />
+              </Grid>
+
               {/* Profile Picture Upload */}
               <Grid item xs={12}>
                 <FormLabel component="legend" sx={{ mb: 1 }}>
@@ -185,64 +283,109 @@ function SpeakerEditProfilePage() {
                 />
               </Grid>
 
-              {/* Bio */}
+              {/* Organization */}
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Organization"
+                  name="organization"
+                  value={formState.organization || ''}
+                  onChange={handleChange}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Job Title (optional)"
+                  name="jobTitle"
+                  value={formState.jobTitle || ''}
+                  onChange={handleChange}
+                />
+              </Grid>
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Bio"
-                  name="bio"
-                  value={formState.bio || ''}
+                  label="LinkedIn/Website (optional)"
+                  name="website"
+                  value={formState.website || ''}
                   onChange={handleChange}
-                  multiline
-                  rows={4}
-                  required
                 />
               </Grid>
 
               {/* Industry */}
               <Grid item xs={12}>
-                <TextField
+                <FormLabel component="legend" sx={{ mb: 1 }}>
+                  Industry Focus
+                </FormLabel>
+                <Select
                   fullWidth
-                  label="Industry"
+                  multiple
+                  value={formState.industry || []}
+                  onChange={handleSelectChange}
                   name="industry"
-                  value={formState.industry?.join(', ') || ''}
-                  onChange={handleChange}
-                  helperText="Enter industries separated by commas"
-                />
+                  renderValue={(selected) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {selected.map((value) => (
+                        <Chip key={value} label={value} />
+                      ))}
+                    </Box>
+                  )}
+                  sx={{ minHeight: 48 }}
+                >
+                  {loadingFocuses ? (
+                    <MenuItem disabled>
+                      <CircularProgress size="small" />
+                    </MenuItem>
+                  ) : (
+                    industryFocuses.map((focus) => (
+                      <MenuItem key={focus._id} value={focus.name}>
+                        {focus.name}
+                      </MenuItem>
+                    ))
+                  )}
+                </Select>
               </Grid>
 
-              {/* Age/Grade Specialty */}
+              {/* Grades */}
               <Grid item xs={12}>
                 <FormLabel component="legend" sx={{ mb: 1 }}>
-                  Age/Grade Specialty
+                  Age/Grade Specialty (optional)
                 </FormLabel>
-                <RadioGroup
-                  row
-                  name="ageSpecialty"
-                  value={formState.ageSpecialty || ''}
-                  onChange={handleRadioChange}
+                <Select
+                  fullWidth
+                  multiple
+                  value={formState.grades || []}
+                  onChange={(e) => handleSelectChange(e as SelectChangeEvent<string[]>)}
+                  name="grades"
+                  renderValue={(selected) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {selected.map((value) => (
+                        <Chip key={value} label={value} />
+                      ))}
+                    </Box>
+                  )}
+                  sx={{ minHeight: 48 }}
                 >
-                  <FormControlLabel
-                    value="elementary"
-                    control={<Radio />}
-                    label="Elementary School"
-                  />
-                  <FormControlLabel
-                    value="middle"
-                    control={<Radio />}
-                    label="Middle School"
-                  />
-                  <FormControlLabel
-                    value="high school"
-                    control={<Radio />}
-                    label="High School"
-                  />
-                  <FormControlLabel
-                    value="all grades"
-                    control={<Radio />}
-                    label="All Grades"
-                  />
-                </RadioGroup>
+                  {gradeOptions.map((grade) => (
+                    <MenuItem key={grade} value={grade}>
+                      {grade}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </Grid>
+
+              {/* Bio */}
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Bio (optional)"
+                  name="bio"
+                  value={formState.bio || ''}
+                  onChange={handleChange}
+                  multiline
+                  rows={4}
+                />
               </Grid>
 
               {/* Location */}
@@ -267,26 +410,42 @@ function SpeakerEditProfilePage() {
 
               {/* Languages */}
               <Grid item xs={12}>
-                <TextField
+                <FormLabel component="legend" sx={{ mb: 1 }}>
+                  Languages
+                </FormLabel>
+                <Select
                   fullWidth
-                  label="Languages"
+                  multiple
+                  value={formState.languages || []}
+                  onChange={(e) => handleSelectChange(e as SelectChangeEvent<string[]>)}
                   name="languages"
-                  value={formState.languages?.join(', ') || ''}
-                  onChange={handleChange}
-                  helperText="Enter languages separated by commas"
-                />
+                  renderValue={(selected) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {selected.map((value) => (
+                        <Chip key={value} label={value} />
+                      ))}
+                    </Box>
+                  )}
+                  sx={{ minHeight: 48 }}
+                >
+                  {languageOptions.map((lang) => (
+                    <MenuItem key={lang} value={lang}>
+                      {lang}
+                    </MenuItem>
+                  ))}
+                </Select>
               </Grid>
 
               {/* Speaking Formats */}
               <Grid item xs={12}>
                 <FormLabel component="legend" sx={{ mb: 1 }}>
-                  Speaking Formats
+                  Preferred Speaking Format (optional)
                 </FormLabel>
                 <FormControlLabel
                   control={
-                    <Radio
+                    <Checkbox
                       checked={formState.inperson}
-                      onChange={handleChange}
+                      onChange={() => handleFormatChange('inperson')}
                       name="inperson"
                     />
                   }
@@ -294,9 +453,9 @@ function SpeakerEditProfilePage() {
                 />
                 <FormControlLabel
                   control={
-                    <Radio
+                    <Checkbox
                       checked={formState.virtual}
-                      onChange={handleChange}
+                      onChange={() => handleFormatChange('virtual')}
                       name="virtual"
                     />
                   }

@@ -77,7 +77,7 @@ function SpeakerProfilePage() {
     const fetchData = async () => {
       try {
         // Fetch profile data
-        const profileResponse = await getData(`/api/speakers/${user.email}`);
+        const profileResponse = await getData('speaker/profile');
         if (profileResponse.error) {
           setError('Failed to load profile data');
         } else {
@@ -151,7 +151,7 @@ function SpeakerProfilePage() {
     setError(null);
 
     try {
-      const response = await putData(`/api/speakers/${user.email}`, formState);
+      const response = await putData('speaker/profile', formState);
       if (response.error) {
         setError(response.error.message || 'Failed to update profile');
       } else {

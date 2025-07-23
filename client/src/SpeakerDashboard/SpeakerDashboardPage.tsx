@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Typography,
   Box,
@@ -8,6 +8,8 @@ import {
   CardContent,
   CardActions,
   Button,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import PrimaryButton from '../components/buttons/PrimaryButton.tsx';
@@ -16,14 +18,55 @@ import TopBar from '../components/top_bar/TopBar.tsx';
 import { useAppSelector } from '../util/redux/hooks.ts';
 import { selectUser } from '../util/redux/userSlice.ts';
 import COLORS from '../assets/colors.ts';
+import { getData } from '../util/api.tsx';
 
 function SpeakerDashboardPage() {
   const navigate = useNavigate();
   const user = useAppSelector(selectUser);
+  const [hasProfile, setHasProfile] = useState<boolean | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleNavigateToForm = () => {
-    navigate('/speaker-submit-info');
-  };
+  useEffect(() => {
+    const checkProfile = async () => {
+      try {
+        setLoading(true);
+        const response = await getData('speaker/profile');
+        if (response.error) {
+          // If speaker not found, they don't have a profile
+          setHasProfile(false);
+        } else {
+          setHasProfile(true);
+        }
+      } catch (err) {
+        setError('Failed to check profile status');
+        setHasProfile(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkProfile();
+  }, [user.email]);
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <TopBar />
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexGrow: 1,
+            marginTop: '64px',
+          }}
+        >
+          <CircularProgress sx={{ color: COLORS.primaryBlue }} />
+        </Box>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -50,6 +93,12 @@ function SpeakerDashboardPage() {
           Welcome, {user.firstName}!
         </Typography>
 
+        {error && (
+          <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        )}
+
         <Grid container spacing={3}>
           {/* Profile Information Card */}
           <Grid item xs={12} md={6}>
@@ -69,30 +118,36 @@ function SpeakerDashboardPage() {
               >
                 Your Profile
               </Typography>
-              <Typography variant="body1" paragraph>
-                Complete your speaker profile to help educators find you and
-                request your expertise for their classrooms.
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-                <PrimaryButton
-                  variant="contained"
-                  onClick={handleNavigateToForm}
-                >
-                  Complete Your Profile
-                </PrimaryButton>
-                <PrimaryButton
-                  variant="outlined"
-                  onClick={() => navigate('/profile')}
-                >
-                  View Profile
-                </PrimaryButton>
-                <PrimaryButton
-                  variant="outlined"
-                  onClick={() => navigate('/profile/edit')}
-                >
-                  Edit Profile
-                </PrimaryButton>
-              </Box>
+              {hasProfile ? (
+                <>
+                  <Typography variant="body1" paragraph>
+                    Manage your speaker profile and help educators find you for their classrooms.
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                    <PrimaryButton
+                      variant="contained"
+                      onClick={() => navigate('/profile/edit')}
+                    >
+                      Edit Profile
+                    </PrimaryButton>
+                  </Box>
+                </>
+              ) : (
+                <>
+                  <Typography variant="body1" paragraph sx={{ color: 'warning.main' }}>
+                    Complete your speaker profile to start appearing in teacher search results and receive speaking requests.
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                    <PrimaryButton
+                      variant="contained"
+                      onClick={() => navigate('/speaker-submit-info')}
+                      sx={{ backgroundColor: COLORS.primaryBlue }}
+                    >
+                      Complete Profile
+                    </PrimaryButton>
+                  </Box>
+                </>
+              )}
             </Paper>
           </Grid>
 
@@ -114,14 +169,37 @@ function SpeakerDashboardPage() {
               >
                 Speaking Requests
               </Typography>
-              <Typography variant="body1" paragraph>
-                You currently have no speaking requests. Once you complete your
-                profile, educators can request your participation in their
-                classrooms.
-              </Typography>
-              <Button variant="outlined" disabled sx={{ mt: 2 }}>
-                View Requests
-              </Button>
+              {hasProfile ? (
+                <>
+                  <Typography variant="body1" paragraph>
+                    Educators can request your participation in their classrooms.
+                  </Typography>
+                  <Button 
+                    variant="outlined" 
+                    onClick={() => navigate('/speaker-requests')}
+                    sx={{ 
+                      height: 48,
+                      fontSize: '1rem',
+                      textTransform: 'none',
+                    }}
+                  >
+                    View Requests
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Typography variant="body1" paragraph sx={{ color: 'text.secondary' }}>
+                    Complete your profile first to start receiving speaking requests from educators.
+                  </Typography>
+                  <Button 
+                    variant="outlined" 
+                    disabled
+                    sx={{ mt: 2 }}
+                  >
+                    View Requests
+                  </Button>
+                </>
+              )}
             </Paper>
           </Grid>
 

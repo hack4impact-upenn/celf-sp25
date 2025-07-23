@@ -4,11 +4,15 @@ import { isAuthenticated } from "../controllers/auth.middleware.ts";
 import {
   getAllSpeakers,
   getSpeaker,
+  getSpeakerByEmailHandler,
   createSpeakerProfile,
+  submitSpeakerProfile,
   updateSpeakerProfile,
+  updateSpeakerProfileByEmail,
   deleteSpeakerProfile,
   filterSpeaker,
-  submitSpeakerProfile,
+  getCurrentUserSpeakerProfile,
+  updateCurrentUserSpeakerProfile,
 } from "../controllers/speaker.controller.ts";
 
 const router = express.Router();
@@ -16,15 +20,21 @@ const router = express.Router();
 // Public routes
 router.get("/all", getAllSpeakers);
 router.get("/filter", filterSpeaker);
-router.get("/:userId", getSpeaker);
 
-// Protected routes
+// Protected routes  
 router.post("/create", isAuthenticated, createSpeakerProfile);
 router.post("/profile", isAuthenticated, submitSpeakerProfile);
-router.put("/:userId", isAuthenticated, updateSpeakerProfile);
-router.delete("/:userId", isAuthenticated, isAdmin, deleteSpeakerProfile);
+router.get("/profile", isAuthenticated, getCurrentUserSpeakerProfile);
+router.put("/profile", isAuthenticated, updateCurrentUserSpeakerProfile);
 
 // Admin routes
 router.post("/filter", isAuthenticated, filterSpeaker);
+
+// Parameterized routes (must come last)
+router.get("/email/:email", getSpeakerByEmailHandler);
+router.put("/email/:email", isAuthenticated, updateSpeakerProfileByEmail);
+router.get("/:userId", getSpeaker);
+router.put("/:userId", isAuthenticated, updateSpeakerProfile);
+router.delete("/:userId", isAuthenticated, isAdmin, deleteSpeakerProfile);
 
 export default router;

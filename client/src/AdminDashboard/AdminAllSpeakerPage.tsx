@@ -132,7 +132,7 @@ const FilterPanelContainer = styled(Box)({
   padding: '16px',
 });
 
-// Helper to get the userId string
+
 const getUserIdString = (userId: Speaker['userId']): string | null => {
   if (!userId) return null;
   if (typeof userId === 'string') return userId;
@@ -174,6 +174,8 @@ function AdminAllSpeakerPage() {
     industry: [] as string[],
     grades: [] as string[],
     languages: [] as string[],
+    jobTitle: '',
+    website: '',
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -410,6 +412,8 @@ function AdminAllSpeakerPage() {
       industry: speaker.industry || [],
       grades: speaker.grades || [],
       languages: speaker.languages || ['English'],
+      jobTitle: (speaker as any).jobTitle || '',
+      website: (speaker as any).website || '',
     });
     setEditOpen(true);
   };
@@ -435,6 +439,22 @@ function AdminAllSpeakerPage() {
     });
   };
 
+  // Handle file input for image upload
+  const handleEditFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result as string;
+        setEditFormState((prev) => ({
+          ...prev,
+          imageUrl: result,
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleFilterPanelToggle = () => {
     setFilterPanelOpen(!filterPanelOpen);
   };
@@ -456,6 +476,7 @@ function AdminAllSpeakerPage() {
         // Get the userId string from the selected speaker
         const userIdStr = getUserIdString(selectedSpeaker.userId);
         if (!userIdStr) throw new Error('Speaker userId is missing');
+        console.log('userIdStr:', userIdStr);
 
         // Format the update data to match the speaker schema and include user data
         const updateData = {
@@ -471,7 +492,8 @@ function AdminAllSpeakerPage() {
           grades: editFormState.grades,
           languages: editFormState.languages,
         };
-
+        const speakersResponse2 = await getData('speaker/all');
+        console.log('All Speakers:', speakersResponse2.data);
         console.log('Updating speaker with data:', updateData);
         const response = await putData(`speaker/${userIdStr}`, updateData);
         if (response.error) {
@@ -480,6 +502,7 @@ function AdminAllSpeakerPage() {
 
         // Refetch all speakers to get the updated data
         const speakersResponse = await getData('speaker/all');
+        console.log('All Speakers:', speakersResponse.data);
         if (speakersResponse.error) {
           throw new Error(
             'Failed to fetch updated speakers: ' +
@@ -842,6 +865,20 @@ function AdminAllSpeakerPage() {
                 />
               </Box>
               <TextField
+                label="Job Title (optional)"
+                name="jobTitle"
+                value={editFormState.jobTitle}
+                onChange={handleEditFormChange}
+                fullWidth
+              />
+              <TextField
+                label="LinkedIn/Website (optional)"
+                name="website"
+                value={editFormState.website}
+                onChange={handleEditFormChange}
+                fullWidth
+              />
+              <TextField
                 label="Organization"
                 name="organization"
                 value={editFormState.organization}
@@ -864,13 +901,23 @@ function AdminAllSpeakerPage() {
                 onChange={handleEditFormChange}
                 fullWidth
               />
-              <TextField
-                label="Image URL"
-                name="imageUrl"
-                value={editFormState.imageUrl}
-                onChange={handleEditFormChange}
-                fullWidth
-              />
+              <Typography variant="subtitle1" sx={{ mt: 2, mb: 1, fontWeight: 500 }}>
+                Profile Picture
+              </Typography>
+              {/* Image preview and upload */}
+              {editFormState.imageUrl && (
+                <Box sx={{ mb: 1 }}>
+                  <Typography variant="subtitle2">Current Profile Picture:</Typography>
+                  <img
+                    src={editFormState.imageUrl}
+                    alt="Profile Preview"
+                    style={{ maxWidth: 180, maxHeight: 180, borderRadius: 8, marginTop: 4 }}
+                  />
+                </Box>
+              )}
+              <Box sx={{ mt: 1, mb: 2 }}>
+                <input type="file" accept="image/*" onChange={handleEditFileChange} />
+              </Box>
               <MultiSelect
                 label="Industry Focus"
                 selectOptions={industryFocuses.map(focus => focus.name)}

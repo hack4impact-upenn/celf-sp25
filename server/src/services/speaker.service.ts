@@ -65,6 +65,24 @@ const getSpeakerByUserId = async (userId: string) => {
 };
 
 /**
+ * Gets a speaker from the database by their email
+ * @param email The email of the speaker to get
+ * @returns The Speaker or null if not found
+ */
+const getSpeakerByEmail = async (email: string) => {
+  const speaker = await Speaker.findOne({})
+    .populate({
+      path: 'userId',
+      match: { email: email },
+      select: 'firstName lastName email'
+    })
+    .exec();
+  
+  // Filter out speakers where the populated userId is null (no match)
+  return speaker && speaker.userId ? speaker : null;
+};
+
+/**
  * Gets all speakers from the database
  * @returns Array of all speakers
  */
@@ -82,6 +100,14 @@ const getAllSpeakers = async () => {
  * @returns The updated speaker
  */
 const updateSpeaker = async (userId: string, updateData: Partial<ISpeaker>) => {
+  console.log('=== UPDATE SPEAKER FUNCTION CALLED ===');
+  console.log('updateSpeaker service called with userId:', userId);
+  console.log('updateData:', updateData);
+  
+  // Print out all users in the speaker database for debugging
+  const allSpeakers = await Speaker.find({}).populate('userId', 'firstName lastName email').exec();
+  console.log('All speakers in database:', allSpeakers);
+  
   const speaker = await Speaker.findOneAndUpdate(
     { userId },
     updateData,
@@ -89,6 +115,8 @@ const updateSpeaker = async (userId: string, updateData: Partial<ISpeaker>) => {
   )
     .populate('userId', 'firstName lastName email')
     .exec();
+    
+  console.log('Update result:', speaker);
   return speaker;
 };
 
@@ -115,6 +143,7 @@ const getfilterSpeakeredList = async (filteredParams: Record<string, any>) => {
 export {
   createSpeaker,
   getSpeakerByUserId,
+  getSpeakerByEmail,
   getAllSpeakers,
   updateSpeaker,
   deleteSpeaker,

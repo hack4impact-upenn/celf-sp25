@@ -42,6 +42,26 @@ const getRequestsByTeacherId = async (teacherId: string) => {
 };
 
 /**
+ * Get requests by speaker ID with populated teacher data
+ */
+const getRequestsBySpeakerId = async (speakerId: string) => {
+  const requests = await Request.find({ speakerId })
+    .populate({
+      path: 'speakerId',
+      populate: {
+        path: 'userId',
+        select: 'firstName lastName email'
+      }
+    })
+    .populate({
+      path: 'teacherId',
+      select: 'firstName lastName email'
+    })
+    .exec();
+  return requests;
+};
+
+/**
  * Get a request by its ID with populated data
  */
 const getRequestById = async (requestId: string) => {
@@ -80,6 +100,7 @@ const createRequest = async (
     timezone: string;
     isInPerson: boolean;
     isVirtual: boolean;
+    additionalInfo?: string;
     
     // Speaker Preferences
     expertise: string;
@@ -157,6 +178,7 @@ const deleteRequest = async (requestId: string) => {
 export {
   getAllRequests,
   getRequestsByTeacherId,
+  getRequestsBySpeakerId,
   getRequestById,
   createRequest,
   updateRequestStatus,

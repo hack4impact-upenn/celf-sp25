@@ -59,6 +59,7 @@ export interface Request {
   timezone: string;
   isInPerson: boolean;
   isVirtual: boolean;
+  additionalInfo?: string;
   
   // Speaker Preferences
   expertise: string;

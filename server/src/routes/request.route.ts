@@ -4,6 +4,7 @@ import { isAuthenticated } from "../controllers/auth.middleware.ts";
 import {
   getAllRequestsHandler,
   getRequestsByTeacherIdHandler,
+  getRequestsBySpeakerIdHandler,
   getCurrentUserRequestsHandler,
   getRequestByIdHandler,
   createRequestHandler,
@@ -17,6 +18,7 @@ const router = express.Router();
 router.get("/all", isAuthenticated, getAllRequestsHandler);
 router.get("/current", isAuthenticated, getCurrentUserRequestsHandler);
 router.get("/teacher/:teacherId", isAuthenticated, getRequestsByTeacherIdHandler);
+router.get("/speaker/:speakerId", isAuthenticated, getRequestsBySpeakerIdHandler);
 router.get("/:requestId", isAuthenticated, getRequestByIdHandler);
 router.post("/", isAuthenticated, createRequestHandler);
 
