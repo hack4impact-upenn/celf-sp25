@@ -18,6 +18,10 @@ const TeacherSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  country: {
+    type: String,
+    required: false,
+  },
   gradeLevel: {
     type: String,
     required: true,
@@ -38,6 +42,7 @@ interface ITeacher extends mongoose.Document {
   school: string;
   city: string;
   state: string;
+  country: string;
   gradeLevel: string;
   subjects: string[];
   bio: string;

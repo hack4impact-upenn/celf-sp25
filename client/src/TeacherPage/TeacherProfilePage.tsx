@@ -49,13 +49,13 @@ interface TeacherProfile {
   lastName?: string;
   email?: string;
   school?: string;
-  grade?: string;
+  gradeLevel?: string;
   subjects?: string[];
   bio?: string;
-  location?: string;
   city?: string;
   state?: string;
   picture?: string;
+  userId?: string | { _id?: string; id?: string };
 }
 
 const initialFormState: TeacherProfile = {
@@ -63,10 +63,9 @@ const initialFormState: TeacherProfile = {
   lastName: '',
   email: '',
   school: '',
-  grade: '',
+  gradeLevel: '',
   subjects: [],
   bio: '',
-  location: '',
   city: '',
   state: '',
   picture: '',
@@ -80,6 +79,7 @@ function TeacherProfilePage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [locationInput, setLocationInput] = useState('');
 
   // Fetch teacher profile data
   useEffect(() => {
@@ -97,6 +97,7 @@ function TeacherProfilePage() {
           );
           
           if (currentTeacher) {
+            console.log('currentTeacher:', currentTeacher);
             setFormState({
               ...currentTeacher,
               // Preserve user data from the populated userId field
@@ -104,6 +105,9 @@ function TeacherProfilePage() {
               lastName: currentTeacher.userId?.lastName || user.lastName || '',
               email: currentTeacher.userId?.email || user.email || '',
             });
+            setLocationInput(
+              [currentTeacher.city, currentTeacher.state].filter(Boolean).join(', ')
+            );
           } else {
             // No teacher profile found, use user data for names
             setFormState({
@@ -155,6 +159,17 @@ function TeacherProfilePage() {
     }
   };
 
+  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setLocationInput(value);
+    const [city, state] = value.split(',').map(s => s.trim());
+    setFormState(prev => ({
+      ...prev,
+      city: city || '',
+      state: state || '',
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -162,7 +177,7 @@ function TeacherProfilePage() {
 
     // Validate required fields
     const requiredFields = [];
-    if (!formState.location || formState.location.trim() === '') {
+    if (!formState.city || formState.city.trim() === '') {
       requiredFields.push('Location');
     }
     if (!formState.bio || formState.bio.trim() === '') {
@@ -179,7 +194,11 @@ function TeacherProfilePage() {
     }
 
     try {
-      const updateResponse = await putData('teacher/profile', formState);
+      const userId =
+        typeof formState.userId === 'string'
+          ? formState.userId
+          : formState.userId?._id || formState.userId?.id || '';
+      const updateResponse = await putData(`teacher/update/${userId}`, formState);
       
       if (updateResponse.error) {
         setError(updateResponse.error.message || 'Failed to update profile');
@@ -338,15 +357,15 @@ function TeacherProfilePage() {
                     <FormControl fullWidth required>
                       <InputLabel>Grade Level</InputLabel>
                       <Select
-                        name="grade"
-                        value={formState.grade || ''}
+                        name="gradeLevel"
+                        value={formState.gradeLevel || ''}
                         onChange={handleSelectChange}
                         label="Grade Level"
                         size="medium"
                       >
-                        {gradeOptions.map((grade) => (
-                          <MenuItem key={grade} value={grade}>
-                            {grade}
+                        {gradeOptions.map((gradeLevel) => (
+                          <MenuItem key={gradeLevel} value={gradeLevel}>
+                            {gradeLevel}
                           </MenuItem>
                         ))}
                       </Select>
@@ -416,8 +435,8 @@ function TeacherProfilePage() {
                       fullWidth
                       label="Location (City, State)"
                       name="location"
-                      value={formState.location || ''}
-                      onChange={handleChange}
+                      value={locationInput}
+                      onChange={handleLocationChange}
                       placeholder="e.g., Philadelphia, PA"
                       size="medium"
                       required
