@@ -5,11 +5,11 @@ import cookieParser from "cookie-parser";
 import session from "express-session";
 import cors from "cors";
 import MongoStore from "connect-mongo";
-import routers from "../routes/routers.ts";
-import initializePassport from "./configPassport.ts";
+import routers from "../routes/routers";
+import initializePassport from "./configPassport";
 import "dotenv/config";
-import apiErrorResponder from "../util/apiErrorResponder.ts";
-import ApiError from "../util/apiError.ts";
+import apiErrorResponder from "../util/apiErrorResponder";
+import ApiError from "../util/apiError";
 
 /**
  * Creates an express instance with the appropriate routes and middleware
@@ -35,8 +35,6 @@ const createExpressApp = (sessionStore: MongoStore): express.Express => {
     })
   );
   // Gives express the ability accept origins outside its own to accept requests from
-  // app.use(cors({ credentials: true, origin: FRONTEND_URL }));
-  var cors = require('cors');
   app.use(
     cors({
       origin: [
@@ -62,7 +60,7 @@ const createExpressApp = (sessionStore: MongoStore): express.Express => {
       cookie: {
         maxAge: 1000 * 60 * 60 * 24, // 1 day
       },
-    })
+    }) as express.RequestHandler
   );
 
   // Init passport on every route call and allow it to use "express-session"
