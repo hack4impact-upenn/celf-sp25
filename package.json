@@ -47,6 +47,7 @@
   "devDependencies": {
     "@types/babel__core": "^7.1.19",
     "@types/express-session": "^1.18.2",
+    "@types/mongoose": "^5.11.97",
     "@types/passport": "^1.0.17",
     "@types/passport-local": "^1.0.38",
     "@types/react": "^18.0.21",
