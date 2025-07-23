@@ -143,7 +143,8 @@ const upgradeUserToAdmin = async (id: string) => {
  * @returns The updated user
  */
 const updateUser = async (userId: string, updateData: Partial<IUser>) => {
-  const user = await User.findOneAndUpdate({ userId }, updateData, {
+  console.log(updateData);
+  const user = await User.findByIdAndUpdate(userId, updateData, {
     new: true,
   }).exec();
   return user;

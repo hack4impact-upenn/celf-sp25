@@ -18,7 +18,7 @@ router.delete("/me", isAuthenticated, deleteCurrentUser);
 
 router.get("/:userId", getUser);
 
-router.get("/:userId", updateUserProfile);
+router.put("/:userId", updateUserProfile);
 
 router.delete("/:userId", deleteUserProfile);
 

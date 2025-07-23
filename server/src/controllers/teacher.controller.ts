@@ -133,6 +133,7 @@ const updateTeacherProfile = async (
     if (updateData.email !== undefined) userFields.email = updateData.email;
 
     if (Object.keys(userFields).length > 0) {
+      console.log(userFields);
       await User.findByIdAndUpdate(userId, userFields);
     }
 
