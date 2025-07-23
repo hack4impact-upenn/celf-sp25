@@ -69,13 +69,14 @@ function LoginPage() {
 
   const dispatch = useAppDispatch();
   function dispatchUser(
+    _id: string,
     userEmail: string,
     firstName: string,
     lastName: string,
     admin: boolean,
     role: string,
   ) {
-    dispatch(loginRedux({ email: userEmail, firstName, lastName, admin, role }));
+    dispatch(loginRedux({ _id, email: userEmail, firstName, lastName, admin, role }));
   }
 
   const clearErrorMessages = () => {
@@ -117,6 +118,7 @@ function LoginPage() {
         .then((user) => {
           console.log('navigating to home!');
           dispatchUser(
+            user._id!,
             user.email!,
             user.firstName!,
             user.lastName!,

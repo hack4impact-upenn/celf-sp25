@@ -19,8 +19,8 @@ import {
   InputLabel,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useAppSelector } from '../util/redux/hooks.ts';
-import { selectUser } from '../util/redux/userSlice.ts';
+import { useAppSelector, useAppDispatch } from '../util/redux/hooks.ts';
+import { selectUser, login } from '../util/redux/userSlice.ts';
 import TopBar from '../components/top_bar/TopBar';
 import { getData, putData } from '../util/api.tsx';
 import COLORS from '../assets/colors.ts';
@@ -74,6 +74,7 @@ const initialFormState: TeacherProfile = {
 function TeacherProfilePage() {
   const navigate = useNavigate();
   const user = useAppSelector(selectUser);
+  const dispatch = useAppDispatch();
   const [formState, setFormState] = useState<TeacherProfile>(initialFormState);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -194,15 +195,24 @@ function TeacherProfilePage() {
     }
 
     try {
-      const userId =
-        typeof formState.userId === 'string'
-          ? formState.userId
-          : formState.userId?._id || formState.userId?.id || '';
+      const userId = user._id;
       const updateResponse = await putData(`teacher/update/${userId}`, formState);
       
       if (updateResponse.error) {
         setError(updateResponse.error.message || 'Failed to update profile');
       } else {
+        // Fetch latest user info and update Redux
+        const userRes = await getData(`user/${userId}`); // or your endpoint for current user
+        if (userRes && userRes.data) {
+          dispatch(login({
+            _id: userRes.data._id,
+            email: userRes.data.email,
+            firstName: userRes.data.firstName,
+            lastName: userRes.data.lastName,
+            admin: userRes.data.admin,
+            role: userRes.data.role,
+          }));
+        }
         setSuccess('Profile updated successfully!');
         setTimeout(() => {
           navigate('/home');

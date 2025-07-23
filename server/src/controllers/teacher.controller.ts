@@ -2,6 +2,7 @@ import express from "express";
 import ApiError from "../util/apiError.ts";
 import StatusCode from "../util/statusCode.ts";
 import { ITeacher } from "../models/teacher.model.ts";
+import { User } from "../models/user.model.ts";
 import {
   createTeacher,
   getTeacherByUserId,
@@ -124,6 +125,17 @@ const updateTeacherProfile = async (
       next(ApiError.notFound("Teacher not found"));
       return;
     }
+
+    // Update user document if firstName, lastName, or email are present
+    const userFields: any = {};
+    if (updateData.firstName !== undefined) userFields.firstName = updateData.firstName;
+    if (updateData.lastName !== undefined) userFields.lastName = updateData.lastName;
+    if (updateData.email !== undefined) userFields.email = updateData.email;
+
+    if (Object.keys(userFields).length > 0) {
+      await User.findByIdAndUpdate(userId, userFields);
+    }
+
     res.status(StatusCode.OK).json(teacher);
   } catch (error) {
     next(ApiError.internal("Unable to update teacher profile"));

@@ -82,7 +82,7 @@ function HomePage() {
   };
 
   const handleSelfPromote = async () => {
-    const newAdminStatus = await selfUpgrade(user.email as string);
+    const newAdminStatus = await selfUpgrade(user._id as string);
     if (newAdminStatus) {
       dispatch(toggleAdmin());
       setAdmin(true);
