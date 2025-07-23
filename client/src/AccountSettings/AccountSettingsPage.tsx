@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   TextField,
@@ -22,6 +22,8 @@ import PrimaryButton from '../components/buttons/PrimaryButton.tsx';
 import AlertDialog from '../components/AlertDialog.tsx';
 import COLORS from '../assets/colors.ts';
 import { deleteAccount } from '../Authentication/api.ts';
+import { putData, getData } from '../util/api.tsx';
+import { login } from '../util/redux/userSlice.ts';
 
 function AccountSettingsPage() {
   const navigate = useNavigate();
@@ -35,6 +37,16 @@ function AccountSettingsPage() {
     newPassword: '',
     confirmPassword: '',
   });
+
+  useEffect(() => {
+    setFormState((prev) => ({
+      ...prev,
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      email: user.email || '',
+    }));
+  }, [user.firstName, user.lastName, user.email]);
+
   const [showAlert, setShowAlert] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
@@ -51,10 +63,43 @@ function AccountSettingsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement account settings update logic
-    setAlertTitle('Success');
-    setAlertMessage('Your account settings have been updated successfully!');
-    setShowAlert(true);
+    try {
+      console.log(user);
+      const userId = user._id;
+      const updateResponse = await putData(`user/${userId}`, {
+        firstName: formState.firstName,
+        lastName: formState.lastName,
+        email: formState.email,
+        // password change logic can be added here if needed
+      });
+      if (updateResponse.error) {
+        setAlertTitle('Error');
+        setAlertMessage(updateResponse.error.message || 'Failed to update account settings.');
+        setShowAlert(true);
+      } else {
+        // Fetch latest user info and update Redux
+        const userRes = await getData(`user/${userId}`);
+        if (userRes && userRes.data) {
+          dispatch(
+            login({
+              _id: userRes.data._id,
+              email: userRes.data.email,
+              firstName: userRes.data.firstName,
+              lastName: userRes.data.lastName,
+              admin: userRes.data.admin,
+              role: userRes.data.role,
+            })
+          );
+        }
+        setAlertTitle('Success');
+        setAlertMessage('Your account settings have been updated successfully!');
+        setShowAlert(true);
+      }
+    } catch (err) {
+      setAlertTitle('Error');
+      setAlertMessage('Failed to update account settings.');
+      setShowAlert(true);
+    }
   };
 
   const handleAlertClose = () => {

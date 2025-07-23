@@ -61,6 +61,7 @@ async function register(
   location?: string,
   subjects?: string[],
   bio?: string,
+  country?: string,
 ) {
   const lowercaseEmail = email.toLowerCase();
   const payload: any = {
@@ -75,6 +76,7 @@ async function register(
   if (location) payload.location = location;
   if (subjects) payload.subjects = subjects;
   if (bio) payload.bio = bio;
+  if (country) payload.country = country;
   const res = await postData('auth/register', payload);
   if (res.error) {
     throw Error(res.error.message);

@@ -51,6 +51,7 @@ function TeacherRegisterPage() {
     school: '',
     gradeLevel: '',
     location: '',
+    country: '',
     subjects: [] as string[],
     bio: '',
   };
@@ -64,6 +65,7 @@ function TeacherRegisterPage() {
     school: false,
     gradeLevel: false,
     location: false,
+    country: false,
     subjects: false,
     bio: false,
   };
@@ -77,6 +79,7 @@ function TeacherRegisterPage() {
     school: '',
     gradeLevel: '',
     location: '',
+    country: '',
     subjects: '',
     bio: '',
   };
@@ -177,7 +180,7 @@ function TeacherRegisterPage() {
 
   async function handleSubmit() {
     if (validateInputs()) {
-      register(values.firstName, values.lastName, values.email, values.password, 'teacher', values.school, values.gradeLevel, values.location, values.subjects, values.bio)
+      register(values.firstName, values.lastName, values.email, values.password, 'teacher', values.school, values.gradeLevel, values.location, values.subjects, values.bio, values.country)
         .then(() => {
           setShowError('alert', true);
           setAlertTitle('');
@@ -378,6 +381,26 @@ function TeacherRegisterPage() {
                     value={values.location}
                     onChange={(e) => setValue('location', e.target.value)}
                     placeholder="e.g., Philadelphia, PA"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '&:hover fieldset': {
+                          borderColor: COLORS.primaryBlue,
+                        },
+                      },
+                    }}
+                  />
+                </Grid>
+                {/* Country - full width, optional */}
+                <Grid item sx={{ width: '100%' }}>
+                  <TextField
+                    fullWidth
+                    error={showError.country}
+                    helperText={errorMessage.country}
+                    type="text"
+                    label="Country (optional)"
+                    value={values.country}
+                    onChange={(e) => setValue('country', e.target.value)}
+                    placeholder="e.g., United States"
                     sx={{
                       '& .MuiOutlinedInput-root': {
                         '&:hover fieldset': {

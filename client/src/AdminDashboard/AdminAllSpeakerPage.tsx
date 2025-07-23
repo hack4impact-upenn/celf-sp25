@@ -24,13 +24,13 @@ import {
   Select,
   MenuItem,
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
 import EmailIcon from '@mui/icons-material/Email';
 import PersonIcon from '@mui/icons-material/Person';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import DeleteIcon from '@mui/icons-material/Delete';
 import SearchBar from '../components/search_bar/SearchBar';
 import SpeakerCard from '../components/cards/SpeakerCard';
 import AdminSidebar from '../components/admin_sidebar/AdminSidebar';
@@ -74,11 +74,22 @@ interface Speaker {
 }
 
 const CardContainer = styled('div')({
-  display: 'flex',
-  flexWrap: 'wrap',
+  display: 'grid',
+  gridTemplateColumns: 'repeat(3, 1fr)',
   gap: '20px',
-  justifyContent: 'flex-start',
   padding: '20px',
+  width: '100%',
+  boxSizing: 'border-box',
+  maxWidth: '1200px',
+  margin: '0 auto',
+});
+
+const GridItem = styled(Grid)({
+  display: 'flex',
+  justifyContent: 'center',
+  padding: '10px',
+  width: '100%',
+  boxSizing: 'border-box',
 });
 
 const ActionButton = styled(Button)({
@@ -96,10 +107,14 @@ const StyledDialogTitle = styled(DialogTitle)({
 
 const Section = styled('div')({
   marginBottom: '40px',
+  maxWidth: '1200px',
+  margin: '0 auto',
+  padding: '0 20px',
 });
 
 const SectionTitle = styled('h2')({
   textAlign: 'left',
+  padding: '0 20px',
   color: '#2c3e50',
   borderBottom: '2px solid #3498db',
   paddingBottom: '10px',

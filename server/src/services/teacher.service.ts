@@ -15,7 +15,8 @@ const createTeacher = async (
   city: string,
   state: string,
   subjects: string[],
-  bio: string
+  bio: string,
+  country?: string
 ) => {
   const newTeacher = new Teacher({
     userId,
@@ -25,6 +26,7 @@ const createTeacher = async (
     state,
     subjects,
     bio,
+    ...(country && { country }),
   });
   const teacher = await newTeacher.save();
   return teacher;
