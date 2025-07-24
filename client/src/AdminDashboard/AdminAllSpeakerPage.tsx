@@ -650,29 +650,13 @@ function AdminAllSpeakerPage() {
                   : 'Loading...';
               return (
                 <div key={speaker._id} style={{ position: 'relative' }}>
-                  <div
-                    onClick={() => handleCardClick(speaker)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <SpeakerCard
-                      id={speaker._id}
-                      name={speakerName}
-                      bio={speaker.bio}
-                      organization={speaker.organization}
-                      location={speaker.location}
-                      imageUrl={speaker.imageUrl}
-                    />
-                  </div>
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: '10px',
-                      right: '10px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '8px',
-                      zIndex: 10,
-                    }}
+                  <SpeakerCard
+                    id={speaker._id}
+                    name={speakerName}
+                    bio={speaker.bio}
+                    organization={speaker.organization}
+                    location={speaker.location}
+                    imageUrl={speaker.imageUrl}
                   >
                     <IconButton
                       size="small"
@@ -704,7 +688,7 @@ function AdminAllSpeakerPage() {
                     >
                       <DeleteIcon />
                     </IconButton>
-                  </div>
+                  </SpeakerCard>
                 </div>
               );
             })}

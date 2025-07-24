@@ -26,7 +26,8 @@ function SpeakerCard({
   organization,
   location,
   imageUrl,
-}: SpeakerCardProps) {
+  children,
+}: SpeakerCardProps & { children?: React.ReactNode }) {
   return (
     <MuiCard
       sx={{
@@ -59,6 +60,7 @@ function SpeakerCard({
           {bio}
         </Typography>
       </CardContent>
+      {children && <CardActions sx={{ justifyContent: 'flex-end' }}>{children}</CardActions>}
     </MuiCard>
   );
 }
