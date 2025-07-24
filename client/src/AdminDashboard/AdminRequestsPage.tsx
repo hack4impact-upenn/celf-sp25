@@ -38,6 +38,7 @@ import {
 } from './requestApi';
 import './AdminDashboard.css';
 import { DEFAULT_IMAGE } from '../components/cards/SpeakerCard';
+import { getData } from '../util/api.tsx';
 
 const Section = styled('div')({
   marginBottom: '40px',
@@ -74,6 +75,8 @@ function AdminRequestsPage() {
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
   const [open, setOpen] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
+  const [teacherProfile, setTeacherProfile] = useState<any>(null);
+  const [loadingTeacherProfile, setLoadingTeacherProfile] = useState(false);
 
   useEffect(() => {
     fetchRequests();
@@ -119,14 +122,33 @@ function AdminRequestsPage() {
     }
   };
 
-  const handleCardClick = (request: Request) => {
+  const handleCardClick = async (request: Request) => {
+    console.log('Request clicked:', request);
+    console.log('Teacher data:', request.teacher);
+    console.log('TeacherId data:', request.teacherId);
     setSelectedRequest(request);
     setOpen(true);
+    
+    // Fetch teacher profile data for the dialog
+    if (request.teacher?._id) {
+      setLoadingTeacherProfile(true);
+      try {
+        const response = await getData(`teacher/${request.teacher._id}`);
+        if (response.data) {
+          setTeacherProfile(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching teacher profile:', error);
+      } finally {
+        setLoadingTeacherProfile(false);
+      }
+    }
   };
 
   const handleClose = () => {
     setOpen(false);
     setSelectedRequest(null);
+    setTeacherProfile(null);
   };
 
   const formatDateTime = (dateTime: string, timezone: string) => {
@@ -151,8 +173,8 @@ function AdminRequestsPage() {
         >
           <SpeakerRequestCard
             id={request._id}
-            speaker={request.speakerId}
-            teacher={request.teacherId}
+            speaker={request.speaker || request.speakerId}
+            teacher={request.teacher || request.teacherId}
             status={request.status}
           />
         </div>
@@ -382,12 +404,12 @@ function AdminRequestsPage() {
                     <Typography
                       variant="subtitle1"
                       gutterBottom
-                      sx={{ color: 'text.secondary', mb: 2 }}
+                      sx={{ color: 'text.secondary', mb: 2, wordWrap: 'break-word', overflowWrap: 'break-word' }}
                     >
                       {selectedRequest.speakerId.organization}
                     </Typography>
 
-                    <Typography variant="body2" sx={{ mb: 2 }}>
+                    <Typography variant="body2" sx={{ mb: 2, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
                       {selectedRequest.speakerId.location}
                     </Typography>
 
@@ -412,7 +434,7 @@ function AdminRequestsPage() {
                       )}
                     </Box>
 
-                    <Typography variant="body1" paragraph>
+                    <Typography variant="body1" paragraph sx={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>
                       {selectedRequest.speakerId.bio}
                     </Typography>
 
@@ -427,7 +449,7 @@ function AdminRequestsPage() {
                       <Typography variant="subtitle2" color="text.secondary">
                         Teacher Name
                       </Typography>
-                      <Typography variant="body1" sx={{ mb: 1 }}>
+                      <Typography variant="body1" sx={{ mb: 1, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
                         {selectedRequest.teacherId
                           ? `${selectedRequest.teacherId.firstName} ${selectedRequest.teacherId.lastName}`
                           : 'Unknown Teacher'}
@@ -435,11 +457,97 @@ function AdminRequestsPage() {
                       <Typography variant="subtitle2" color="text.secondary">
                         Teacher Email
                       </Typography>
-                      <Typography variant="body1">
+                      <Typography variant="body1" sx={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>
                         {selectedRequest.teacherId
                           ? selectedRequest.teacherId.email
                           : 'Unknown Email'}
                       </Typography>
+                      
+                      {/* Teacher Profile Information */}
+                      {loadingTeacherProfile && (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+                          <CircularProgress size={20} />
+                        </Box>
+                      )}
+                      
+                      {teacherProfile && !loadingTeacherProfile && (
+                        <>
+                          {/* School Information */}
+                          {teacherProfile.school && (
+                            <>
+                              <Typography variant="subtitle2" color="text.secondary">
+                                School
+                              </Typography>
+                              <Typography variant="body1" sx={{ mb: 1, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+                                {teacherProfile.school}
+                              </Typography>
+                            </>
+                          )}
+                          
+                          {/* Grade Level */}
+                          {teacherProfile.gradeLevel && (
+                            <>
+                              <Typography variant="subtitle2" color="text.secondary">
+                                Grade Level
+                              </Typography>
+                              <Typography variant="body1" sx={{ mb: 1, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+                                {teacherProfile.gradeLevel}
+                              </Typography>
+                            </>
+                          )}
+                          
+                          {/* Location */}
+                          {(teacherProfile.city || teacherProfile.state) && (
+                            <>
+                              <Typography variant="subtitle2" color="text.secondary">
+                                Location
+                              </Typography>
+                              <Typography variant="body1" sx={{ mb: 1, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+                                {[teacherProfile.city, teacherProfile.state].filter(Boolean).join(', ')}
+                              </Typography>
+                            </>
+                          )}
+                          
+                          {/* Subjects */}
+                          {teacherProfile.subjects && teacherProfile.subjects.length > 0 && (
+                            <>
+                              <Typography variant="subtitle2" color="text.secondary">
+                                Subjects Taught
+                              </Typography>
+                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
+                                {teacherProfile.subjects.map((subject: string, index: number) => (
+                                  <Chip
+                                    key={index}
+                                    label={subject}
+                                    size="small"
+                                    color="primary"
+                                    variant="outlined"
+                                  />
+                                ))}
+                              </Box>
+                            </>
+                          )}
+                          
+                          {/* Bio */}
+                          {teacherProfile.bio && (
+                            <>
+                              <Typography variant="subtitle2" color="text.secondary">
+                                About the Teacher
+                              </Typography>
+                              <Typography variant="body1" sx={{ 
+                                mb: 1, 
+                                fontSize: '0.9rem', 
+                                lineHeight: 1.4,
+                                wordWrap: 'break-word',
+                                overflowWrap: 'break-word',
+                                whiteSpace: 'pre-wrap'
+                              }}>
+                                {teacherProfile.bio}
+                              </Typography>
+                            </>
+                          )}
+                        </>
+                      )}
                     </Box>
                   </Box>
 

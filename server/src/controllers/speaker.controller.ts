@@ -226,6 +226,8 @@ const submitSpeakerProfile = async (
     return;
   }
 
+  console.log("right before create speaker");
+
   try {
     const speaker = await createSpeaker(
       userId,
