@@ -459,6 +459,16 @@ function AdminAllSpeakerPage() {
   const handleEditFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Limit file size to 1MB
+      if (file.size > 14 * 1024 * 1024) {
+        setError('Image file is too large (max 14MB). Please choose a smaller image.');
+        return;
+      }
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        setError('Only image files are allowed.');
+        return;
+      }
       const reader = new FileReader();
       reader.onload = (event) => {
         const result = event.target?.result as string;
