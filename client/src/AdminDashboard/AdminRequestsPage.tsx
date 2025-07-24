@@ -404,12 +404,12 @@ function AdminRequestsPage() {
                     <Typography
                       variant="subtitle1"
                       gutterBottom
-                      sx={{ color: 'text.secondary', mb: 2 }}
+                      sx={{ color: 'text.secondary', mb: 2, wordWrap: 'break-word', overflowWrap: 'break-word' }}
                     >
                       {selectedRequest.speakerId.organization}
                     </Typography>
 
-                    <Typography variant="body2" sx={{ mb: 2 }}>
+                    <Typography variant="body2" sx={{ mb: 2, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
                       {selectedRequest.speakerId.location}
                     </Typography>
 
@@ -434,7 +434,7 @@ function AdminRequestsPage() {
                       )}
                     </Box>
 
-                    <Typography variant="body1" paragraph>
+                    <Typography variant="body1" paragraph sx={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>
                       {selectedRequest.speakerId.bio}
                     </Typography>
 
@@ -449,17 +449,17 @@ function AdminRequestsPage() {
                       <Typography variant="subtitle2" color="text.secondary">
                         Teacher Name
                       </Typography>
-                      <Typography variant="body1" sx={{ mb: 1 }}>
-                        {(selectedRequest.teacher || selectedRequest.teacherId)
-                          ? `${(selectedRequest.teacher || selectedRequest.teacherId).firstName} ${(selectedRequest.teacher || selectedRequest.teacherId).lastName}`
+                      <Typography variant="body1" sx={{ mb: 1, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+                        {selectedRequest.teacherId
+                          ? `${selectedRequest.teacherId.firstName} ${selectedRequest.teacherId.lastName}`
                           : 'Unknown Teacher'}
                       </Typography>
                       <Typography variant="subtitle2" color="text.secondary">
                         Teacher Email
                       </Typography>
-                      <Typography variant="body1" sx={{ mb: 1 }}>
-                        {(selectedRequest.teacher || selectedRequest.teacherId)
-                          ? (selectedRequest.teacher || selectedRequest.teacherId).email
+                      <Typography variant="body1" sx={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+                        {selectedRequest.teacherId
+                          ? selectedRequest.teacherId.email
                           : 'Unknown Email'}
                       </Typography>
                       
@@ -478,7 +478,7 @@ function AdminRequestsPage() {
                               <Typography variant="subtitle2" color="text.secondary">
                                 School
                               </Typography>
-                              <Typography variant="body1" sx={{ mb: 1 }}>
+                              <Typography variant="body1" sx={{ mb: 1, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
                                 {teacherProfile.school}
                               </Typography>
                             </>
@@ -490,7 +490,7 @@ function AdminRequestsPage() {
                               <Typography variant="subtitle2" color="text.secondary">
                                 Grade Level
                               </Typography>
-                              <Typography variant="body1" sx={{ mb: 1 }}>
+                              <Typography variant="body1" sx={{ mb: 1, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
                                 {teacherProfile.gradeLevel}
                               </Typography>
                             </>
@@ -502,7 +502,7 @@ function AdminRequestsPage() {
                               <Typography variant="subtitle2" color="text.secondary">
                                 Location
                               </Typography>
-                              <Typography variant="body1" sx={{ mb: 1 }}>
+                              <Typography variant="body1" sx={{ mb: 1, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
                                 {[teacherProfile.city, teacherProfile.state].filter(Boolean).join(', ')}
                               </Typography>
                             </>
@@ -534,7 +534,14 @@ function AdminRequestsPage() {
                               <Typography variant="subtitle2" color="text.secondary">
                                 About the Teacher
                               </Typography>
-                              <Typography variant="body1" sx={{ mb: 1, fontSize: '0.9rem', lineHeight: 1.4 }}>
+                              <Typography variant="body1" sx={{ 
+                                mb: 1, 
+                                fontSize: '0.9rem', 
+                                lineHeight: 1.4,
+                                wordWrap: 'break-word',
+                                overflowWrap: 'break-word',
+                                whiteSpace: 'pre-wrap'
+                              }}>
                                 {teacherProfile.bio}
                               </Typography>
                             </>
