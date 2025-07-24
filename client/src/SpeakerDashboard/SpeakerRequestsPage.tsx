@@ -81,6 +81,8 @@ function SpeakerRequestsPage() {
   const [open, setOpen] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
   const [expandedTeachers, setExpandedTeachers] = useState<Set<string>>(new Set());
+  const [teacherProfile, setTeacherProfile] = useState<any>(null);
+  const [loadingTeacherProfile, setLoadingTeacherProfile] = useState(false);
 
   useEffect(() => {
     fetchRequests();
@@ -114,9 +116,24 @@ function SpeakerRequestsPage() {
     }
   };
 
-  const handleCardClick = (request: SpeakerRequest) => {
+  const handleCardClick = async (request: SpeakerRequest) => {
     setSelectedRequest(request);
     setOpen(true);
+    // Debug: Print teacherId and its fields
+    console.log('TeacherId:', request.teacherId);
+    if (request.teacherId && request.teacherId._id) {
+      setLoadingTeacherProfile(true);
+      try {
+        const response = await getData(`teacher/${request.teacherId._id}`);
+        if (response.data) {
+          setTeacherProfile(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching teacher profile:', error);
+      } finally {
+        setLoadingTeacherProfile(false);
+      }
+    }
   };
 
   const handleClose = () => {
@@ -128,7 +145,7 @@ function SpeakerRequestsPage() {
 
   const toggleTeacherDetails = (requestId: string, event: React.MouseEvent) => {
     event.stopPropagation(); // Prevent card click
-    setExpandedTeachers(prev => {
+    setExpandedTeachers((prev: Set<string>) => {
       const newSet = new Set(prev);
       if (newSet.has(requestId)) {
         newSet.delete(requestId);
@@ -289,7 +306,7 @@ function SpeakerRequestsPage() {
                             />
                           </Box>
                           
-                          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+                          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1, wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'pre-line' }}>
                             Requested by: {request.teacherId.firstName} {request.teacherId.lastName}
                           </Typography>
                           
@@ -320,100 +337,6 @@ function SpeakerRequestsPage() {
                               </Typography>
                             </Box>
                           )}
-
-                          {/* Teacher Details Toggle Button */}
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            onClick={(e) => toggleTeacherDetails(request._id, e)}
-                            sx={{ 
-                              mb: 2, 
-                              textTransform: 'none',
-                              fontSize: '0.75rem',
-                              py: 0.5,
-                              px: 1.5
-                            }}
-                          >
-                            {expandedTeachers.has(request._id) ? 'Hide' : 'View'} Teacher Details
-                          </Button>
-
-                          {/* Expanded Teacher Details */}
-                          <Collapse in={expandedTeachers.has(request._id)}>
-                            <Paper 
-                              sx={{ 
-                                p: 2, 
-                                mb: 2, 
-                                backgroundColor: COLORS.lightGray,
-                                border: `1px solid ${COLORS.primaryBlue}20`
-                              }}
-                            >
-                              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: COLORS.primaryDark, mb: 1 }}>
-                                Complete Teacher Profile
-                              </Typography>
-                              
-                              {/* All Subjects */}
-                              {request.teacherId.subjects && request.teacherId.subjects.length > 0 && (
-                                <Box sx={{ mb: 1.5 }}>
-                                  <Typography variant="body2" sx={{ fontWeight: 600, color: COLORS.primaryDark, mb: 0.5 }}>
-                                    All Subjects:
-                                  </Typography>
-                                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                    {request.teacherId.subjects.map((subject, index) => (
-                                      <Chip
-                                        key={index}
-                                        label={subject}
-                                        size="small"
-                                        color="primary"
-                                        variant="outlined"
-                                        sx={{ fontSize: '0.7rem' }}
-                                      />
-                                    ))}
-                                  </Box>
-                                </Box>
-                              )}
-
-                              {/* Bio */}
-                              {request.teacherId.bio && (
-                                <Box sx={{ mb: 1.5 }}>
-                                  <Typography variant="body2" sx={{ fontWeight: 600, color: COLORS.primaryDark, mb: 0.5 }}>
-                                    About:
-                                  </Typography>
-                                  <Typography variant="body2" sx={{ fontSize: '0.8rem', lineHeight: 1.4 }}>
-                                    {request.teacherId.bio}
-                                  </Typography>
-                                </Box>
-                              )}
-
-                              {/* Contact Info */}
-                              <Box sx={{ mb: 1.5 }}>
-                                <Typography variant="body2" sx={{ fontWeight: 600, color: COLORS.primaryDark, mb: 0.5 }}>
-                                  Contact Information:
-                                </Typography>
-                                <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
-                                  📧 {request.teacherId.email}
-                                </Typography>
-                                {(request.teacherId.city || request.teacherId.state) && (
-                                  <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
-                                    📍 {[request.teacherId.city, request.teacherId.state].filter(Boolean).join(', ')}
-                                  </Typography>
-                                )}
-                              </Box>
-
-                              {/* School Info */}
-                              {(request.teacherId.school || request.teacherId.gradeLevel) && (
-                                <Box>
-                                  <Typography variant="body2" sx={{ fontWeight: 600, color: COLORS.primaryDark, mb: 0.5 }}>
-                                    School Information:
-                                  </Typography>
-                                  <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
-                                    {request.teacherId.school && `🏫 ${request.teacherId.school}`}
-                                    {request.teacherId.school && request.teacherId.gradeLevel && ' • '}
-                                    {request.teacherId.gradeLevel && `Grade ${request.teacherId.gradeLevel}`}
-                                  </Typography>
-                                </Box>
-                              )}
-                            </Paper>
-                          </Collapse>
 
                           <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                             {request.isInPerson && (
@@ -499,7 +422,7 @@ function SpeakerRequestsPage() {
                         />
                       </Box>
                       
-                      <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1, wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'pre-line' }}>
                         Requested by: {request.teacherId.firstName} {request.teacherId.lastName}
                       </Typography>
                       
@@ -530,100 +453,6 @@ function SpeakerRequestsPage() {
                           </Typography>
                         </Box>
                       )}
-
-                      {/* Teacher Details Toggle Button */}
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={(e) => toggleTeacherDetails(request._id, e)}
-                        sx={{ 
-                          mb: 2, 
-                          textTransform: 'none',
-                          fontSize: '0.75rem',
-                          py: 0.5,
-                          px: 1.5
-                        }}
-                      >
-                        {expandedTeachers.has(request._id) ? 'Hide' : 'View'} Teacher Details
-                      </Button>
-
-                      {/* Expanded Teacher Details */}
-                      <Collapse in={expandedTeachers.has(request._id)}>
-                        <Paper 
-                          sx={{ 
-                            p: 2, 
-                            mb: 2, 
-                            backgroundColor: COLORS.lightGray,
-                            border: `1px solid ${COLORS.primaryBlue}20`
-                          }}
-                        >
-                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: COLORS.primaryDark, mb: 1 }}>
-                            Complete Teacher Profile
-                          </Typography>
-                          
-                          {/* All Subjects */}
-                          {request.teacherId.subjects && request.teacherId.subjects.length > 0 && (
-                            <Box sx={{ mb: 1.5 }}>
-                              <Typography variant="body2" sx={{ fontWeight: 600, color: COLORS.primaryDark, mb: 0.5 }}>
-                                All Subjects:
-                              </Typography>
-                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                {request.teacherId.subjects.map((subject, index) => (
-                                  <Chip
-                                    key={index}
-                                    label={subject}
-                                    size="small"
-                                    color="primary"
-                                    variant="outlined"
-                                    sx={{ fontSize: '0.7rem' }}
-                                  />
-                                ))}
-                              </Box>
-                            </Box>
-                          )}
-
-                          {/* Bio */}
-                          {request.teacherId.bio && (
-                            <Box sx={{ mb: 1.5 }}>
-                              <Typography variant="body2" sx={{ fontWeight: 600, color: COLORS.primaryDark, mb: 0.5 }}>
-                                About:
-                              </Typography>
-                              <Typography variant="body2" sx={{ fontSize: '0.8rem', lineHeight: 1.4 }}>
-                                {request.teacherId.bio}
-                              </Typography>
-                            </Box>
-                          )}
-
-                          {/* Contact Info */}
-                          <Box sx={{ mb: 1.5 }}>
-                            <Typography variant="body2" sx={{ fontWeight: 600, color: COLORS.primaryDark, mb: 0.5 }}>
-                              Contact Information:
-                            </Typography>
-                            <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
-                              📧 {request.teacherId.email}
-                            </Typography>
-                            {(request.teacherId.city || request.teacherId.state) && (
-                              <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
-                                📍 {[request.teacherId.city, request.teacherId.state].filter(Boolean).join(', ')}
-                              </Typography>
-                            )}
-                          </Box>
-
-                          {/* School Info */}
-                          {(request.teacherId.school || request.teacherId.gradeLevel) && (
-                            <Box>
-                              <Typography variant="body2" sx={{ fontWeight: 600, color: COLORS.primaryDark, mb: 0.5 }}>
-                                School Information:
-                              </Typography>
-                              <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
-                                {request.teacherId.school && `🏫 ${request.teacherId.school}`}
-                                {request.teacherId.school && request.teacherId.gradeLevel && ' • '}
-                                {request.teacherId.gradeLevel && `Grade ${request.teacherId.gradeLevel}`}
-                              </Typography>
-                            </Box>
-                          )}
-                        </Paper>
-                      </Collapse>
 
                       <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                         {request.isInPerson && (
@@ -729,37 +558,37 @@ function SpeakerRequestsPage() {
                     <Grid container spacing={2}>
                       {/* Basic Info */}
                       <Grid item xs={12} md={6}>
-                        <Typography variant="h6" sx={{ color: COLORS.primaryBlue, fontWeight: 600, mb: 1 }}>
+                        <Typography variant="h6" sx={{ color: COLORS.primaryBlue, fontWeight: 600, mb: 1, wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'pre-line' }}>
                           {selectedRequest.teacherId.firstName} {selectedRequest.teacherId.lastName}
                         </Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                           <EmailIcon sx={{ mr: 1, color: '#7f8c8d', fontSize: 18 }} />
-                          <Typography variant="body2">
+                          <Typography variant="body2" sx={{ wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'pre-line' }}>
                             {selectedRequest.teacherId.email}
                           </Typography>
                         </Box>
                       </Grid>
 
                       {/* School Info */}
-                      {(selectedRequest.teacherId.school || selectedRequest.teacherId.gradeLevel) && (
+                      {(teacherProfile.school || teacherProfile.gradeLevel) && (
                         <Grid item xs={12} md={6}>
-                          {selectedRequest.teacherId.school && (
+                          {teacherProfile.school && (
                             <Box sx={{ mb: 1 }}>
                               <Typography variant="subtitle2" sx={{ fontWeight: 600, color: COLORS.primaryDark }}>
                                 School
                               </Typography>
-                              <Typography variant="body2">
-                                {selectedRequest.teacherId.school}
+                              <Typography variant="body2" sx={{ wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'pre-line' }}>
+                                {teacherProfile.school}
                               </Typography>
                             </Box>
                           )}
-                          {selectedRequest.teacherId.gradeLevel && (
+                          {teacherProfile.gradeLevel && (
                             <Box sx={{ mb: 1 }}>
                               <Typography variant="subtitle2" sx={{ fontWeight: 600, color: COLORS.primaryDark }}>
                                 Grade Level
                               </Typography>
-                              <Typography variant="body2">
-                                {selectedRequest.teacherId.gradeLevel}
+                              <Typography variant="body2" sx={{ wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'pre-line' }}>
+                                {teacherProfile.gradeLevel}
                               </Typography>
                             </Box>
                           )}
@@ -767,25 +596,25 @@ function SpeakerRequestsPage() {
                       )}
 
                       {/* Location */}
-                      {(selectedRequest.teacherId.city || selectedRequest.teacherId.state) && (
+                      {(teacherProfile.city || teacherProfile.state) && (
                         <Grid item xs={12} md={6}>
                           <Typography variant="subtitle2" sx={{ fontWeight: 600, color: COLORS.primaryDark }}>
                             Location
                           </Typography>
-                          <Typography variant="body2">
-                            {[selectedRequest.teacherId.city, selectedRequest.teacherId.state].filter(Boolean).join(', ')}
+                          <Typography variant="body2" sx={{ wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'pre-line' }}>
+                            {[teacherProfile.city, teacherProfile.state].filter(Boolean).join(', ')}
                           </Typography>
                         </Grid>
                       )}
 
                       {/* Subjects Taught */}
-                      {selectedRequest.teacherId.subjects && selectedRequest.teacherId.subjects.length > 0 && (
+                      {teacherProfile.subjects && teacherProfile.subjects.length > 0 && (
                         <Grid item xs={12} md={6}>
                           <Typography variant="subtitle2" sx={{ fontWeight: 600, color: COLORS.primaryDark }}>
                             Subjects Taught
                           </Typography>
                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
-                            {selectedRequest.teacherId.subjects.map((subject, index) => (
+                            {teacherProfile.subjects.map((subject: string, index: number) => (
                               <Chip
                                 key={index}
                                 label={subject}
@@ -799,13 +628,13 @@ function SpeakerRequestsPage() {
                       )}
 
                       {/* Bio */}
-                      {selectedRequest.teacherId.bio && (
+                      {teacherProfile.bio && (
                         <Grid item xs={12}>
                           <Typography variant="subtitle2" sx={{ fontWeight: 600, color: COLORS.primaryDark }}>
                             About the Teacher
                           </Typography>
-                          <Typography variant="body2" sx={{ mt: 0.5, lineHeight: 1.6 }}>
-                            {selectedRequest.teacherId.bio}
+                          <Typography variant="body2" sx={{ mt: 0.5, lineHeight: 1.6, wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'pre-line' }}>
+                            {teacherProfile.bio}
                           </Typography>
                         </Grid>
                       )}
