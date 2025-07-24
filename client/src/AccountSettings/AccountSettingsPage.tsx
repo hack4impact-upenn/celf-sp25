@@ -21,7 +21,7 @@ import TopBar from '../components/top_bar/TopBar.tsx';
 import PrimaryButton from '../components/buttons/PrimaryButton.tsx';
 import AlertDialog from '../components/AlertDialog.tsx';
 import COLORS from '../assets/colors.ts';
-import { deleteAccount } from '../Authentication/api.ts';
+import { deleteAccount, changePassword } from '../Authentication/api.ts';
 import { putData, getData } from '../util/api.tsx';
 import { login } from '../util/redux/userSlice.ts';
 
@@ -64,13 +64,48 @@ function AccountSettingsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      console.log(user);
       const userId = user._id;
+      // Handle password change if fields are filled
+      if (
+        formState.currentPassword ||
+        formState.newPassword ||
+        formState.confirmPassword
+      ) {
+        if (!formState.currentPassword || !formState.newPassword || !formState.confirmPassword) {
+          setAlertTitle('Error');
+          setAlertMessage('Please fill out all password fields.');
+          setShowAlert(true);
+          return;
+        }
+        if (formState.newPassword !== formState.confirmPassword) {
+          setAlertTitle('Error');
+          setAlertMessage('New password and confirmation do not match.');
+          setShowAlert(true);
+          return;
+        }
+        try {
+          await changePassword(formState.currentPassword, formState.newPassword);
+          setAlertTitle('Success');
+          setAlertMessage('Your password has been changed successfully!');
+          setShowAlert(true);
+          setFormState((prev) => ({
+            ...prev,
+            currentPassword: '',
+            newPassword: '',
+            confirmPassword: '',
+          }));
+        } catch (err: any) {
+          setAlertTitle('Error');
+          setAlertMessage(err.message || 'Failed to change password.');
+          setShowAlert(true);
+          return;
+        }
+      }
+      // Update profile info
       const updateResponse = await putData(`user/${userId}`, {
         firstName: formState.firstName,
         lastName: formState.lastName,
         email: formState.email,
-        // password change logic can be added here if needed
       });
       if (updateResponse.error) {
         setAlertTitle('Error');

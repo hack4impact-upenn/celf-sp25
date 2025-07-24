@@ -155,6 +155,20 @@ async function deleteAccount() {
   return res.data;
 }
 
+/**
+ * Sends a request to the server to change the password for a logged-in user
+ * @param currentPassword The user's current password
+ * @param newPassword The new password to set
+ * @throws An {@link Error} with a `message` field describing the issue in changing the password
+ */
+async function changePassword(currentPassword: string, newPassword: string) {
+  const res = await postData('auth/change-password', { currentPassword, newPassword });
+  if (res.error) {
+    throw Error(res.error.message);
+  }
+  return res.data;
+}
+
 export {
   register,
   loginUser,
@@ -163,4 +177,5 @@ export {
   resetPassword,
   registerInvite,
   deleteAccount,
+  changePassword,
 };
