@@ -9,6 +9,7 @@ import {
 import React from 'react';
 import PersonIcon from '@mui/icons-material/Person';
 import VideocamIcon from '@mui/icons-material/Videocam';
+import { getData } from '../../util/api.tsx';
 
 // Export this constant so it can be imported elsewhere
 export const DEFAULT_IMAGE = '/defaultprofile.jpg';
@@ -43,6 +44,12 @@ interface Teacher {
   firstName: string;
   lastName: string;
   email: string;
+  school?: string;
+  gradeLevel?: string;
+  city?: string;
+  state?: string;
+  subjects?: string[];
+  bio?: string;
 }
 
 interface Request {
@@ -53,7 +60,31 @@ interface Request {
 }
 
 function SpeakerRequestCard({ id, speaker, teacher, status }: Request) {
+  const [teacherProfile, setTeacherProfile] = React.useState<Teacher | null>(null);
+  const [loadingTeacher, setLoadingTeacher] = React.useState(false);
+
+  React.useEffect(() => {
+    const fetchTeacherProfile = async () => {
+      if (teacher?._id) {
+        setLoadingTeacher(true);
+        try {
+          const response = await getData(`teacher/${teacher._id}`);
+          if (response.data) {
+            setTeacherProfile(response.data);
+          }
+        } catch (error) {
+          console.error('Error fetching teacher profile:', error);
+        } finally {
+          setLoadingTeacher(false);
+        }
+      }
+    };
+
+    fetchTeacherProfile();
+  }, [teacher?._id]);
+
   console.log('SpeakerRequestCard - teacher data:', teacher);
+  console.log('SpeakerRequestCard - teacher profile:', teacherProfile);
   
   const speakerName =
     speaker?.userId?.firstName && speaker?.userId?.lastName
@@ -67,6 +98,10 @@ function SpeakerRequestCard({ id, speaker, teacher, status }: Request) {
   const teacherEmail = teacher
     ? teacher.email
     : 'Unknown Email';
+
+  const teacherId = teacher 
+  ? teacher._id
+  : 'Unknown Id';
 
   const organization = speaker?.organization || 'Unknown Organization';
   const location = speaker?.location || 'Unknown Location';

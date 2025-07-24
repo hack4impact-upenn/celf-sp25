@@ -80,6 +80,7 @@ function SpeakerRequestsPage() {
   const [selectedRequest, setSelectedRequest] = useState<SpeakerRequest | null>(null);
   const [open, setOpen] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
+  const [expandedTeachers, setExpandedTeachers] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchRequests();
@@ -124,6 +125,19 @@ function SpeakerRequestsPage() {
   };
 
   const handleCloseError = () => setError(null);
+
+  const toggleTeacherDetails = (requestId: string, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent card click
+    setExpandedTeachers(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(requestId)) {
+        newSet.delete(requestId);
+      } else {
+        newSet.add(requestId);
+      }
+      return newSet;
+    });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -279,9 +293,127 @@ function SpeakerRequestsPage() {
                             Requested by: {request.teacherId.firstName} {request.teacherId.lastName}
                           </Typography>
                           
-                          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
                             {request.teacherId.email}
                           </Typography>
+
+                          {/* Additional Teacher Information */}
+                          {(request.teacherId.school || request.teacherId.gradeLevel) && (
+                            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+                              {request.teacherId.school && `${request.teacherId.school}`}
+                              {request.teacherId.school && request.teacherId.gradeLevel && ' • '}
+                              {request.teacherId.gradeLevel && `Grade ${request.teacherId.gradeLevel}`}
+                            </Typography>
+                          )}
+
+                          {(request.teacherId.city || request.teacherId.state) && (
+                            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+                              📍 {[request.teacherId.city, request.teacherId.state].filter(Boolean).join(', ')}
+                            </Typography>
+                          )}
+
+                          {request.teacherId.subjects && request.teacherId.subjects.length > 0 && (
+                            <Box sx={{ mb: 2 }}>
+                              <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5 }}>
+                                Subjects: {request.teacherId.subjects.slice(0, 3).join(', ')}
+                                {request.teacherId.subjects.length > 3 && ` +${request.teacherId.subjects.length - 3} more`}
+                              </Typography>
+                            </Box>
+                          )}
+
+                          {/* Teacher Details Toggle Button */}
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={(e) => toggleTeacherDetails(request._id, e)}
+                            sx={{ 
+                              mb: 2, 
+                              textTransform: 'none',
+                              fontSize: '0.75rem',
+                              py: 0.5,
+                              px: 1.5
+                            }}
+                          >
+                            {expandedTeachers.has(request._id) ? 'Hide' : 'View'} Teacher Details
+                          </Button>
+
+                          {/* Expanded Teacher Details */}
+                          <Collapse in={expandedTeachers.has(request._id)}>
+                            <Paper 
+                              sx={{ 
+                                p: 2, 
+                                mb: 2, 
+                                backgroundColor: COLORS.lightGray,
+                                border: `1px solid ${COLORS.primaryBlue}20`
+                              }}
+                            >
+                              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: COLORS.primaryDark, mb: 1 }}>
+                                Complete Teacher Profile
+                              </Typography>
+                              
+                              {/* All Subjects */}
+                              {request.teacherId.subjects && request.teacherId.subjects.length > 0 && (
+                                <Box sx={{ mb: 1.5 }}>
+                                  <Typography variant="body2" sx={{ fontWeight: 600, color: COLORS.primaryDark, mb: 0.5 }}>
+                                    All Subjects:
+                                  </Typography>
+                                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                    {request.teacherId.subjects.map((subject, index) => (
+                                      <Chip
+                                        key={index}
+                                        label={subject}
+                                        size="small"
+                                        color="primary"
+                                        variant="outlined"
+                                        sx={{ fontSize: '0.7rem' }}
+                                      />
+                                    ))}
+                                  </Box>
+                                </Box>
+                              )}
+
+                              {/* Bio */}
+                              {request.teacherId.bio && (
+                                <Box sx={{ mb: 1.5 }}>
+                                  <Typography variant="body2" sx={{ fontWeight: 600, color: COLORS.primaryDark, mb: 0.5 }}>
+                                    About:
+                                  </Typography>
+                                  <Typography variant="body2" sx={{ fontSize: '0.8rem', lineHeight: 1.4 }}>
+                                    {request.teacherId.bio}
+                                  </Typography>
+                                </Box>
+                              )}
+
+                              {/* Contact Info */}
+                              <Box sx={{ mb: 1.5 }}>
+                                <Typography variant="body2" sx={{ fontWeight: 600, color: COLORS.primaryDark, mb: 0.5 }}>
+                                  Contact Information:
+                                </Typography>
+                                <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                                  📧 {request.teacherId.email}
+                                </Typography>
+                                {(request.teacherId.city || request.teacherId.state) && (
+                                  <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                                    📍 {[request.teacherId.city, request.teacherId.state].filter(Boolean).join(', ')}
+                                  </Typography>
+                                )}
+                              </Box>
+
+                              {/* School Info */}
+                              {(request.teacherId.school || request.teacherId.gradeLevel) && (
+                                <Box>
+                                  <Typography variant="body2" sx={{ fontWeight: 600, color: COLORS.primaryDark, mb: 0.5 }}>
+                                    School Information:
+                                  </Typography>
+                                  <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                                    {request.teacherId.school && `🏫 ${request.teacherId.school}`}
+                                    {request.teacherId.school && request.teacherId.gradeLevel && ' • '}
+                                    {request.teacherId.gradeLevel && `Grade ${request.teacherId.gradeLevel}`}
+                                  </Typography>
+                                </Box>
+                              )}
+                            </Paper>
+                          </Collapse>
 
                           <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                             {request.isInPerson && (
@@ -371,9 +503,127 @@ function SpeakerRequestsPage() {
                         Requested by: {request.teacherId.firstName} {request.teacherId.lastName}
                       </Typography>
                       
-                      <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                      <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
                         {request.teacherId.email}
                       </Typography>
+
+                      {/* Additional Teacher Information */}
+                      {(request.teacherId.school || request.teacherId.gradeLevel) && (
+                        <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+                          {request.teacherId.school && `${request.teacherId.school}`}
+                          {request.teacherId.school && request.teacherId.gradeLevel && ' • '}
+                          {request.teacherId.gradeLevel && `Grade ${request.teacherId.gradeLevel}`}
+                        </Typography>
+                      )}
+
+                      {(request.teacherId.city || request.teacherId.state) && (
+                        <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+                          📍 {[request.teacherId.city, request.teacherId.state].filter(Boolean).join(', ')}
+                        </Typography>
+                      )}
+
+                      {request.teacherId.subjects && request.teacherId.subjects.length > 0 && (
+                        <Box sx={{ mb: 2 }}>
+                          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5 }}>
+                            Subjects: {request.teacherId.subjects.slice(0, 3).join(', ')}
+                            {request.teacherId.subjects.length > 3 && ` +${request.teacherId.subjects.length - 3} more`}
+                          </Typography>
+                        </Box>
+                      )}
+
+                      {/* Teacher Details Toggle Button */}
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={(e) => toggleTeacherDetails(request._id, e)}
+                        sx={{ 
+                          mb: 2, 
+                          textTransform: 'none',
+                          fontSize: '0.75rem',
+                          py: 0.5,
+                          px: 1.5
+                        }}
+                      >
+                        {expandedTeachers.has(request._id) ? 'Hide' : 'View'} Teacher Details
+                      </Button>
+
+                      {/* Expanded Teacher Details */}
+                      <Collapse in={expandedTeachers.has(request._id)}>
+                        <Paper 
+                          sx={{ 
+                            p: 2, 
+                            mb: 2, 
+                            backgroundColor: COLORS.lightGray,
+                            border: `1px solid ${COLORS.primaryBlue}20`
+                          }}
+                        >
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: COLORS.primaryDark, mb: 1 }}>
+                            Complete Teacher Profile
+                          </Typography>
+                          
+                          {/* All Subjects */}
+                          {request.teacherId.subjects && request.teacherId.subjects.length > 0 && (
+                            <Box sx={{ mb: 1.5 }}>
+                              <Typography variant="body2" sx={{ fontWeight: 600, color: COLORS.primaryDark, mb: 0.5 }}>
+                                All Subjects:
+                              </Typography>
+                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                {request.teacherId.subjects.map((subject, index) => (
+                                  <Chip
+                                    key={index}
+                                    label={subject}
+                                    size="small"
+                                    color="primary"
+                                    variant="outlined"
+                                    sx={{ fontSize: '0.7rem' }}
+                                  />
+                                ))}
+                              </Box>
+                            </Box>
+                          )}
+
+                          {/* Bio */}
+                          {request.teacherId.bio && (
+                            <Box sx={{ mb: 1.5 }}>
+                              <Typography variant="body2" sx={{ fontWeight: 600, color: COLORS.primaryDark, mb: 0.5 }}>
+                                About:
+                              </Typography>
+                              <Typography variant="body2" sx={{ fontSize: '0.8rem', lineHeight: 1.4 }}>
+                                {request.teacherId.bio}
+                              </Typography>
+                            </Box>
+                          )}
+
+                          {/* Contact Info */}
+                          <Box sx={{ mb: 1.5 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600, color: COLORS.primaryDark, mb: 0.5 }}>
+                              Contact Information:
+                            </Typography>
+                            <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                              📧 {request.teacherId.email}
+                            </Typography>
+                            {(request.teacherId.city || request.teacherId.state) && (
+                              <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                                📍 {[request.teacherId.city, request.teacherId.state].filter(Boolean).join(', ')}
+                              </Typography>
+                            )}
+                          </Box>
+
+                          {/* School Info */}
+                          {(request.teacherId.school || request.teacherId.gradeLevel) && (
+                            <Box>
+                              <Typography variant="body2" sx={{ fontWeight: 600, color: COLORS.primaryDark, mb: 0.5 }}>
+                                School Information:
+                              </Typography>
+                              <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                                {request.teacherId.school && `🏫 ${request.teacherId.school}`}
+                                {request.teacherId.school && request.teacherId.gradeLevel && ' • '}
+                                {request.teacherId.gradeLevel && `Grade ${request.teacherId.gradeLevel}`}
+                              </Typography>
+                            </Box>
+                          )}
+                        </Paper>
+                      </Collapse>
 
                       <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                         {request.isInPerson && (

@@ -45,6 +45,8 @@ export interface Request {
   _id: string;
   speakerId: Speaker;
   teacherId: Teacher;
+  speaker?: Speaker; // For frontend compatibility
+  teacher?: Teacher; // For frontend compatibility
   status: RequestStatus;
   
   // Audience Information
@@ -83,20 +85,28 @@ export async function getAllRequests(): Promise<Request[]> {
     if (response.error) {
       throw new Error(response.error);
     }
+    console.log('Raw API response:', response.data);
     // Map teacherId.userId to teacher for frontend compatibility
-    return (response.data || []).map((req: any) => ({
-      ...req,
-      teacherId: req.teacherId, // keep the original
-      teacher: req.teacherId && req.teacherId.userId
-        ? {
-            _id: req.teacherId.userId._id,
-            firstName: req.teacherId.userId.firstName,
-            lastName: req.teacherId.userId.lastName,
-            email: req.teacherId.userId.email,
-          }
-        : undefined,
-      speaker: req.speakerId,
-    }));
+    const mappedRequests = (response.data || []).map((req: any) => {
+      console.log('Mapping request:', req);
+      console.log('TeacherId in request:', req.teacherId);
+      const mapped = {
+        ...req,
+        teacherId: req.teacherId, // keep the original
+        teacher: req.teacherId
+          ? {
+              _id: req.teacherId._id,
+              firstName: req.teacherId.firstName,
+              lastName: req.teacherId.lastName,
+              email: req.teacherId.email,
+            }
+          : undefined,
+        speaker: req.speakerId,
+      };
+      console.log('Mapped request:', mapped);
+      return mapped;
+    });
+    return mappedRequests;
   } catch (error) {
     console.error('Error fetching requests:', error);
     throw error;
