@@ -404,10 +404,20 @@ function AdminRequestsPage() {
                     <Typography
                       variant="subtitle1"
                       gutterBottom
-                      sx={{ color: 'text.secondary', mb: 2, wordWrap: 'break-word', overflowWrap: 'break-word' }}
+                      sx={{ color: 'text.secondary', mb: 1, wordWrap: 'break-word', overflowWrap: 'break-word' }}
                     >
                       {selectedRequest.speakerId.organization}
                     </Typography>
+
+                    {selectedRequest.speakerId.jobTitle && (
+                      <Typography
+                        variant="subtitle1"
+                        gutterBottom
+                        sx={{ color: 'text.secondary', mb: 2, fontStyle: 'italic' }}
+                      >
+                        {selectedRequest.speakerId.jobTitle}
+                      </Typography>
+                    )}
 
                     <Typography variant="body2" sx={{ mb: 2, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
                       {selectedRequest.speakerId.location}

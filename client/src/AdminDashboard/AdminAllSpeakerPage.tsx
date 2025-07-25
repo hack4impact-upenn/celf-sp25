@@ -67,6 +67,7 @@ interface Speaker {
   grades: string[];
   city: string;
   state: string;
+  jobTitle?: string;
   coordinates?: {
     lat: number;
     lng: number;
@@ -512,6 +513,7 @@ function AdminAllSpeakerPage() {
           bio: editFormState.bio,
           location: editFormState.location,
           inperson: editFormState.inperson,
+          jobTitle: editFormState.jobTitle,
           virtual: editFormState.virtual,
           imageUrl: editFormState.imageUrl,
           industry: editFormState.industry,

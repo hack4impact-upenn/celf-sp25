@@ -13,6 +13,7 @@ import {
   getfilterSpeakeredList,
 } from "../services/speaker.service.ts";
 import { updateUser } from "../services/user.service.ts";
+import { updateRequestStatusHandler } from "./request.controller.ts";
 
 /**
  * Get all speakers from the database
@@ -281,7 +282,15 @@ const updateSpeakerProfile = async (
   try {
     // Extract user data (firstName, lastName) from updateData
     const { firstName, lastName, ...speakerUpdateData } = updateData;
-    
+
+    // If location is present, parse city and state from it
+    if (speakerUpdateData.location) {
+      const locationParts = speakerUpdateData.location.split(',').map((part: string) => part.trim());
+      speakerUpdateData.city = locationParts[0] || '';
+      speakerUpdateData.state = locationParts[1] || '';
+    }
+    // Pass jobTitle if present (already included in ...speakerUpdateData)
+
     // Update speaker profile
     const speaker = await updateSpeaker(userId, speakerUpdateData);
     if (!speaker) {
@@ -294,7 +303,6 @@ const updateSpeakerProfile = async (
       const userUpdateData: any = {};
       if (firstName !== undefined) userUpdateData.firstName = firstName;
       if (lastName !== undefined) userUpdateData.lastName = lastName;
-      
       await User.findByIdAndUpdate(userId, userUpdateData, { new: true });
     }
 

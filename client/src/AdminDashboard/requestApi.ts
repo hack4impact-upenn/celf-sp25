@@ -23,6 +23,7 @@ export interface Speaker {
   inperson: boolean;
   virtual: boolean;
   imageUrl?: string;
+  jobTitle?: string;
   industry: string[];
   grades: string[];
   city: string;

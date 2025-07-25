@@ -36,6 +36,10 @@ const SpeakerSchema = new mongoose.Schema({
     type: String,
     required: true
   }],
+  jobTitle: {
+    type: String,
+    required: false
+  },
   grades: [{
     type: String,
     required: true,
@@ -75,6 +79,7 @@ interface ISpeaker extends mongoose.Document {
   virtual: boolean;
   imageUrl?: string;
   industry: string[];
+  jobTitle?: string;
   grades: string[];
   city: string;
   state: string;

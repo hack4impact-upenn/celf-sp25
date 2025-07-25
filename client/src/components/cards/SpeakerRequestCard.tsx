@@ -37,6 +37,7 @@ interface Speaker {
     lng: number;
   };
   languages: string[];
+  jobTitle?: string;
 }
 
 interface Teacher {
@@ -107,6 +108,7 @@ function SpeakerRequestCard({ id, speaker, teacher, status }: Request) {
   const location = speaker?.location || 'Unknown Location';
   const bio = speaker?.bio || 'Speaker bio not available';
   const imageUrl = speaker?.imageUrl || DEFAULT_IMAGE;
+  const jobTitle = speaker?.jobTitle || 'Job Title Not Specified';
 
   return (
     <MuiCard
@@ -129,6 +131,7 @@ function SpeakerRequestCard({ id, speaker, teacher, status }: Request) {
           height: 200,
           borderTopLeftRadius: '16px',
           borderTopRightRadius: '16px',
+          objectFit: 'cover',
         }}
         image={imageUrl}
         title={speakerName}
@@ -148,7 +151,9 @@ function SpeakerRequestCard({ id, speaker, teacher, status }: Request) {
           {speakerName}
         </Typography>
         <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-          {organization} • {location}
+          {organization}
+          {jobTitle && jobTitle !== 'Job Title Not Specified' && ` • ${jobTitle}`}
+          {` • ${location}`}
         </Typography>
 
         {/* Teacher information (always show) */}
@@ -158,7 +163,10 @@ function SpeakerRequestCard({ id, speaker, teacher, status }: Request) {
             color: 'text.secondary', 
             mb: 0.5, 
             fontSize: '0.875rem',
-            fontStyle: 'italic'
+            fontStyle: 'italic',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
           }}
         >
           Requested by: {teacherName}
