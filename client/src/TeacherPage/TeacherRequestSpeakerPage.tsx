@@ -67,7 +67,9 @@ interface Request {
   // Speaker Preferences
   expertise: string;
   preferredLanguage: string;
-  location: string;
+  city: string;
+  state: string;
+  country?: string;
   goals: string;
   budget?: string;
   engagementFormat: string;
@@ -178,7 +180,9 @@ function TeacherRequestSpeakerPage() {
           isVirtual: req.isVirtual,
           expertise: req.expertise,
           preferredLanguage: req.preferredLanguage,
-          location: req.location,
+          city: req.city,
+          state: req.state,
+          country: req.country,
           goals: req.goals,
           budget: req.budget,
           engagementFormat: req.engagementFormat,
@@ -231,13 +235,15 @@ function TeacherRequestSpeakerPage() {
           `${request.speaker.userId.firstName} ${request.speaker.userId.lastName}`.toLowerCase();
         const organization = (request.speaker.organization || '').toLowerCase();
         const bio = (request.speaker.bio || '').toLowerCase();
-        const location = (request.speaker.location || '').toLowerCase();
+        const city = (request.speaker.city || '').toLowerCase();
+        const state = (request.speaker.state || '').toLowerCase();
 
         return (
           speakerName.includes(lowercaseQuery) ||
           organization.includes(lowercaseQuery) ||
           bio.includes(lowercaseQuery) ||
-          location.includes(lowercaseQuery)
+          state.includes(lowercaseQuery) ||
+          city.includes(lowercaseQuery)
         );
       });
     }
@@ -632,7 +638,10 @@ function TeacherRequestSpeakerPage() {
                     gutterBottom
                     sx={{ color: 'text.secondary', mb: 2 }}
                   >
-                    {selectedRequest.speaker.location}
+                    {[
+                      selectedRequest.speaker.city,
+                      selectedRequest.speaker.state
+                    ].filter(Boolean).join(', ')}
                   </Typography>
 
                   <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
@@ -812,7 +821,8 @@ function TeacherRequestSpeakerPage() {
                         Event Location
                       </Typography>
                       <Typography variant="body1">
-                        {selectedRequest.location}
+                        {selectedRequest.city}, {selectedRequest.state}
+                        {selectedRequest.country ? `, ${selectedRequest.country}` : ''}
                       </Typography>
                     </Grid>
                     <Grid item xs={12}>

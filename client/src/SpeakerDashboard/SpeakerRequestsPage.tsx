@@ -63,7 +63,9 @@ interface SpeakerRequest {
   // Speaker Preferences
   expertise: string;
   preferredLanguage: string;
-  location: string;
+  city: string;
+  state: string;
+  country?: string;
   goals: string;
   budget?: string;
   engagementFormat: string;
@@ -570,7 +572,7 @@ function SpeakerRequestsPage() {
                       </Grid>
 
                       {/* School Info */}
-                      {(teacherProfile.school || teacherProfile.gradeLevel) && (
+                      {teacherProfile && (teacherProfile.school || teacherProfile.gradeLevel) && (
                         <Grid item xs={12} md={6}>
                           {teacherProfile.school && (
                             <Box sx={{ mb: 1 }}>
@@ -596,7 +598,7 @@ function SpeakerRequestsPage() {
                       )}
 
                       {/* Location */}
-                      {(teacherProfile.city || teacherProfile.state) && (
+                      {teacherProfile && (teacherProfile.city || teacherProfile.state) && (
                         <Grid item xs={12} md={6}>
                           <Typography variant="subtitle2" sx={{ fontWeight: 600, color: COLORS.primaryDark }}>
                             Location
@@ -608,7 +610,7 @@ function SpeakerRequestsPage() {
                       )}
 
                       {/* Subjects Taught */}
-                      {teacherProfile.subjects && teacherProfile.subjects.length > 0 && (
+                      {teacherProfile && teacherProfile.subjects && teacherProfile.subjects.length > 0 && (
                         <Grid item xs={12} md={6}>
                           <Typography variant="subtitle2" sx={{ fontWeight: 600, color: COLORS.primaryDark }}>
                             Subjects Taught
@@ -628,7 +630,7 @@ function SpeakerRequestsPage() {
                       )}
 
                       {/* Bio */}
-                      {teacherProfile.bio && (
+                      {teacherProfile && teacherProfile.bio && (
                         <Grid item xs={12}>
                           <Typography variant="subtitle2" sx={{ fontWeight: 600, color: COLORS.primaryDark }}>
                             About the Teacher
@@ -728,7 +730,9 @@ function SpeakerRequestsPage() {
                       <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                         Location
                       </Typography>
-                      <Typography variant="body1">{selectedRequest.location}</Typography>
+                      <Typography variant="body1">
+                        {[selectedRequest.city, selectedRequest.state, selectedRequest.country].filter(Boolean).join(', ')}
+                      </Typography>
                     </Grid>
                     <Grid item xs={12} md={6}>
                       <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>

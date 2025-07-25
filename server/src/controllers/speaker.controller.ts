@@ -95,26 +95,25 @@ const createSpeakerProfile = async (
     userId,
     organization,
     bio,
-    location,
+    city,
+    state,
+    country,
     inperson,
     virtual,
     imageUrl,
     industry,
     grades,
-    city,
-    state,
     coordinates,
     languages
   } = req.body;
 
   // Validate required fields
-  if (!userId || !organization || !bio || !location || !city || !state) {
+  if (!userId || !organization || !bio || !city || !state) {
     next(
       ApiError.missingFields([
         "userId",
         "organization",
         "bio",
-        "location",
         "city",
         "state"
       ])
@@ -140,14 +139,14 @@ const createSpeakerProfile = async (
       userId,
       organization,
       bio,
-      location,
+      city,
+      state,
+      country,
       inperson || false,
       virtual || false,
       imageUrl,
       industry,
       grades,
-      city,
-      state,
       coordinates,
       languages || []
     );
@@ -170,7 +169,9 @@ const submitSpeakerProfile = async (
     personalSite,
     organisation,
     bio,
-    location,
+    city,
+    state,
+    country,
     speakingFormat,
     ageGroup,
     industryFocus,
@@ -188,8 +189,8 @@ const submitSpeakerProfile = async (
   }
 
   // Validate required fields
-  if (!organisation || !bio || !location) {
-    next(ApiError.missingFields(["organisation", "bio", "location"]));
+  if (!organisation || !bio || !city || !state) {
+    next(ApiError.missingFields(["organisation", "bio", "city", "state"]));
     return;
   }
 
@@ -217,16 +218,6 @@ const submitSpeakerProfile = async (
     grades = ['Elementary', 'Middle School', 'High School'];
   }
 
-  // Extract city and state from location (assuming format: "City, State")
-  const locationParts = location.split(',').map((part: string) => part.trim());
-  const city = locationParts[0] || '';
-  const state = locationParts[1] || '';
-
-  if (!city || !state) {
-    next(ApiError.badRequest("Location must be in format: 'City, State'"));
-    return;
-  }
-
   console.log("right before create speaker");
 
   try {
@@ -234,14 +225,14 @@ const submitSpeakerProfile = async (
       userId,
       organisation,
       bio,
-      location,
+      city,
+      state,
+      country,
       inperson,
       virtual,
       picture,
       industryFocus || [],
       grades,
-      city,
-      state,
       undefined, // coordinates
       languages || ['English']
     );
@@ -426,6 +417,7 @@ const getCurrentUserSpeakerProfile = async (
     }
 
     const speaker = await getSpeakerByUserId(userId);
+    console.log(speaker);
     if (!speaker) {
       next(ApiError.notFound("Speaker profile not found"));
       return;

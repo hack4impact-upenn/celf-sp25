@@ -105,7 +105,9 @@ const createRequest = async (
     // Speaker Preferences
     expertise: string;
     preferredLanguage: string;
-    location: string;
+    city: string;
+    state: string;
+    country?: string;
     goals: string;
     budget?: string;
     engagementFormat: string;

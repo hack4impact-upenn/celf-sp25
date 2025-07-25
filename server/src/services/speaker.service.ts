@@ -6,14 +6,14 @@ import { User } from "../models/user.model.ts";
  * @param userId - string representing the user ID
  * @param organization - string representing the organization
  * @param bio - string representing the speaker's bio
- * @param location - string representing the location
+ * @param city - string representing the city
+ * @param state - string representing the state
+ * @param country - string representing the country (optional)
  * @param inperson - boolean indicating if available for in-person events
  * @param virtual - boolean indicating if available for virtual events
  * @param imageUrl - string representing the image URL
  * @param industry - string array representing the industry focus
  * @param grades - string array representing the grades
- * @param city - string representing the city
- * @param state - string representing the state
  * @param coordinates - object representing the coordinates
  * @param languages - string array representing the languages
  * @returns The created Speaker profile
@@ -22,14 +22,14 @@ const createSpeaker = async (
   userId: string,
   organization: string,
   bio: string,
-  location: string,
+  city: string,
+  state: string,
+  country: string | undefined,
   inperson: boolean,
   virtual: boolean,
   imageUrl: string | undefined,
   industry: string[],
   grades: string[],
-  city: string,
-  state: string,
   coordinates: { lat: number; lng: number } | undefined,
   languages: string[]
 ) => {
@@ -37,14 +37,14 @@ const createSpeaker = async (
     userId,
     organization,
     bio,
-    location,
+    city,
+    state,
+    country,
     inperson,
     virtual,
     imageUrl,
     industry,
     grades,
-    city,
-    state,
     coordinates,
     languages
   });

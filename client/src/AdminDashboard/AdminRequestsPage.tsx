@@ -420,7 +420,7 @@ function AdminRequestsPage() {
                     )}
 
                     <Typography variant="body2" sx={{ mb: 2, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
-                      {selectedRequest.speakerId.location}
+                    {[selectedRequest.city, selectedRequest.state, selectedRequest.country].filter(Boolean).join(', ')}
                     </Typography>
 
                     <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
@@ -678,7 +678,7 @@ function AdminRequestsPage() {
                           Event Location
                         </Typography>
                         <Typography variant="body1">
-                          {selectedRequest.location}
+                        {[selectedRequest.city, selectedRequest.state, selectedRequest.country].filter(Boolean).join(', ')}
                         </Typography>
                       </Grid>
                       <Grid item xs={12}>

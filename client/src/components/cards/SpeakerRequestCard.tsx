@@ -24,14 +24,14 @@ interface Speaker {
   };
   organization: string;
   bio: string;
-  location: string;
+  city: string;
+  state: string;
+  country?: string;
   inperson: boolean;
   virtual: boolean;
   imageUrl?: string;
   industry: string[];
   grades: string[];
-  city: string;
-  state: string;
   coordinates?: {
     lat: number;
     lng: number;
@@ -105,10 +105,12 @@ function SpeakerRequestCard({ id, speaker, teacher, status }: Request) {
   : 'Unknown Id';
 
   const organization = speaker?.organization || 'Unknown Organization';
-  const location = speaker?.location || 'Unknown Location';
-  const bio = speaker?.bio || 'Speaker bio not available';
-  const imageUrl = speaker?.imageUrl || DEFAULT_IMAGE;
+  const locationDisplay = speaker 
+    ? [speaker.city, speaker.state, speaker.country].filter(Boolean).join(', ')
+    : 'Unknown Location';
   const jobTitle = speaker?.jobTitle || 'Job Title Not Specified';
+  const imageUrl = speaker?.imageUrl || DEFAULT_IMAGE;
+  const bio = speaker?.bio || 'Speaker bio not available';
 
   return (
     <MuiCard
@@ -150,10 +152,10 @@ function SpeakerRequestCard({ id, speaker, teacher, status }: Request) {
         >
           {speakerName}
         </Typography>
-        <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
           {organization}
           {jobTitle && jobTitle !== 'Job Title Not Specified' && ` • ${jobTitle}`}
-          {` • ${location}`}
+          {` • ${locationDisplay}`}
         </Typography>
 
         {/* Teacher information (always show) */}

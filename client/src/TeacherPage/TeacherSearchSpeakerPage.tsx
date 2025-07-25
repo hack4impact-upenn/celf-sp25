@@ -58,14 +58,14 @@ interface Speaker {
   };
   organization: string;
   bio: string;
-  location: string;
+  city: string;
+  state: string;
+  country?: string;
   inperson: boolean;
   virtual: boolean;
   imageUrl?: string;
   industry: string[];
   grades: string[];
-  city: string;
-  state: string;
   coordinates?: {
     lat: number;
     lng: number;
@@ -108,7 +108,9 @@ interface BookingFormState {
   // Speaker Preferences
   expertise: string;
   preferredLanguage: string;
-  location: string;
+  city: string;
+  state: string;
+  country?: string;
   goals: string;
   budget: string;
   engagementFormat: string;
@@ -195,7 +197,9 @@ const initialBookingFormState: BookingFormState = {
   // Speaker Preferences
   expertise: '',
   preferredLanguage: '',
-  location: '',
+  city: '',
+  state: '',
+  country: '',
   goals: '',
   budget: '',
   engagementFormat: '',
@@ -309,11 +313,12 @@ function TeacherSearchSpeakerPage() {
     const lowercaseQuery = query.toLowerCase();
     const results = speakers.filter((speaker) => {
       const fullName = getSpeakerName(speaker).toLowerCase();
+      const locationDisplay = [speaker.city, speaker.state, speaker.country].filter(Boolean).join(', ').toLowerCase();
       return (
         fullName.includes(lowercaseQuery) ||
         (speaker.organization || '').toLowerCase().includes(lowercaseQuery) ||
         (speaker.bio || '').toLowerCase().includes(lowercaseQuery) ||
-        (speaker.location || '').toLowerCase().includes(lowercaseQuery)
+        locationDisplay.includes(lowercaseQuery)
       );
     });
 
@@ -474,7 +479,8 @@ function TeacherSearchSpeakerPage() {
       !bookingForm.dateTime ||
       !bookingForm.expertise ||
       !bookingForm.preferredLanguage ||
-      !bookingForm.location ||
+      !bookingForm.city ||
+      !bookingForm.state ||
       !bookingForm.goals ||
       !bookingForm.engagementFormat
     ) {
@@ -509,7 +515,9 @@ function TeacherSearchSpeakerPage() {
         // Speaker Preferences
         expertise: bookingForm.expertise,
         preferredLanguage: bookingForm.preferredLanguage,
-        location: bookingForm.location,
+        city: bookingForm.city,
+        state: bookingForm.state,
+        country: bookingForm.country,
         goals: bookingForm.goals,
         budget: bookingForm.budget,
         engagementFormat: bookingForm.engagementFormat,
@@ -601,7 +609,9 @@ function TeacherSearchSpeakerPage() {
                       organization={
                         speaker.organization || 'No organization provided'
                       }
-                      location={speaker.location || 'No location provided'}
+                      city={speaker.city}
+                      state={speaker.state}
+                      country={speaker.country}
                       imageUrl={speaker.imageUrl}
                     />
                   </div>
@@ -894,11 +904,31 @@ function TeacherSearchSpeakerPage() {
                       <TextField
                         required
                         fullWidth
-                        label="Event Location"
-                        name="location"
-                        value={bookingForm.location}
+                        label="City"
+                        name="city"
+                        value={bookingForm.city}
                         onChange={handleBookingFormChange}
-                        helperText="Where will this event take place (or be hosted virtually)?"
+                        helperText="City where the event will take place"
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        label="State"
+                        name="state"
+                        value={bookingForm.state}
+                        onChange={handleBookingFormChange}
+                        helperText="State (if applicable)"
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        label="Country"
+                        name="country"
+                        value={bookingForm.country}
+                        onChange={handleBookingFormChange}
+                        helperText="Country (if applicable)"
                       />
                     </Grid>
                     <Grid item xs={12} md={6}>
@@ -1016,7 +1046,7 @@ function TeacherSearchSpeakerPage() {
                       gutterBottom
                       sx={{ color: 'text.secondary', mb: 2 }}
                     >
-                      {selectedSpeaker.location || 'No location provided'}
+                      {[selectedSpeaker.city, selectedSpeaker.state, selectedSpeaker.country].filter(Boolean).join(', ') || 'No location provided'}
                     </Typography>
 
                     <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>

@@ -14,9 +14,17 @@ const SpeakerSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  location: {
+  city: {
     type: String,
     required: true
+  },
+  state: {
+    type: String,
+    required: true
+  },
+  country: {
+    type: String,
+    required: false
   },
   inperson: {
     type: Boolean,
@@ -45,14 +53,6 @@ const SpeakerSchema = new mongoose.Schema({
     required: true,
     enum: ['Elementary', 'Middle School', 'High School']
   }],
-  city: {
-    type: String,
-    required: true
-  },
-  state: {
-    type: String,
-    required: true
-  },
   coordinates: {
     lat: {
       type: Number,
@@ -74,15 +74,15 @@ interface ISpeaker extends mongoose.Document {
   userId: mongoose.Types.ObjectId;
   organization: string;
   bio: string;
-  location: string;
+  city: string;
+  state: string;
+  country?: string;
   inperson: boolean;
   virtual: boolean;
   imageUrl?: string;
   industry: string[];
   jobTitle?: string;
   grades: string[];
-  city: string;
-  state: string;
   coordinates?: {
     lat: number;
     lng: number;

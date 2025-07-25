@@ -23,9 +23,11 @@ export interface IRequest extends mongoose.Document {
   // Speaker Preferences
   expertise: string;
   preferredLanguage: string;
-  location: string;
+  city: string;
+  state: string;
+  country?: string;
   goals: string;
-  budget: string;
+  budget?: string;
   engagementFormat: string;
   
   createdAt: Date;
@@ -108,9 +110,17 @@ const RequestSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    location: {
+    city: {
       type: String,
       required: true,
+    },
+    state: {
+      type: String,
+      required: true,
+    },
+    country: {
+      type: String,
+      required: false,
     },
     goals: {
       type: String,
