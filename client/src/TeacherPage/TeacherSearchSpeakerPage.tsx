@@ -220,15 +220,25 @@ const languageOptions = ['English', 'Spanish', 'Mandarin', 'French', 'Other'];
 
 // Add a helper function to safely get speaker name
 const getSpeakerName = (speaker: Speaker): string => {
-  if (speaker.userId?.firstName && speaker.userId?.lastName) {
-    return `${speaker.userId.firstName} ${speaker.userId.lastName}`;
+  try {
+    if (speaker?.userId?.firstName && speaker?.userId?.lastName) {
+      return `${speaker.userId.firstName} ${speaker.userId.lastName}`;
+    }
+    return 'Unnamed Speaker';
+  } catch (error) {
+    console.error('Error getting speaker name:', speaker, error);
+    return 'Unnamed Speaker';
   }
-  return 'Unnamed Speaker';
 };
 
 // Add a helper function to safely get speaker email
 const getSpeakerEmail = (speaker: Speaker): string => {
-  return speaker.userId?.email || 'No email provided';
+  try {
+    return speaker?.userId?.email || 'No email provided';
+  } catch (error) {
+    console.error('Error getting speaker email:', speaker, error);
+    return 'No email provided';
+  }
 };
 
 function TeacherSearchSpeakerPage() {
@@ -269,6 +279,17 @@ function TeacherSearchSpeakerPage() {
           throw new Error(response.error.message);
         }
         console.log('Fetched speakers:', response.data);
+        
+        // Validate speaker data structure
+        if (Array.isArray(response.data)) {
+          response.data.forEach((speaker, index) => {
+            console.log(`Speaker ${index}:`, speaker);
+            if (!speaker.userId) {
+              console.warn(`Speaker ${index} missing userId:`, speaker);
+            }
+          });
+        }
+        
         setSpeakers(response.data);
         setFilteredSpeakers(response.data);
       } catch (error) {
@@ -304,25 +325,10 @@ function TeacherSearchSpeakerPage() {
 
   // Update handleSearch to use safe name access
   const handleSearch = (query: string) => {
+    console.log('Search query:', query);
+    console.log('Current speakers:', speakers);
     setSearchQuery(query);
-    if (!query.trim()) {
-      setFilteredSpeakers(speakers);
-      return;
-    }
-
-    const lowercaseQuery = query.toLowerCase();
-    const results = speakers.filter((speaker) => {
-      const fullName = getSpeakerName(speaker).toLowerCase();
-      const locationDisplay = [speaker.city, speaker.state, speaker.country].filter(Boolean).join(', ').toLowerCase();
-      return (
-        fullName.includes(lowercaseQuery) ||
-        (speaker.organization || '').toLowerCase().includes(lowercaseQuery) ||
-        (speaker.bio || '').toLowerCase().includes(lowercaseQuery) ||
-        locationDisplay.includes(lowercaseQuery)
-      );
-    });
-
-    setFilteredSpeakers(results);
+    applyFiltersAndSearch(speakers, query, filters);
   };
 
   const handleCardClick = (speaker: Speaker) => {
@@ -339,58 +345,78 @@ function TeacherSearchSpeakerPage() {
     setFilterPanelOpen(!filterPanelOpen);
   };
 
-  // Update handleFilterChange to filter speakers
-  const handleFilterChange = (newFilters: FilterState) => {
-    setFilters(newFilters);
-    setFilterPanelOpen(false);
-    setSearchQuery(''); // Reset search query when applying filters
+  // Combined function to apply both search and filters
+  const applyFiltersAndSearch = (speakersToFilter: Speaker[], currentSearchQuery: string, currentFilters: FilterState) => {
+    console.log('applyFiltersAndSearch called with:', { speakersToFilter, currentSearchQuery, currentFilters });
+    let result = [...speakersToFilter];
 
-    let result = [...speakers];
+    // Apply search query
+    if (currentSearchQuery.trim()) {
+      const lowercaseQuery = currentSearchQuery.toLowerCase();
+      result = result.filter((speaker) => {
+        try {
+          const fullName = getSpeakerName(speaker).toLowerCase();
+          const locationDisplay = [speaker.city, speaker.state, speaker.country].filter(Boolean).join(', ').toLowerCase();
+          const organization = (speaker.organization || '').toLowerCase();
+          const bio = (speaker.bio || '').toLowerCase();
+          
+          return (
+            fullName.includes(lowercaseQuery) ||
+            organization.includes(lowercaseQuery) ||
+            bio.includes(lowercaseQuery) ||
+            locationDisplay.includes(lowercaseQuery)
+          );
+        } catch (error) {
+          console.error('Error filtering speaker:', speaker, error);
+          return false;
+        }
+      });
+    }
 
     // Apply industry filter
-    if (newFilters.industry && newFilters.industry.length > 0) {
+    if (currentFilters.industry && currentFilters.industry.length > 0) {
       result = result.filter(
         (speaker) =>
           speaker.industry &&
-          newFilters.industry.some((industry) =>
+          currentFilters.industry.some((industry) =>
             speaker.industry.includes(industry),
           ),
       );
     }
 
     // Apply grade level filter
-    if (newFilters.grades && newFilters.grades.length > 0) {
+    if (currentFilters.grades && currentFilters.grades.length > 0) {
       result = result.filter(
         (speaker) =>
           speaker.grades &&
-          newFilters.grades.some((grade) => speaker.grades.includes(grade)),
+          currentFilters.grades.some((grade) => speaker.grades.includes(grade)),
       );
     }
 
     // Apply location filter
-    if (newFilters.city && newFilters.city.trim() !== '') {
+    if (currentFilters.city && currentFilters.city.trim() !== '') {
       result = result.filter(
         (speaker) =>
           speaker.city &&
-          speaker.city.toLowerCase() === newFilters.city.toLowerCase(),
+          speaker.city.toLowerCase() === currentFilters.city.toLowerCase(),
       );
     }
 
-    if (newFilters.state && newFilters.state.trim() !== '') {
+    if (currentFilters.state && currentFilters.state.trim() !== '') {
       result = result.filter(
         (speaker) =>
           speaker.state &&
-          speaker.state.toLowerCase() === newFilters.state.toLowerCase(),
+          speaker.state.toLowerCase() === currentFilters.state.toLowerCase(),
       );
     }
 
     // Apply radius filter if coordinates are available
     if (
-      newFilters.radius &&
-      newFilters.radius > 0 &&
-      newFilters.userCoordinates
+      currentFilters.radius &&
+      currentFilters.radius > 0 &&
+      currentFilters.userCoordinates
     ) {
-      const { lat: userLat, lng: userLng } = newFilters.userCoordinates;
+      const { lat: userLat, lng: userLng } = currentFilters.userCoordinates;
 
       result = result.filter((speaker) => {
         if (!speaker.coordinates) return true;
@@ -400,17 +426,17 @@ function TeacherSearchSpeakerPage() {
           speaker.coordinates.lat,
           speaker.coordinates.lng,
         );
-        return distance <= newFilters.radius;
+        return distance <= currentFilters.radius;
       });
     }
 
     // Apply format filter
-    if (newFilters.formats) {
-      if (newFilters.formats.inperson && !newFilters.formats.virtual) {
+    if (currentFilters.formats) {
+      if (currentFilters.formats.inperson && !currentFilters.formats.virtual) {
         result = result.filter((speaker) => speaker.inperson === true);
-      } else if (!newFilters.formats.inperson && newFilters.formats.virtual) {
+      } else if (!currentFilters.formats.inperson && currentFilters.formats.virtual) {
         result = result.filter((speaker) => speaker.virtual === true);
-      } else if (newFilters.formats.inperson && newFilters.formats.virtual) {
+      } else if (currentFilters.formats.inperson && currentFilters.formats.virtual) {
         result = result.filter(
           (speaker) => speaker.inperson === true || speaker.virtual === true,
         );
@@ -418,17 +444,25 @@ function TeacherSearchSpeakerPage() {
     }
 
     // Apply language filter
-    if (newFilters.languages && newFilters.languages.length > 0) {
+    if (currentFilters.languages && currentFilters.languages.length > 0) {
       result = result.filter(
         (speaker) =>
           speaker.languages &&
-          newFilters.languages.some((language) =>
+          currentFilters.languages.some((language) =>
             speaker.languages.includes(language),
           ),
       );
     }
 
     setFilteredSpeakers(result);
+  };
+
+  // Update handleFilterChange to work with search
+  const handleFilterChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+    setFilterPanelOpen(false);
+    // Apply both current search query and new filters
+    applyFiltersAndSearch(speakers, searchQuery, newFilters);
   };
 
   const handleBookingFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
