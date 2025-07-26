@@ -147,7 +147,9 @@ const createRequestHandler = async (
     // Speaker Preferences
     expertise,
     preferredLanguage,
-    location,
+    city,
+    state,
+    country,
     goals,
     budget,
     engagementFormat
@@ -168,7 +170,7 @@ const createRequestHandler = async (
   const requiredFields = [
     'gradeLevels', 'subjects', 'estimatedStudents',
     'eventName', 'eventPurpose', 'dateTime', 'timezone',
-    'expertise', 'preferredLanguage', 'location', 'goals', 'engagementFormat'
+    'expertise', 'preferredLanguage', 'city', 'state', 'goals', 'engagementFormat'
   ];
   
   const missingFields = requiredFields.filter(field => !req.body[field]);
@@ -197,7 +199,9 @@ const createRequestHandler = async (
       additionalInfo,
       expertise,
       preferredLanguage,
-      location,
+      city,
+      state,
+      country,
       goals,
       budget,
       engagementFormat

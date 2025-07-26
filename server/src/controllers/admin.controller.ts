@@ -21,6 +21,9 @@ import {
 } from "../services/invite.service.ts";
 import { IInvite } from "../models/invite.model.ts";
 import { emailInviteLink } from "../services/mail.service.ts";
+import { deleteTeacher } from "../services/teacher.service.ts";
+import { deleteSpeaker } from "../services/speaker.service.ts";
+import { deleteRequestsBySpeakerId, deleteRequestsByTeacherId } from "../services/request.service.ts";
 
 /**
  * Get all users from the database. Upon success, send the a list of all users in the res body with 200 OK status code.
@@ -108,12 +111,29 @@ const deleteUser = async (
     return;
   }
 
-  deleteUserById(user._id)
-    .then(() => res.sendStatus(StatusCode.OK))
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    .catch((e) => {
-      next(ApiError.internal("Failed to delete user."));
-    });
+  try {
+    // Delete associated requests and profile based on user role
+    if (user.role === 'teacher') {
+      // Delete all requests made by this teacher
+      await deleteRequestsByTeacherId(user._id);
+      // Delete the teacher profile
+      await deleteTeacher(user._id);
+    } else if (user.role === 'speaker') {
+      // First get the speaker profile to get the speaker ID
+      const speaker = await deleteSpeaker(user._id);
+      if (speaker) {
+        // Delete all requests that reference this speaker
+        await deleteRequestsBySpeakerId(speaker._id);
+      }
+    }
+    
+    // Delete the user
+    await deleteUserById(user._id);
+    res.sendStatus(StatusCode.OK);
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    next(ApiError.internal("Failed to delete user."));
+  }
 };
 
 const verifyToken = async (

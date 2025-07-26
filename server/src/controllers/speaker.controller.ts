@@ -13,6 +13,8 @@ import {
   getfilterSpeakeredList,
 } from "../services/speaker.service.ts";
 import { updateUser } from "../services/user.service.ts";
+import { updateRequestStatusHandler } from "./request.controller.ts";
+import { deleteRequestsBySpeakerId } from "../services/request.service.ts";
 
 /**
  * Get all speakers from the database
@@ -94,26 +96,25 @@ const createSpeakerProfile = async (
     userId,
     organization,
     bio,
-    location,
+    city,
+    state,
+    country,
     inperson,
     virtual,
     imageUrl,
     industry,
     grades,
-    city,
-    state,
     coordinates,
     languages
   } = req.body;
 
   // Validate required fields
-  if (!userId || !organization || !bio || !location || !city || !state) {
+  if (!userId || !organization || !bio || !city || !state) {
     next(
       ApiError.missingFields([
         "userId",
         "organization",
         "bio",
-        "location",
         "city",
         "state"
       ])
@@ -139,14 +140,14 @@ const createSpeakerProfile = async (
       userId,
       organization,
       bio,
-      location,
+      city,
+      state,
+      country,
       inperson || false,
       virtual || false,
       imageUrl,
       industry,
       grades,
-      city,
-      state,
       coordinates,
       languages || []
     );
@@ -169,7 +170,9 @@ const submitSpeakerProfile = async (
     personalSite,
     organisation,
     bio,
-    location,
+    city,
+    state,
+    country,
     speakingFormat,
     ageGroup,
     industryFocus,
@@ -187,8 +190,8 @@ const submitSpeakerProfile = async (
   }
 
   // Validate required fields
-  if (!organisation || !bio || !location) {
-    next(ApiError.missingFields(["organisation", "bio", "location"]));
+  if (!organisation || !bio || !city || !state) {
+    next(ApiError.missingFields(["organisation", "bio", "city", "state"]));
     return;
   }
 
@@ -216,16 +219,6 @@ const submitSpeakerProfile = async (
     grades = ['Elementary', 'Middle School', 'High School'];
   }
 
-  // Extract city and state from location (assuming format: "City, State")
-  const locationParts = location.split(',').map((part: string) => part.trim());
-  const city = locationParts[0] || '';
-  const state = locationParts[1] || '';
-
-  if (!city || !state) {
-    next(ApiError.badRequest("Location must be in format: 'City, State'"));
-    return;
-  }
-
   console.log("right before create speaker");
 
   try {
@@ -233,14 +226,14 @@ const submitSpeakerProfile = async (
       userId,
       organisation,
       bio,
-      location,
+      city,
+      state,
+      country,
       inperson,
       virtual,
       picture,
       industryFocus || [],
       grades,
-      city,
-      state,
       undefined, // coordinates
       languages || ['English']
     );
@@ -281,7 +274,15 @@ const updateSpeakerProfile = async (
   try {
     // Extract user data (firstName, lastName) from updateData
     const { firstName, lastName, ...speakerUpdateData } = updateData;
-    
+
+    // If location is present, parse city and state from it
+    if (speakerUpdateData.location) {
+      const locationParts = speakerUpdateData.location.split(',').map((part: string) => part.trim());
+      speakerUpdateData.city = locationParts[0] || '';
+      speakerUpdateData.state = locationParts[1] || '';
+    }
+    // Pass jobTitle if present (already included in ...speakerUpdateData)
+
     // Update speaker profile
     const speaker = await updateSpeaker(userId, speakerUpdateData);
     if (!speaker) {
@@ -294,7 +295,6 @@ const updateSpeakerProfile = async (
       const userUpdateData: any = {};
       if (firstName !== undefined) userUpdateData.firstName = firstName;
       if (lastName !== undefined) userUpdateData.lastName = lastName;
-      
       await User.findByIdAndUpdate(userId, userUpdateData, { new: true });
     }
 
@@ -378,6 +378,10 @@ const deleteSpeakerProfile = async (
       next(ApiError.notFound("Speaker not found"));
       return;
     }
+    
+    // Delete all requests that reference this speaker
+    await deleteRequestsBySpeakerId(speaker._id);
+    
     res.status(StatusCode.OK).json(speaker);
   } catch (error) {
     next(ApiError.internal("Unable to delete speaker profile"));
@@ -418,6 +422,7 @@ const getCurrentUserSpeakerProfile = async (
     }
 
     const speaker = await getSpeakerByUserId(userId);
+    console.log(speaker);
     if (!speaker) {
       next(ApiError.notFound("Speaker profile not found"));
       return;

@@ -23,6 +23,7 @@ export interface Speaker {
   inperson: boolean;
   virtual: boolean;
   imageUrl?: string;
+  jobTitle?: string;
   industry: string[];
   grades: string[];
   city: string;
@@ -66,7 +67,9 @@ export interface Request {
   // Speaker Preferences
   expertise: string;
   preferredLanguage: string;
-  location: string;
+  city: string;
+  state: string;
+  country?: string;
   goals: string;
   budget?: string;
   engagementFormat: string;

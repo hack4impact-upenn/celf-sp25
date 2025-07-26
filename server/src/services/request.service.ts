@@ -105,7 +105,9 @@ const createRequest = async (
     // Speaker Preferences
     expertise: string;
     preferredLanguage: string;
-    location: string;
+    city: string;
+    state: string;
+    country?: string;
     goals: string;
     budget?: string;
     engagementFormat: string;
@@ -175,6 +177,26 @@ const deleteRequest = async (requestId: string) => {
   return request;
 };
 
+/**
+ * Delete all requests by speaker ID
+ * @param speakerId - The ID of the speaker whose requests should be deleted
+ * @returns The number of deleted requests
+ */
+const deleteRequestsBySpeakerId = async (speakerId: string) => {
+  const result = await Request.deleteMany({ speakerId }).exec();
+  return result.deletedCount;
+};
+
+/**
+ * Delete all requests by teacher ID
+ * @param teacherId - The ID of the teacher whose requests should be deleted
+ * @returns The number of deleted requests
+ */
+const deleteRequestsByTeacherId = async (teacherId: string) => {
+  const result = await Request.deleteMany({ teacherId }).exec();
+  return result.deletedCount;
+};
+
 export {
   getAllRequests,
   getRequestsByTeacherId,
@@ -183,4 +205,6 @@ export {
   createRequest,
   updateRequestStatus,
   deleteRequest,
+  deleteRequestsBySpeakerId,
+  deleteRequestsByTeacherId,
 }; 

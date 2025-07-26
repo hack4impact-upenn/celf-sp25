@@ -35,7 +35,9 @@ interface SpeakerFormState {
   email: string;
   organization: string;
   bio: string;
-  location: string;
+  city: string;
+  state: string;
+  country: string;
   jobTitle: string;
   website: string;
   speakingFormats: string[];
@@ -51,7 +53,9 @@ const initialFormState: SpeakerFormState = {
   email: '',
   organization: '',
   bio: '',
-  location: '',
+  city: '',
+  state: '',
+  country: '',
   speakingFormats: [],
   jobTitle: '',
   website: '',
@@ -173,11 +177,6 @@ function AdminUsersPage() {
       }
       console.log('User created:', userResponse.data);
 
-      // Parse location into city and state
-      const locationParts = formState.location.split(',').map((part) => part.trim());
-      const city = locationParts[0] || 'Unknown';
-      const state = locationParts[1] || 'Unknown';
-
       // Map grade specialties to the expected format
       const mappedGrades = formState.gradeSpecialties.map(grade => {
         switch (grade) {
@@ -200,7 +199,9 @@ function AdminUsersPage() {
         userId: userResponse.data._id,
         organization: formState.organization || 'Unknown',
         bio: formState.bio || 'No bio provided',
-        location: formState.location || 'Unknown',
+        city: formState.city || 'Unknown',
+        state: formState.state || 'Unknown',
+        country: formState.country || undefined,
         inperson,
         virtual,
         imageUrl: formState.picture || undefined,
@@ -209,8 +210,6 @@ function AdminUsersPage() {
             ? formState.industryFocuses
             : ['Other'],
         grades: mappedGrades,
-        city,
-        state,
         languages: formState.languages.length > 0 ? formState.languages : ['English'],
       };
 
@@ -322,6 +321,31 @@ function AdminUsersPage() {
             value={formState.bio}
             onChange={handleChange}
           />
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField
+              label="City"
+              name="city"
+              value={formState.city}
+              onChange={handleChange}
+              sx={{ flex: 1 }}
+              required
+            />
+            <TextField
+              label="State"
+              name="state"
+              value={formState.state}
+              onChange={handleChange}
+              sx={{ flex: 1 }}
+              required
+            />
+            <TextField
+              label="Country (optional)"
+              name="country"
+              value={formState.country}
+              onChange={handleChange}
+              sx={{ flex: 1 }}
+            />
+          </Box>
           <MultiSelect
             label="Industry Focus"
             selectOptions={industryFocuses.map(focus => focus.name)}
@@ -351,12 +375,6 @@ function AdminUsersPage() {
               ))}
             </Select>
           </FormControl>
-          <TextField
-            label="Location (optional)"
-            name="location"
-            value={formState.location}
-            onChange={handleChange}
-          />
 
           <FormControl component="fieldset">
             <FormLabel component="legend">

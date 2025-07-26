@@ -404,13 +404,23 @@ function AdminRequestsPage() {
                     <Typography
                       variant="subtitle1"
                       gutterBottom
-                      sx={{ color: 'text.secondary', mb: 2, wordWrap: 'break-word', overflowWrap: 'break-word' }}
+                      sx={{ color: 'text.secondary', mb: 1, wordWrap: 'break-word', overflowWrap: 'break-word' }}
                     >
                       {selectedRequest.speakerId.organization}
                     </Typography>
 
+                    {selectedRequest.speakerId.jobTitle && (
+                      <Typography
+                        variant="subtitle1"
+                        gutterBottom
+                        sx={{ color: 'text.secondary', mb: 2, fontStyle: 'italic' }}
+                      >
+                        {selectedRequest.speakerId.jobTitle}
+                      </Typography>
+                    )}
+
                     <Typography variant="body2" sx={{ mb: 2, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
-                      {selectedRequest.speakerId.location}
+                    {[selectedRequest.city, selectedRequest.state, selectedRequest.country].filter(Boolean).join(', ')}
                     </Typography>
 
                     <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
@@ -668,7 +678,7 @@ function AdminRequestsPage() {
                           Event Location
                         </Typography>
                         <Typography variant="body1">
-                          {selectedRequest.location}
+                        {[selectedRequest.city, selectedRequest.state, selectedRequest.country].filter(Boolean).join(', ')}
                         </Typography>
                       </Grid>
                       <Grid item xs={12}>

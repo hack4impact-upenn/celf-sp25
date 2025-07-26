@@ -12,6 +12,7 @@ import {
   resetPassword,
   verifyAccount,
   registerInvite,
+  changePassword,
 } from "../controllers/auth.controller.ts";
 import { isAuthenticated } from "../controllers/auth.middleware.ts";
 import "dotenv/config";
@@ -59,6 +60,14 @@ router.post("/send-reset-password-email", sendResetPasswordEmail);
  * - token (string) - The token identifying the reset password attempt
  */
 router.post("/reset-password", resetPassword);
+
+/**
+ * A POST route to change a user's password. Expects a JSON body with:
+ * - currentPassword (string) - The user's current password
+ * - newPassword (string) - The new password to set
+ * Requires authentication.
+ */
+router.post("/change-password", isAuthenticated, changePassword);
 
 /**
  * A GET request to check if a user is an logged in. Utilizes the middleware to

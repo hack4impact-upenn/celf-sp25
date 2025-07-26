@@ -59,14 +59,15 @@ interface Speaker {
     | null;
   organization: string;
   bio: string;
-  location: string;
+  city: string;
+  state: string;
+  country?: string;
   inperson: boolean;
   virtual: boolean;
   imageUrl?: string;
   industry: string[];
   grades: string[];
-  city: string;
-  state: string;
+  jobTitle?: string;
   coordinates?: {
     lat: number;
     lng: number;
@@ -183,7 +184,9 @@ function AdminAllSpeakerPage() {
     lastName: '',
     organization: '',
     bio: '',
-    location: '',
+    city: '',
+    state: '',
+    country: '',
     inperson: false,
     virtual: false,
     imageUrl: '',
@@ -264,11 +267,12 @@ function AdminAllSpeakerPage() {
           typeof speaker.userId === 'object' && speaker.userId !== null
             ? `${speaker.userId.firstName} ${speaker.userId.lastName}`.toLowerCase()
             : '';
+        const locationDisplay = [speaker.city, speaker.state, speaker.country].filter(Boolean).join(', ').toLowerCase();
         return (
           fullName.includes(lowercaseQuery) ||
           speaker.organization.toLowerCase().includes(lowercaseQuery) ||
           speaker.bio.toLowerCase().includes(lowercaseQuery) ||
-          speaker.location.toLowerCase().includes(lowercaseQuery)
+          locationDisplay.includes(lowercaseQuery)
         );
       });
     }
@@ -378,11 +382,12 @@ function AdminAllSpeakerPage() {
         typeof speaker.userId === 'object' && speaker.userId !== null
           ? `${speaker.userId.firstName} ${speaker.userId.lastName}`.toLowerCase()
           : '';
+      const locationDisplay = [speaker.city, speaker.state, speaker.country].filter(Boolean).join(', ').toLowerCase();
       return (
         fullName.includes(lowercaseQuery) ||
         speaker.organization.toLowerCase().includes(lowercaseQuery) ||
         speaker.bio.toLowerCase().includes(lowercaseQuery) ||
-        speaker.location.toLowerCase().includes(lowercaseQuery)
+        locationDisplay.includes(lowercaseQuery)
       );
     });
 
@@ -421,7 +426,9 @@ function AdminAllSpeakerPage() {
       lastName,
       organization: speaker.organization,
       bio: speaker.bio,
-      location: speaker.location,
+      city: speaker.city,
+      state: speaker.state,
+      country: speaker.country || '',
       inperson: speaker.inperson,
       virtual: speaker.virtual || false,
       imageUrl: speaker.imageUrl || '',
@@ -459,6 +466,16 @@ function AdminAllSpeakerPage() {
   const handleEditFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Limit file size to 1MB
+      if (file.size > 14 * 1024 * 1024) {
+        setError('Image file is too large (max 14MB). Please choose a smaller image.');
+        return;
+      }
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        setError('Only image files are allowed.');
+        return;
+      }
       const reader = new FileReader();
       reader.onload = (event) => {
         const result = event.target?.result as string;
@@ -500,8 +517,11 @@ function AdminAllSpeakerPage() {
           lastName: editFormState.lastName,
           organization: editFormState.organization,
           bio: editFormState.bio,
-          location: editFormState.location,
+          city: editFormState.city,
+          state: editFormState.state,
+          country: editFormState.country,
           inperson: editFormState.inperson,
+          jobTitle: editFormState.jobTitle,
           virtual: editFormState.virtual,
           imageUrl: editFormState.imageUrl,
           industry: editFormState.industry,
@@ -650,29 +670,15 @@ function AdminAllSpeakerPage() {
                   : 'Loading...';
               return (
                 <div key={speaker._id} style={{ position: 'relative' }}>
-                  <div
-                    onClick={() => handleCardClick(speaker)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <SpeakerCard
-                      id={speaker._id}
-                      name={speakerName}
-                      bio={speaker.bio}
-                      organization={speaker.organization}
-                      location={speaker.location}
-                      imageUrl={speaker.imageUrl}
-                    />
-                  </div>
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: '10px',
-                      right: '10px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '8px',
-                      zIndex: 10,
-                    }}
+                  <SpeakerCard
+                    id={speaker._id}
+                    name={speakerName}
+                    bio={speaker.bio}
+                    organization={speaker.organization}
+                    city={speaker.city}
+                    state={speaker.state}
+                    country={speaker.country}
+                    imageUrl={speaker.imageUrl}
                   >
                     <IconButton
                       size="small"
@@ -704,7 +710,7 @@ function AdminAllSpeakerPage() {
                     >
                       <DeleteIcon />
                     </IconButton>
-                  </div>
+                  </SpeakerCard>
                 </div>
               );
             })}
@@ -797,7 +803,7 @@ function AdminAllSpeakerPage() {
                       gutterBottom
                       sx={{ color: 'text.secondary', mb: 2 }}
                     >
-                      {selectedSpeaker.location}
+                      {[selectedSpeaker.city, selectedSpeaker.state, selectedSpeaker.country].filter(Boolean).join(', ')}
                     </Typography>
 
                     <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
@@ -910,13 +916,31 @@ function AdminAllSpeakerPage() {
                 multiline
                 rows={4}
               />
-              <TextField
-                label="Location"
-                name="location"
-                value={editFormState.location}
-                onChange={handleEditFormChange}
-                fullWidth
-              />
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <TextField
+                  label="City"
+                  name="city"
+                  value={editFormState.city}
+                  onChange={handleEditFormChange}
+                  sx={{ flex: 1 }}
+                  required
+                />
+                <TextField
+                  label="State"
+                  name="state"
+                  value={editFormState.state}
+                  onChange={handleEditFormChange}
+                  sx={{ flex: 1 }}
+                  required
+                />
+                <TextField
+                  label="Country (optional)"
+                  name="country"
+                  value={editFormState.country}
+                  onChange={handleEditFormChange}
+                  sx={{ flex: 1 }}
+                />
+              </Box>
               <Typography variant="subtitle1" sx={{ mt: 2, mb: 1, fontWeight: 500 }}>
                 Profile Picture
               </Typography>

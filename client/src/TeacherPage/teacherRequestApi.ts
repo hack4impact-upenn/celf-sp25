@@ -60,7 +60,9 @@ export interface TeacherRequest {
   // Speaker Preferences
   expertise: string;
   preferredLanguage: string;
-  location: string;
+  city: string;
+  state: string;
+  country?: string;
   goals: string;
   budget?: string;
   engagementFormat: string;
@@ -111,7 +113,9 @@ export async function createTeacherRequest(
     // Speaker Preferences
     expertise: string;
     preferredLanguage: string;
-    location: string;
+    city: string;
+    state: string;
+    country?: string;
     goals: string;
     budget?: string;
     engagementFormat: string;

@@ -45,7 +45,9 @@ async function verifyAccount(verificationToken: string) {
  * @param role
  * @param school (optional) School for teacher registration
  * @param gradeLevel (optional) Grade level for teacher registration
- * @param location (optional) Location for teacher registration
+ * @param city (optional) City for teacher registration
+ * @param state (optional) State for teacher registration
+ * @param country (optional) Country for teacher registration
  * @param subjects (optional) Subjects taught for teacher registration
  * @param bio (optional) Bio for teacher registration
  * @throws An {@link Error} with a `messsage` field describing the issue in verifying
@@ -58,10 +60,11 @@ async function register(
   role?: string,
   school?: string,
   gradeLevel?: string,
-  location?: string,
+  city?: string,
+  state?: string,
+  country?: string,
   subjects?: string[],
   bio?: string,
-  country?: string,
 ) {
   const lowercaseEmail = email.toLowerCase();
   const payload: any = {
@@ -73,10 +76,11 @@ async function register(
   if (role) payload.role = role;
   if (school) payload.school = school;
   if (gradeLevel) payload.gradeLevel = gradeLevel;
-  if (location) payload.location = location;
+  if (city) payload.city = city;
+  if (state) payload.state = state;
+  if (country) payload.country = country;
   if (subjects) payload.subjects = subjects;
   if (bio) payload.bio = bio;
-  if (country) payload.country = country;
   const res = await postData('auth/register', payload);
   if (res.error) {
     throw Error(res.error.message);
@@ -155,6 +159,20 @@ async function deleteAccount() {
   return res.data;
 }
 
+/**
+ * Sends a request to the server to change the password for a logged-in user
+ * @param currentPassword The user's current password
+ * @param newPassword The new password to set
+ * @throws An {@link Error} with a `message` field describing the issue in changing the password
+ */
+async function changePassword(currentPassword: string, newPassword: string) {
+  const res = await postData('auth/change-password', { currentPassword, newPassword });
+  if (res.error) {
+    throw Error(res.error.message);
+  }
+  return res.data;
+}
+
 export {
   register,
   loginUser,
@@ -163,4 +181,5 @@ export {
   resetPassword,
   registerInvite,
   deleteAccount,
+  changePassword,
 };

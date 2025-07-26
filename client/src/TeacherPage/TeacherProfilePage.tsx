@@ -80,7 +80,8 @@ function TeacherProfilePage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [locationInput, setLocationInput] = useState('');
+  const [cityInput, setCityInput] = useState('');
+  const [stateInput, setStateInput] = useState('');
 
   // Fetch teacher profile data
   useEffect(() => {
@@ -106,9 +107,8 @@ function TeacherProfilePage() {
               lastName: currentTeacher.userId?.lastName || user.lastName || '',
               email: currentTeacher.userId?.email || user.email || '',
             });
-            setLocationInput(
-              [currentTeacher.city, currentTeacher.state].filter(Boolean).join(', ')
-            );
+            setCityInput(currentTeacher.city || '');
+            setStateInput(currentTeacher.state || '');
           } else {
             // No teacher profile found, use user data for names
             setFormState({
@@ -160,14 +160,21 @@ function TeacherProfilePage() {
     }
   };
 
-  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setLocationInput(value);
-    const [city, state] = value.split(',').map(s => s.trim());
+    setCityInput(value);
     setFormState(prev => ({
       ...prev,
-      city: city || '',
-      state: state || '',
+      city: value || '',
+    }));
+  };
+
+  const handleStateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setStateInput(value);
+    setFormState(prev => ({
+      ...prev,
+      state: value || '',
     }));
   };
 
@@ -179,7 +186,10 @@ function TeacherProfilePage() {
     // Validate required fields
     const requiredFields = [];
     if (!formState.city || formState.city.trim() === '') {
-      requiredFields.push('Location');
+      requiredFields.push('City');
+    }
+    if (!formState.state || formState.state.trim() === '') {
+      requiredFields.push('State');
     }
     if (!formState.bio || formState.bio.trim() === '') {
       requiredFields.push('Bio');
@@ -440,14 +450,26 @@ function TeacherProfilePage() {
               <Grid item xs={12}>
                 <Typography variant="h6" sx={{ color: COLORS.primaryDark, mb: 2 }}>Location</Typography>
                 <Grid container spacing={2}>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label="Location (City, State)"
-                      name="location"
-                      value={locationInput}
-                      onChange={handleLocationChange}
-                      placeholder="e.g., Philadelphia, PA"
+                      label="City"
+                      name="city"
+                      value={cityInput}
+                      onChange={handleCityChange}
+                      placeholder="e.g., Philadelphia"
+                      size="medium"
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="State"
+                      name="state"
+                      value={stateInput}
+                      onChange={handleStateChange}
+                      placeholder="e.g., PA"
                       size="medium"
                       required
                     />

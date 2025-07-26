@@ -6,7 +6,7 @@ import express from "express";
 import { logger_info } from "../config/configDatadog.ts";
 import passport from "passport";
 import crypto from "crypto";
-import { hash } from "bcrypt";
+import { hash, compare } from "bcrypt";
 import { IUser } from "../models/user.model.ts";
 import StatusCode from "../util/statusCode.ts";
 import {
@@ -15,6 +15,7 @@ import {
   getUserByEmail,
   getUserByResetPasswordToken,
   getUserByVerificationToken,
+  getUserByEmailWithPassword,
 } from "../services/user.service.ts";
 import {
   emailResetPasswordLink,
@@ -365,6 +366,48 @@ const resetPassword = async (
   }
 };
 
+/**
+ * A controller function to change a user's password (must be authenticated).
+ * Expects currentPassword and newPassword in the body.
+ */
+const changePassword = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  try {
+    const user = req.user as IUser;
+    if (!user || !user.email) {
+      next(ApiError.unauthorized("User not authenticated"));
+      return;
+    }
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      next(ApiError.missingFields(["currentPassword", "newPassword"]));
+      return;
+    }
+    // Get user with password
+    const userWithPassword = await getUserByEmailWithPassword(user.email);
+    if (!userWithPassword || !userWithPassword.password) {
+      next(ApiError.notFound("User not found"));
+      return;
+    }
+    // Verify current password
+    const isMatch = await compare(currentPassword, userWithPassword.password);
+    if (!isMatch) {
+      next(ApiError.unauthorized("Current password is incorrect"));
+      return;
+    }
+    // Hash new password
+    const hashedPassword = await hash(newPassword, passwordHashSaltRounds);
+    userWithPassword.password = hashedPassword;
+    await userWithPassword.save();
+    res.status(StatusCode.OK).json({ message: "Password changed successfully" });
+  } catch (err) {
+    next(ApiError.internal("Unable to change password"));
+  }
+};
+
 const registerInvite = async (
   req: express.Request,
   res: express.Response,
@@ -465,4 +508,5 @@ export {
   sendResetPasswordEmail,
   resetPassword,
   registerInvite,
+  changePassword,
 };

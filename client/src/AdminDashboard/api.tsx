@@ -13,6 +13,7 @@ async function deleteUser(email: string) {
   if (res.error) return false;
   return true;
 }
+
 /**
  * Sends a request to the server to promote a user to admin
  * @param email - the email of the user to promote
@@ -23,20 +24,5 @@ async function upgradePrivilege(email: string) {
   if (res.error) return false;
   return true;
 }
-
-/**
- * Deletes a speaker profile
- * @param userId - The ID of the speaker to delete
- * @returns boolean indicating success
- */
-export const deleteSpeaker = async (userId: string) => {
-  try {
-    const response = await deleteData(`speaker/${userId}`);
-    return response !== null;
-  } catch (error) {
-    console.error("Error deleting speaker:", error);
-    return false;
-  }
-};
 
 export { deleteUser, upgradePrivilege };

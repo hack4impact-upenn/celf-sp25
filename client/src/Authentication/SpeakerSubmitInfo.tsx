@@ -48,7 +48,9 @@ interface SpeakerInfoFormState {
   website: string;
   organization: string;
   bio: string;
-  location: string;
+  city: string;
+  state: string;
+  country?: string;
   speakingFormat: 'in-person' | 'virtual' | 'both' | '';
   ageSpecialty: 'elementary' | 'middle' | 'high school' | 'all grades' | '';
   industryFocuses: string[];
@@ -61,7 +63,9 @@ const initialFormState: SpeakerInfoFormState = {
   website: '',
   organization: '',
   bio: '',
-  location: '',
+  city: '',
+  state: '',
+  country: '',
   speakingFormat: '',
   ageSpecialty: '',
   industryFocuses: [],
@@ -172,9 +176,16 @@ function SpeakerSubmitInfoPage() {
       return;
     }
 
-    if (!formState.location.trim()) {
+    if (!formState.city.trim()) {
       setAlertTitle('Error');
-      setAlertMessage('Location is required');
+      setAlertMessage('City is required');
+      setShowAlert(true);
+      return;
+    }
+
+    if (!formState.state.trim()) {
+      setAlertTitle('Error');
+      setAlertMessage('State is required');
       setShowAlert(true);
       return;
     }
@@ -213,7 +224,9 @@ function SpeakerSubmitInfoPage() {
         personalSite: formState.website,
         organisation: formState.organization,
         bio: formState.bio,
-        location: formState.location,
+        city: formState.city,
+        state: formState.state,
+        country: formState.country,
         speakingFormat: formState.speakingFormat,
         ageGroup: formState.ageSpecialty,
         industryFocus: formState.industryFocuses,
@@ -361,15 +374,37 @@ function SpeakerSubmitInfoPage() {
               </Grid>
 
               <Grid item sx={{ width: '100%' }}>
-                <TextField
-                  fullWidth
-                  label="Location (City, State)"
-                  name="location"
-                  value={formState.location}
-                  onChange={handleChange}
-                  required
-                  sx={{ mb: 2 }}
-                />
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={4}>
+                    <TextField
+                      fullWidth
+                      label="City"
+                      name="city"
+                      value={formState.city}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <TextField
+                      fullWidth
+                      label="State"
+                      name="state"
+                      value={formState.state}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <TextField
+                      fullWidth
+                      label="Country"
+                      name="country"
+                      value={formState.country}
+                      onChange={handleChange}
+                    />
+                  </Grid>
+                </Grid>
               </Grid>
 
               {/* Industry Focus MultiSelect */}
