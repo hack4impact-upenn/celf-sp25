@@ -72,15 +72,26 @@ function SearchBar({
 }: SearchBarProps) {
   const [searchQuery, setSearchQuery] = React.useState('');
 
+  // Debounce effect for dynamic search
+  React.useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      onSearch(searchQuery);
+    }, 300); // 300ms delay
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, onSearch]);
+
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
       event.preventDefault();
+      // Clear any pending debounced call and search immediately
       onSearch(searchQuery);
     }
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
+    // The debounced search will trigger automatically via useEffect
   };
 
   return (
