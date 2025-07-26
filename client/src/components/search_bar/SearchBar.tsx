@@ -72,8 +72,9 @@ function SearchBar({
 }: SearchBarProps) {
   const [searchQuery, setSearchQuery] = React.useState('');
 
-  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
+      event.preventDefault();
       onSearch(searchQuery);
     }
   };
@@ -91,7 +92,7 @@ function SearchBar({
           placeholder={placeholder} 
           value={searchQuery}
           onChange={handleChange}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyDown}
         />
         <TrailingIconWrapper>
           {onFilterClick && (
