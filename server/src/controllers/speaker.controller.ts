@@ -14,6 +14,7 @@ import {
 } from "../services/speaker.service.ts";
 import { updateUser } from "../services/user.service.ts";
 import { updateRequestStatusHandler } from "./request.controller.ts";
+import { deleteRequestsBySpeakerId } from "../services/request.service.ts";
 
 /**
  * Get all speakers from the database
@@ -377,6 +378,10 @@ const deleteSpeakerProfile = async (
       next(ApiError.notFound("Speaker not found"));
       return;
     }
+    
+    // Delete all requests that reference this speaker
+    await deleteRequestsBySpeakerId(speaker._id);
+    
     res.status(StatusCode.OK).json(speaker);
   } catch (error) {
     next(ApiError.internal("Unable to delete speaker profile"));

@@ -50,7 +50,8 @@ function TeacherRegisterPage() {
     confirmPassword: '',
     school: '',
     gradeLevel: '',
-    location: '',
+    city: '',
+    state: '',
     country: '',
     subjects: [] as string[],
     bio: '',
@@ -64,7 +65,8 @@ function TeacherRegisterPage() {
     alert: false,
     school: false,
     gradeLevel: false,
-    location: false,
+    city: false,
+    state: false,
     country: false,
     subjects: false,
     bio: false,
@@ -78,7 +80,8 @@ function TeacherRegisterPage() {
     alert: '',
     school: '',
     gradeLevel: '',
-    location: '',
+    city: '',
+    state: '',
     country: '',
     subjects: '',
     bio: '',
@@ -129,7 +132,7 @@ function TeacherRegisterPage() {
     let isValid = true;
 
     // Check required text fields
-    const requiredTextFields = ['firstName', 'lastName', 'email', 'password', 'confirmPassword', 'school', 'gradeLevel', 'location', 'bio'];
+    const requiredTextFields = ['firstName', 'lastName', 'email', 'password', 'confirmPassword', 'school', 'gradeLevel', 'city', 'bio'];
     
     for (const field of requiredTextFields) {
       const value = values[field as keyof typeof values];
@@ -180,7 +183,7 @@ function TeacherRegisterPage() {
 
   async function handleSubmit() {
     if (validateInputs()) {
-      register(values.firstName, values.lastName, values.email, values.password, 'teacher', values.school, values.gradeLevel, values.location, values.subjects, values.bio, values.country)
+      register(values.firstName, values.lastName, values.email, values.password, 'teacher', values.school, values.gradeLevel, values.city, values.state, values.country, values.subjects, values.bio)
         .then(() => {
           setShowError('alert', true);
           setAlertTitle('');
@@ -373,14 +376,34 @@ function TeacherRegisterPage() {
                 <Grid item sx={{ width: '100%' }}>
                   <TextField
                     fullWidth
-                    error={showError.location}
-                    helperText={errorMessage.location}
+                    error={showError.city}
+                    helperText={errorMessage.city}
                     type="text"
                     required
-                    label="Location (City, State)"
-                    value={values.location}
-                    onChange={(e) => setValue('location', e.target.value)}
-                    placeholder="e.g., Philadelphia, PA"
+                    label="City"
+                    value={values.city}
+                    onChange={(e) => setValue('city', e.target.value)}
+                    placeholder="e.g., Philadelphia"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '&:hover fieldset': {
+                          borderColor: COLORS.primaryBlue,
+                        },
+                      },
+                    }}
+                  />
+                </Grid>
+                <Grid item sx={{ width: '100%' }}>
+                  <TextField
+                    fullWidth
+                    error={showError.state}
+                    helperText={errorMessage.state}
+                    type="text"
+                    required
+                    label="State"
+                    value={values.state}
+                    onChange={(e) => setValue('state', e.target.value)}
+                    placeholder="e.g., PA"
                     sx={{
                       '& .MuiOutlinedInput-root': {
                         '&:hover fieldset': {

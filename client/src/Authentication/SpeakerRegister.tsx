@@ -31,7 +31,9 @@ function SpeakerRegisterPage() {
     password: '',
     confirmPassword: '',
     organization: '',
-    location: '',
+    city: '',
+    state: '',
+    country: '',
   };
   const defaultShowErrors = {
     firstName: false,
@@ -41,7 +43,9 @@ function SpeakerRegisterPage() {
     confirmPassword: false,
     alert: false,
     organization: false,
-    location: false,
+    city: false,
+    state: false,
+    country: false,
   };
   const defaultErrorMessages = {
     firstName: '',
@@ -51,7 +55,9 @@ function SpeakerRegisterPage() {
     confirmPassword: '',
     alert: '',
     organization: '',
-    location: '',
+    city: '',
+    state: '',
+    country: '',
   };
   type ValueType = keyof typeof values;
 
@@ -139,7 +145,7 @@ function SpeakerRegisterPage() {
 
   async function handleSubmit() {
     if (validateInputs()) {
-      register(values.firstName, values.lastName, values.email, values.password, 'speaker')
+      register(values.firstName, values.lastName, values.email, values.password, 'speaker', undefined, undefined, values.city, values.state, values.country)
         .then(() => {
           setShowError('alert', true);
           setAlertTitle('');
@@ -274,13 +280,51 @@ function SpeakerRegisterPage() {
               <Grid item sx={{ width: '100%' }}>
                 <TextField
                   fullWidth
-                  error={showError.location}
-                  helperText={errorMessage.location}
+                  error={showError.city}
+                  helperText={errorMessage.city}
                   type="text"
                   required
-                  label="Location"
-                  value={values.location}
-                  onChange={(e) => setValue('location', e.target.value)}
+                  label="City"
+                  value={values.city}
+                  onChange={(e) => setValue('city', e.target.value)}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&:hover fieldset': {
+                        borderColor: COLORS.primaryBlue,
+                      },
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid item sx={{ width: '100%' }}>
+                <TextField
+                  fullWidth
+                  error={showError.state}
+                  helperText={errorMessage.state}
+                  type="text"
+                  required
+                  label="State"
+                  value={values.state}
+                  onChange={(e) => setValue('state', e.target.value)}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&:hover fieldset': {
+                        borderColor: COLORS.primaryBlue,
+                      },
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid item sx={{ width: '100%' }}>
+                <TextField
+                  fullWidth
+                  error={showError.country}
+                  helperText={errorMessage.country}
+                  type="text"
+                  required
+                  label="Country"
+                  value={values.country}
+                  onChange={(e) => setValue('country', e.target.value)}
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       '&:hover fieldset': {

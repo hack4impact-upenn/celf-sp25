@@ -10,6 +10,7 @@ import {
   updateTeacher,
   deleteTeacher,
 } from "../services/teacher.service.ts";
+import { deleteRequestsByTeacherId } from "../services/request.service.ts";
 
 /**
  * Get all teachers from the database
@@ -133,7 +134,7 @@ const updateTeacherProfile = async (
     if (updateData.email !== undefined) userFields.email = updateData.email;
 
     if (Object.keys(userFields).length > 0) {
-      console.log(userFields);
+      console.log(userFields)
       await User.findByIdAndUpdate(userId, userFields);
     }
 
@@ -164,6 +165,10 @@ const deleteTeacherProfile = async (
       next(ApiError.notFound("Teacher not found"));
       return;
     }
+    
+    // Delete all requests made by this teacher
+    await deleteRequestsByTeacherId(userId);
+    
     res.status(StatusCode.OK).json(teacher);
   } catch (error) {
     next(ApiError.internal("Unable to delete teacher profile"));

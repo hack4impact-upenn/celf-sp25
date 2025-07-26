@@ -125,9 +125,8 @@ function UserTable() {
             updateAdmin={updateAdmin}
           />,
           <DeleteUserButton
-            admin={user.admin}
-            email={user.email}
-            removeRow={() => removeUser(user)}
+            user={user}
+            removeRow={removeUser}
           />,
         ),
       )}
