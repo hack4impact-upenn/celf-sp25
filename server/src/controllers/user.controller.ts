@@ -112,10 +112,10 @@ const deleteCurrentUser = async (
     }
 
     // Check if user is an admin (prevent admin self-deletion)
-    if (currentUser.admin) {
-      next(ApiError.forbidden("Admin accounts cannot be deleted"));
-      return;
-    }
+    // if (currentUser.admin) {
+    //   next(ApiError.forbidden("Admin accounts cannot be deleted"));
+    //   return;
+    // }
 
     console.log(`Deleting user account for user ID: ${currentUser._id}, role: ${currentUser.role}`);
 
@@ -183,7 +183,8 @@ const deleteUserByRole = async (userId: string, userRole: string) => {
         break;
         
       case 'admin':
-        console.log(`Admin cannot self delete`);
+        const deletedAdmin = await deleteUserById(userId);
+        console.log(`Deleted admin for user ID: ${userId}`, deletedAdmin ? 'success' : 'not found');
         break;
         
       default:
