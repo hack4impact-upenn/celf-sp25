@@ -8,6 +8,7 @@ import {
   getSpeakerByUserId,
   getSpeakerByEmail,
   getAllSpeakers,
+  getAllSpeakersForAdmin,
   updateSpeaker,
   deleteSpeaker,
   getfilterSpeakeredList,
@@ -15,6 +16,22 @@ import {
 import { updateUser } from "../services/user.service.ts";
 import { updateRequestStatusHandler } from "./request.controller.ts";
 import { deleteRequestsBySpeakerId } from "../services/request.service.ts";
+
+/**
+ * Get all speakers from the database (including invisible ones) for admin use
+ */
+const getAllSpeakersAdminHandler = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  try {
+    const speakers = await getAllSpeakersForAdmin();
+    res.status(StatusCode.OK).json(speakers);
+  } catch (error) {
+    next(ApiError.internal("Unable to retrieve speakers"));
+  }
+};
 
 /**
  * Get all speakers from the database
@@ -109,16 +126,22 @@ const createSpeakerProfile = async (
   } = req.body;
 
   // Validate required fields
-  if (!userId || !organization || !bio || !city || !state) {
+  if (!userId || !organization || !bio || !city || !country) {
     next(
       ApiError.missingFields([
         "userId",
         "organization",
         "bio",
         "city",
-        "state"
+        "country"
       ])
     );
+    return;
+  }
+
+  // Validate that required fields are not empty strings
+  if (organization.trim() === '' || bio.trim() === '' || city.trim() === '' || country.trim() === '') {
+    next(ApiError.badRequest("Organization, bio, city, and country cannot be empty"));
     return;
   }
 
@@ -128,9 +151,9 @@ const createSpeakerProfile = async (
     return;
   }
 
-  // Validate grades enum
+  // Validate grades enum (only if grades array is not empty)
   const validGrades = ["Elementary", "Middle School", "High School"];
-  if (!grades.every(grade => validGrades.includes(grade))) {
+  if (grades.length > 0 && !grades.every(grade => validGrades.includes(grade))) {
     next(ApiError.badRequest("Invalid grade values"));
     return;
   }
@@ -149,7 +172,8 @@ const createSpeakerProfile = async (
       industry,
       grades,
       coordinates,
-      languages || []
+      languages || [],
+      true // visible - complete profile submission
     );
     res.status(StatusCode.CREATED).json(speaker);
   } catch (error) {
@@ -190,8 +214,14 @@ const submitSpeakerProfile = async (
   }
 
   // Validate required fields
-  if (!organisation || !bio || !city || !state) {
-    next(ApiError.missingFields(["organisation", "bio", "city", "state"]));
+  if (!organisation || !bio || !city || !country) {
+    next(ApiError.missingFields(["organisation", "bio", "city", "country"]));
+    return;
+  }
+
+  // Validate that required fields are not empty strings
+  if (organisation.trim() === '' || bio.trim() === '' || city.trim() === '' || country.trim() === '') {
+    next(ApiError.badRequest("Organisation, bio, city, and country cannot be empty"));
     return;
   }
 
@@ -235,7 +265,8 @@ const submitSpeakerProfile = async (
       industryFocus || [],
       grades,
       undefined, // coordinates
-      languages || ['English']
+      languages || ['English'],
+      true // visible - complete profile submission
     );
     res.status(StatusCode.CREATED).json(speaker);
   } catch (error) {
@@ -488,6 +519,7 @@ const updateCurrentUserSpeakerProfile = async (
 };
 
 export {
+  getAllSpeakersAdminHandler as getAllSpeakersAdmin,
   getAllSpeakersHandler as getAllSpeakers,
   getSpeaker,
   getSpeakerByEmailHandler,

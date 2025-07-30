@@ -145,7 +145,7 @@ function SpeakerRegisterPage() {
 
   async function handleSubmit() {
     if (validateInputs()) {
-      register(values.firstName, values.lastName, values.email, values.password, 'speaker', undefined, undefined, values.city, values.state, values.country)
+      register(values.firstName, values.lastName, values.email, values.password, 'speaker', undefined, undefined, values.city, values.state, values.country, undefined, undefined, values.organization)
         .then(() => {
           setShowError('alert', true);
           setAlertTitle('');

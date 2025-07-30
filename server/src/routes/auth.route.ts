@@ -4,15 +4,16 @@
  */
 import express from "express";
 import {
+  register,
   login,
   logout,
-  register,
+  verifyAccount,
   approve,
   sendResetPasswordEmail,
   resetPassword,
-  verifyAccount,
   registerInvite,
   changePassword,
+  resendVerificationEmail,
 } from "../controllers/auth.controller.ts";
 import { isAuthenticated } from "../controllers/auth.middleware.ts";
 import "dotenv/config";
@@ -52,6 +53,13 @@ router.post("/logout", logout);
  * - email (string) - The email of the user
  */
 router.post("/send-reset-password-email", sendResetPasswordEmail);
+
+/**
+ * A POST route to resend verification email to a user. Expects a JSON body
+ * with the following fields:
+ * - email (string) - The email of the user
+ */
+router.post("/resend-verification-email", resendVerificationEmail);
 
 /**
  * A POST route to reset a user's password. Expects a JSON body with the

@@ -24,7 +24,7 @@ export interface FilterState {
   grades: string[];
   city: string;
   state: string;
-  radius: number;
+  country: string;
   formats: {
     inperson: boolean;
     virtual: boolean;
@@ -161,21 +161,14 @@ export default function SpeakerFilterPanel({ filters, onChange }: Props) {
             sx={{ backgroundColor: '#fff' }}
           />
         </Box>
-
-        {/* Radius */}
-        <Box>
-          <Typography gutterBottom>
-            Search Radius: {localFilters.radius} miles
-          </Typography>
-          <Slider
-            value={localFilters.radius}
-            onChange={(e, value) => handleChange('radius', value)}
-            step={10}
-            min={10}
-            max={100}
-            marks
-          />
-        </Box>
+        <TextField
+          label="Country"
+          value={localFilters.country}
+          onChange={(e) => handleChange('country', e.target.value)}
+          fullWidth
+          size="small"
+          sx={{ backgroundColor: '#fff' }}
+        />
 
         {/* Speaking Formats */}
         <FormControl component="fieldset">

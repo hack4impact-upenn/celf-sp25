@@ -32,6 +32,8 @@ import PersonIcon from '@mui/icons-material/Person';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import DeleteIcon from '@mui/icons-material/Delete';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import SearchBar from '../components/search_bar/SearchBar';
 import SpeakerCard from '../components/cards/SpeakerCard';
 import AdminSidebar from '../components/admin_sidebar/AdminSidebar';
@@ -73,6 +75,7 @@ interface Speaker {
     lng: number;
   };
   languages: string[];
+  visible: boolean;
 }
 
 const CardContainer = styled('div')({
@@ -172,7 +175,7 @@ function AdminAllSpeakerPage() {
     grades: [],
     city: '',
     state: '',
-    radius: 50,
+    country: '',
     formats: {
       inperson: false,
       virtual: false,
@@ -206,7 +209,7 @@ function AdminAllSpeakerPage() {
   // Load speakers from backend
   useEffect(() => {
     const fetchSpeakers = async () => {
-      const response = await getData('speaker/all');
+      const response = await getData('admin/speakers'); // Use admin endpoint to get all speakers
       if (response.error) {
         setError('Failed to fetch speakers: ' + response.error.message);
         return;
@@ -233,27 +236,6 @@ function AdminAllSpeakerPage() {
     };
     fetchIndustryFocuses();
   }, []);
-
-  // Function to calculate distance between two points using Haversine formula
-  const calculateDistance = (
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number,
-  ): number => {
-    const R = 3958.8; // Earth's radius in miles
-    const dLat = ((lat2 - lat1) * Math.PI) / 180;
-    const dLon = ((lon2 - lon1) * Math.PI) / 180;
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos((lat1 * Math.PI) / 180) *
-        Math.cos((lat2 * Math.PI) / 180) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = R * c;
-    return distance;
-  };
 
   // Apply both search and filters
   const applyFiltersAndSearch = (speakersToFilter: Speaker[]) => {
@@ -310,28 +292,12 @@ function AdminAllSpeakerPage() {
       );
     }
 
-    // Apply radius filter
-    if (filters.radius && filters.radius > 0 && filters.userCoordinates) {
-      const { lat: userLat, lng: userLng } = filters.userCoordinates;
-
-      result = result.filter((speaker) => {
-        if (
-          !speaker.coordinates ||
-          !speaker.coordinates.lat ||
-          !speaker.coordinates.lng
-        ) {
-          return true;
-        }
-
-        const distance = calculateDistance(
-          userLat,
-          userLng,
-          speaker.coordinates.lat,
-          speaker.coordinates.lng,
-        );
-
-        return distance <= filters.radius;
-      });
+    if (filters.country && filters.country.trim() !== '') {
+      result = result.filter(
+        (speaker) =>
+          speaker.country &&
+          speaker.country.toLowerCase() === filters.country.toLowerCase(),
+      );
     }
 
     // Apply format filter
@@ -454,6 +420,33 @@ function AdminAllSpeakerPage() {
     setDeleteOpen(false);
   };
 
+  const handleToggleVisibility = async (speaker: Speaker) => {
+    try {
+      const userIdStr = getUserIdString(speaker.userId);
+      if (!userIdStr) throw new Error('Speaker userId is missing');
+      
+      // Toggle visibility
+      const updateData = { visible: !speaker.visible };
+      const response = await putData(`speaker/${userIdStr}`, updateData);
+      
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+      
+      // Update local state
+      setSpeakers(prev => prev.map(s => 
+        s._id === speaker._id ? { ...s, visible: !s.visible } : s
+      ));
+      setFilteredSpeakers(prev => prev.map(s => 
+        s._id === speaker._id ? { ...s, visible: !s.visible } : s
+      ));
+      
+      setSuccess(`Speaker ${speaker.visible ? 'hidden' : 'made visible'} successfully`);
+    } catch (error: any) {
+      setError('Failed to update visibility: ' + error.message);
+    }
+  };
+
   const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setEditFormState({
@@ -528,7 +521,7 @@ function AdminAllSpeakerPage() {
           grades: editFormState.grades,
           languages: editFormState.languages,
         };
-        const speakersResponse2 = await getData('speaker/all');
+        const speakersResponse2 = await getData('admin/speakers');
         console.log('All Speakers:', speakersResponse2.data);
         console.log('Updating speaker with data:', updateData);
         const response = await putData(`speaker/${userIdStr}`, updateData);
@@ -537,7 +530,7 @@ function AdminAllSpeakerPage() {
         }
 
         // Refetch all speakers to get the updated data
-        const speakersResponse = await getData('speaker/all');
+        const speakersResponse = await getData('admin/speakers');
         console.log('All Speakers:', speakersResponse.data);
         if (speakersResponse.error) {
           throw new Error(
@@ -680,12 +673,61 @@ function AdminAllSpeakerPage() {
                     country={speaker.country}
                     imageUrl={speaker.imageUrl}
                   >
+                    {/* Visibility Status Chip */}
+                    <Chip
+                      label={speaker.visible ? 'Visible' : 'Hidden'}
+                      color={speaker.visible ? 'success' : 'error'}
+                      size="small"
+                      sx={{
+                        position: 'absolute',
+                        top: 8,
+                        left: 8,
+                        fontWeight: 600,
+                        fontSize: '0.8em',
+                      }}
+                    />
+                    
+                    {/* Visibility Toggle Button */}
+                    <IconButton
+                      size="small"
+                      title={speaker.visible ? 'Hide speaker' : 'Make speaker visible'}
+                      sx={{
+                        position: 'absolute',
+                        bottom: 8,
+                        left: 8,
+                        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                        width: 32,
+                        height: 32,
+                        '&:hover': {
+                          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        },
+                        '& .MuiSvgIcon-root': {
+                          fontSize: 18,
+                        },
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleToggleVisibility(speaker);
+                      }}
+                    >
+                      {speaker.visible ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                    </IconButton>
+                    
+                    {/* Edit Button */}
                     <IconButton
                       size="small"
                       sx={{
+                        position: 'absolute',
+                        bottom: 8,
+                        left: 48,
                         backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                        width: 32,
+                        height: 32,
                         '&:hover': {
                           backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        },
+                        '& .MuiSvgIcon-root': {
+                          fontSize: 18,
                         },
                       }}
                       onClick={(e) => {
@@ -695,12 +737,22 @@ function AdminAllSpeakerPage() {
                     >
                       <EditIcon />
                     </IconButton>
+                    
+                    {/* Delete Button */}
                     <IconButton
                       size="small"
                       sx={{
+                        position: 'absolute',
+                        bottom: 8,
+                        left: 88,
                         backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                        width: 32,
+                        height: 32,
                         '&:hover': {
                           backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        },
+                        '& .MuiSvgIcon-root': {
+                          fontSize: 18,
                         },
                       }}
                       onClick={(e) => {

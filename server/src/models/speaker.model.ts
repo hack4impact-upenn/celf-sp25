@@ -8,19 +8,23 @@ const SpeakerSchema = new mongoose.Schema({
   },
   organization: {
     type: String,
-    required: true
+    required: false,
+    default: ''
   },
   bio: {
     type: String,
-    required: true
+    required: false,
+    default: ''
   },
   city: {
     type: String,
-    required: true
+    required: false,
+    default: ''
   },
   state: {
     type: String,
-    required: true
+    required: false,
+    default: ''
   },
   country: {
     type: String,
@@ -42,7 +46,7 @@ const SpeakerSchema = new mongoose.Schema({
   },
   industry: [{
     type: String,
-    required: true
+    required: false
   }],
   jobTitle: {
     type: String,
@@ -50,7 +54,7 @@ const SpeakerSchema = new mongoose.Schema({
   },
   grades: [{
     type: String,
-    required: true,
+    required: false,
     enum: ['Elementary', 'Middle School', 'High School']
   }],
   coordinates: {
@@ -66,7 +70,12 @@ const SpeakerSchema = new mongoose.Schema({
   languages: [{
     type: String,
     required: false
-  }]
+  }],
+  visible: {
+    type: Boolean,
+    required: true,
+    default: false
+  }
 });
 
 interface ISpeaker extends mongoose.Document {
@@ -88,6 +97,7 @@ interface ISpeaker extends mongoose.Document {
     lng: number;
   };
   languages: string[];
+  visible: boolean;
 }
 
 const Speaker = mongoose.model<ISpeaker>("Speaker", SpeakerSchema);

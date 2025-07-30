@@ -65,6 +65,7 @@ async function register(
   country?: string,
   subjects?: string[],
   bio?: string,
+  organization?: string,
 ) {
   const lowercaseEmail = email.toLowerCase();
   const payload: any = {
@@ -81,6 +82,7 @@ async function register(
   if (country) payload.country = country;
   if (subjects) payload.subjects = subjects;
   if (bio) payload.bio = bio;
+  if (organization) payload.organization = organization;
   const res = await postData('auth/register', payload);
   if (res.error) {
     throw Error(res.error.message);
@@ -173,6 +175,19 @@ async function changePassword(currentPassword: string, newPassword: string) {
   return res.data;
 }
 
+/**
+ * Sends a request to the server to resend verification email to a user
+ * @param email The email of the user to resend verification to
+ * @throws An {@link Error} with a `message` field describing the issue
+ */
+async function resendVerificationEmail(email: string) {
+  const res = await postData('auth/resend-verification-email', { email });
+  if (res.error) {
+    throw Error(res.error.message);
+  }
+  return res.data;
+}
+
 export {
   register,
   loginUser,
@@ -182,4 +197,5 @@ export {
   registerInvite,
   deleteAccount,
   changePassword,
+  resendVerificationEmail,
 };

@@ -16,6 +16,7 @@ import { User } from "../models/user.model.ts";
  * @param grades - string array representing the grades
  * @param coordinates - object representing the coordinates
  * @param languages - string array representing the languages
+ * @param visible - boolean indicating if the speaker is visible to others (default: false)
  * @returns The created Speaker profile
  */
 const createSpeaker = async (
@@ -31,7 +32,8 @@ const createSpeaker = async (
   industry: string[],
   grades: string[],
   coordinates: { lat: number; lng: number } | undefined,
-  languages: string[]
+  languages: string[],
+  visible: boolean = false
 ) => {
   const newSpeaker = new Speaker({
     userId,
@@ -46,7 +48,8 @@ const createSpeaker = async (
     industry,
     grades,
     coordinates,
-    languages
+    languages,
+    visible
   });
   const speaker = await newSpeaker.save();
   return speaker;
@@ -83,11 +86,22 @@ const getSpeakerByEmail = async (email: string) => {
 };
 
 /**
+ * Gets all speakers from the database (including invisible ones) for admin use
+ * @returns Array of all speakers
+ */
+const getAllSpeakersForAdmin = async () => {
+  const speakers = await Speaker.find({}) // No visibility filter for admins
+    .populate('userId', 'firstName lastName email')
+    .exec();
+  return speakers;
+};
+
+/**
  * Gets all speakers from the database
  * @returns Array of all speakers
  */
 const getAllSpeakers = async () => {
-  const speakers = await Speaker.find({})
+  const speakers = await Speaker.find({ visible: true })
     .populate('userId', 'firstName lastName email')
     .exec();
   return speakers;
@@ -100,14 +114,6 @@ const getAllSpeakers = async () => {
  * @returns The updated speaker
  */
 const updateSpeaker = async (userId: string, updateData: Partial<ISpeaker>) => {
-  console.log('=== UPDATE SPEAKER FUNCTION CALLED ===');
-  console.log('updateSpeaker service called with userId:', userId);
-  console.log('updateData:', updateData);
-  
-  // Print out all users in the speaker database for debugging
-  const allSpeakers = await Speaker.find({}).populate('userId', 'firstName lastName email').exec();
-  console.log('All speakers in database:', allSpeakers);
-  
   const speaker = await Speaker.findOneAndUpdate(
     { userId },
     updateData,
@@ -115,9 +121,33 @@ const updateSpeaker = async (userId: string, updateData: Partial<ISpeaker>) => {
   )
     .populate('userId', 'firstName lastName email')
     .exec();
-    
-  console.log('Update result:', speaker);
+  
+  // Check if profile is complete and auto-set visibility
+  if (speaker && isProfileComplete(speaker)) {
+    if (!speaker.visible) {
+      speaker.visible = true;
+      await speaker.save();
+    }
+  }
+  
   return speaker;
+};
+
+/**
+ * Checks if a speaker profile is complete and ready to be visible
+ * @param speaker - The speaker to check
+ * @returns boolean indicating if profile is complete
+ */
+const isProfileComplete = (speaker: ISpeaker): boolean => {
+  return !!(
+    speaker.organization && speaker.organization.trim() !== '' &&
+    speaker.bio && speaker.bio.trim() !== '' &&
+    speaker.city && speaker.city.trim() !== '' &&
+    speaker.country && speaker.country.trim() !== '' &&
+    speaker.industry && speaker.industry.length > 0 &&
+    speaker.grades && speaker.grades.length > 0 &&
+    (speaker.inperson || speaker.virtual) // Must support at least one format
+  );
 };
 
 /**
@@ -134,7 +164,9 @@ const deleteSpeaker = async (userId: string) => {
  * Gets filtered list of speakers based on provided criteria
  */
 const getfilterSpeakeredList = async (filteredParams: Record<string, any>) => {
-  const speakers = await Speaker.find(filteredParams)
+  // Ensure only visible speakers are returned
+  const filterWithVisibility = { ...filteredParams, visible: true };
+  const speakers = await Speaker.find(filterWithVisibility)
     .populate('userId', 'firstName lastName email')
     .exec();
   return speakers;
@@ -145,7 +177,9 @@ export {
   getSpeakerByUserId,
   getSpeakerByEmail,
   getAllSpeakers,
+  getAllSpeakersForAdmin,
   updateSpeaker,
   deleteSpeaker,
   getfilterSpeakeredList,
+  isProfileComplete,
 };

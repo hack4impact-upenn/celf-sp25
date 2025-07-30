@@ -16,7 +16,6 @@ import AdminAddSpeakerPage from './AdminDashboard/AdminAddSpeakerPage.tsx';
 import AdminAllSpeakerPage from './AdminDashboard/AdminAllSpeakerPage.tsx';
 import AdminRequestsPage from './AdminDashboard/AdminRequestsPage';
 import AdminIndustryFocusPage from './AdminDashboard/AdminIndustryFocusPage.tsx';
-import SpeakerProfilePage from './SpeakerDashboard/SpeakerProfilePage.tsx';
 import SpeakerEditProfilePage from './SpeakerDashboard/SpeakerEditProfilePage.tsx';
 import SpeakerRequestsPage from './SpeakerDashboard/SpeakerRequestsPage.tsx';
 
@@ -116,7 +115,6 @@ function App() {
                     path="/speaker-requests"
                     element={<SpeakerRequestsPage />}
                   />
-                  <Route path="/profile" element={<SpeakerProfilePage />} />
                   <Route
                     path="/profile/edit"
                     element={<SpeakerEditProfilePage />}

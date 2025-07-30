@@ -19,6 +19,7 @@ interface AdminDashboardRow {
   last: string;
   email: string;
   userType: React.ReactNode;
+  status?: React.ReactNode;
   promote: React.ReactElement;
   remove: React.ReactElement;
 }
@@ -34,6 +35,7 @@ function UserTable() {
     { id: 'last', label: 'Last Name' },
     { id: 'email', label: 'Email' },
     { id: 'userType', label: 'User Type' },
+    { id: 'status', label: 'Status' },
     { id: 'promote', label: 'Promote to Admin' },
     { id: 'remove', label: 'Remove User' },
   ];
@@ -44,7 +46,7 @@ function UserTable() {
     promote: React.ReactElement,
     remove: React.ReactElement,
   ): AdminDashboardRow {
-    const { _id, firstName, lastName, email, admin, role } = user;
+    const { _id, firstName, lastName, email, admin, role, speakerVisible, profileComplete } = user;
     let userType = '';
     if (admin) {
       userType = 'admin';
@@ -60,12 +62,26 @@ function UserTable() {
     if (userType === 'admin') color = 'primary';
     else if (userType === 'teacher') color = 'success';
     else if (userType === 'speaker') color = 'secondary';
+
+    // Create status chip for speakers
+    let statusChip: React.ReactNode = null;
+    if (role === 'speaker' && speakerVisible !== undefined) {
+      if (speakerVisible) {
+        statusChip = <Chip label="Visible" color="success" size="small" sx={{ fontWeight: 600, fontSize: '0.85em', borderRadius: '8px' }} />;
+      } else if (profileComplete) {
+        statusChip = <Chip label="Hidden: Complete" color="warning" size="small" sx={{ fontWeight: 600, fontSize: '0.85em', borderRadius: '8px' }} />;
+      } else {
+        statusChip = <Chip label="Hidden: Incomplete" color="error" size="small" sx={{ fontWeight: 600, fontSize: '0.85em', borderRadius: '8px' }} />;
+      }
+    }
+
     return {
       key: _id,
       first: firstName,
       last: lastName,
       email,
       userType: <Chip label={label} color={color} size="small" sx={{ fontWeight: 600, fontSize: '0.95em', borderRadius: '8px' }} />,
+      status: statusChip,
       promote,
       remove,
     };

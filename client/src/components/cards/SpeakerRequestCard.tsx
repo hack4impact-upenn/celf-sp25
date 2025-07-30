@@ -108,7 +108,7 @@ function SpeakerRequestCard({ id, speaker, teacher, status }: Request) {
   const locationDisplay = speaker 
     ? [speaker.city, speaker.state, speaker.country].filter(Boolean).join(', ')
     : 'Unknown Location';
-  const jobTitle = speaker?.jobTitle || 'Job Title Not Specified';
+  const jobTitle = speaker?.jobTitle || '';
   const imageUrl = speaker?.imageUrl || DEFAULT_IMAGE;
   const bio = speaker?.bio || 'Speaker bio not available';
 
@@ -154,7 +154,7 @@ function SpeakerRequestCard({ id, speaker, teacher, status }: Request) {
         </Typography>
         <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
           {organization}
-          {jobTitle && jobTitle !== 'Job Title Not Specified' && ` • ${jobTitle}`}
+          {jobTitle && jobTitle.trim() !== '' && ` • ${jobTitle}`}
           {` • ${locationDisplay}`}
         </Typography>
 

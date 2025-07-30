@@ -17,13 +17,14 @@ import ScreenGrid from '../components/ScreenGrid.tsx';
 import TopBar from '../components/top_bar/TopBar.tsx';
 import { useAppSelector } from '../util/redux/hooks.ts';
 import { selectUser } from '../util/redux/userSlice.ts';
-import COLORS from '../assets/colors.ts';
 import { getData } from '../util/api.tsx';
+import COLORS from '../assets/colors.ts';
 
 function SpeakerDashboardPage() {
   const navigate = useNavigate();
   const user = useAppSelector(selectUser);
   const [hasProfile, setHasProfile] = useState<boolean | null>(null);
+  const [isProfileVisible, setIsProfileVisible] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,12 +36,16 @@ function SpeakerDashboardPage() {
         if (response.error) {
           // If speaker not found, they don't have a profile
           setHasProfile(false);
+          setIsProfileVisible(false);
         } else {
           setHasProfile(true);
+          // Check if the profile is visible (complete)
+          setIsProfileVisible(response.data?.visible || false);
         }
       } catch (err) {
         setError('Failed to check profile status');
         setHasProfile(false);
+        setIsProfileVisible(false);
       } finally {
         setLoading(false);
       }
@@ -120,17 +125,36 @@ function SpeakerDashboardPage() {
               </Typography>
               {hasProfile ? (
                 <>
-                  <Typography variant="body1" paragraph>
-                    Manage your speaker profile and help educators find you for their classrooms.
-                  </Typography>
-                  <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-                    <PrimaryButton
-                      variant="contained"
-                      onClick={() => navigate('/profile/edit')}
-                    >
-                      Edit Profile
-                    </PrimaryButton>
-                  </Box>
+                  {isProfileVisible ? (
+                    <>
+                      <Typography variant="body1" paragraph>
+                        Manage your speaker profile and help educators find you for their classrooms.
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                        <PrimaryButton
+                          variant="contained"
+                          onClick={() => navigate('/profile/edit')}
+                        >
+                          Edit Profile
+                        </PrimaryButton>
+                      </Box>
+                    </>
+                  ) : (
+                    <>
+                      <Typography variant="body1" paragraph sx={{ color: 'warning.main' }}>
+                        Your profile exists but needs to be completed to appear in teacher search results. Complete all required fields to become visible to educators.
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                        <PrimaryButton
+                          variant="contained"
+                          onClick={() => navigate('/profile/edit')}
+                          sx={{ backgroundColor: COLORS.primaryBlue }}
+                        >
+                          Complete Profile
+                        </PrimaryButton>
+                      </Box>
+                    </>
+                  )}
                 </>
               ) : (
                 <>

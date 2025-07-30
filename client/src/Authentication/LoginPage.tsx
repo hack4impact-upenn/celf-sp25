@@ -9,6 +9,7 @@ import FormRow from '../components/form/FormRow.tsx';
 import { emailRegex, InputErrorMessage } from '../util/inputvalidation.ts';
 import { loginUser } from './api.ts';
 import AlertDialog from '../components/AlertDialog.tsx';
+import VerificationErrorDialog from '../components/VerificationErrorDialog.tsx';
 import PrimaryButton from '../components/buttons/PrimaryButton.tsx';
 import ScreenGrid from '../components/ScreenGrid.tsx';
 import COLORS from '../assets/colors.ts';
@@ -41,6 +42,7 @@ function LoginPage() {
   const [values, setValueState] = useState(defaultValues);
   const [showError, setShowErrorState] = useState(defaultShowErrors);
   const [errorMessage, setErrorMessageState] = useState(defaultErrorMessages);
+  const [isVerificationError, setIsVerificationError] = useState(false);
 
   // Helper functions for changing only one field in a state object
   const setValue = (field: string, value: string) => {
@@ -65,6 +67,7 @@ function LoginPage() {
   const alertTitle = 'Error';
   const handleAlertClose = () => {
     setShowError('alert', false);
+    setIsVerificationError(false);
   };
 
   const dispatch = useAppDispatch();
@@ -131,6 +134,11 @@ function LoginPage() {
           console.log('failed to login...');
           setShowError('alert', true);
           setErrorMessage('alert', e.message);
+          
+          // Check if this is a verification error
+          const isVerificationErr = e.message.toLowerCase().includes('verify') || 
+                                   e.message.toLowerCase().includes('verification');
+          setIsVerificationError(isVerificationErr);
         });
     }
   }
@@ -288,12 +296,22 @@ function LoginPage() {
       </Box>
       {/* The alert that pops up */}
       <Grid item>
-        <AlertDialog
-          showAlert={showError.alert}
-          title={alertTitle}
-          message={errorMessage.alert}
-          onClose={handleAlertClose}
-        />
+        {isVerificationError ? (
+          <VerificationErrorDialog
+            showAlert={showError.alert}
+            title={alertTitle}
+            message={errorMessage.alert}
+            userEmail={values.email}
+            onClose={handleAlertClose}
+          />
+        ) : (
+          <AlertDialog
+            showAlert={showError.alert}
+            title={alertTitle}
+            message={errorMessage.alert}
+            onClose={handleAlertClose}
+          />
+        )}
       </Grid>
     </ScreenGrid>
   );

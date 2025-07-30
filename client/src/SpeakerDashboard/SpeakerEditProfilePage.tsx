@@ -38,6 +38,7 @@ interface SpeakerProfile {
   lastName?: string;
   email?: string;
   picture?: string;
+  imageUrl?: string;
   organization?: string;
   jobTitle?: string;
   website?: string;
@@ -46,6 +47,7 @@ interface SpeakerProfile {
   bio?: string;
   city?: string;
   state?: string;
+  country?: string;
   languages?: string[];
   inperson?: boolean;
   virtual?: boolean;
@@ -67,6 +69,7 @@ function SpeakerEditProfilePage() {
     lastName: user.lastName || '',
     email: user.email || '',
     picture: '',
+    imageUrl: '',
     organization: '',
     jobTitle: '',
     website: '',
@@ -75,6 +78,7 @@ function SpeakerEditProfilePage() {
     bio: '',
     city: '',
     state: '',
+    country: '',
     languages: [],
     inperson: false,
     virtual: false,
@@ -104,6 +108,8 @@ function SpeakerEditProfilePage() {
         firstName: user.firstName || prevState.firstName,
         lastName: user.lastName || prevState.lastName,
         email: user.email || prevState.email,
+        picture: response.data.imageUrl || prevState.picture, // Map imageUrl to picture
+        imageUrl: response.data.imageUrl || prevState.imageUrl, // Ensure imageUrl is set
       }));
     }
   }, [response, user.firstName, user.lastName, user.email]);
@@ -160,8 +166,56 @@ function SpeakerEditProfilePage() {
     e.preventDefault();
     setLoading(true);
 
+    // Validate required fields
+    if (!formState.bio || formState.bio.trim() === '') {
+      setAlertTitle('Error');
+      setAlertMessage('Bio is required to complete your profile.');
+      setShowAlert(true);
+      setLoading(false);
+      return;
+    }
+
+    if (!formState.city || formState.city.trim() === '') {
+      setAlertTitle('Error');
+      setAlertMessage('City is required to complete your profile.');
+      setShowAlert(true);
+      setLoading(false);
+      return;
+    }
+
+    if (!formState.country || formState.country.trim() === '') {
+      setAlertTitle('Error');
+      setAlertMessage('Country is required to complete your profile.');
+      setShowAlert(true);
+      setLoading(false);
+      return;
+    }
+
+    if (!formState.grades || formState.grades.length === 0) {
+      setAlertTitle('Error');
+      setAlertMessage('Please select at least one grade level you want to speak to.');
+      setShowAlert(true);
+      setLoading(false);
+      return;
+    }
+
+    if (!formState.inperson && !formState.virtual) {
+      setAlertTitle('Error');
+      setAlertMessage('Please select at least one speaking format (In-person or Virtual).');
+      setShowAlert(true);
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response = await putData('speaker/profile', formState);
+      // Map picture to imageUrl for backend compatibility
+      const submitData = {
+        ...formState,
+        imageUrl: formState.picture,
+      };
+      delete submitData.picture; // Remove the picture field since backend expects imageUrl
+      
+      const response = await putData('speaker/profile', submitData);
       if (response.error) {
         setAlertTitle('Error');
         setAlertMessage(response.error.message || 'Failed to update profile. Please try again.');
@@ -169,7 +223,7 @@ function SpeakerEditProfilePage() {
         setAlertTitle('Success');
         setAlertMessage('Your profile has been updated successfully!');
         setTimeout(() => {
-          navigate('/home');
+          navigate('/speaker-dashboard');
         }, 2000);
       }
       setShowAlert(true);
@@ -281,12 +335,29 @@ function SpeakerEditProfilePage() {
                 <FormLabel component="legend" sx={{ mb: 1 }}>
                   Profile Picture
                 </FormLabel>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  name="picture"
-                />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    name="picture"
+                  />
+                  {formState.picture && (
+                    <Box sx={{ mt: 1 }}>
+                      <img
+                        src={formState.picture}
+                        alt="Profile Preview"
+                        style={{
+                          width: '100px',
+                          height: '100px',
+                          objectFit: 'cover',
+                          borderRadius: '8px',
+                          border: '1px solid #ddd'
+                        }}
+                      />
+                    </Box>
+                  )}
+                </Box>
               </Grid>
 
               {/* Organization */}
@@ -356,11 +427,12 @@ function SpeakerEditProfilePage() {
               {/* Grades */}
               <Grid item xs={12}>
                 <FormLabel component="legend" sx={{ mb: 1 }}>
-                  Age/Grade Specialty (optional)
+                  Age/Grade Specialty (required)
                 </FormLabel>
                 <Select
                   fullWidth
                   multiple
+                  required
                   value={formState.grades || []}
                   onChange={(e) => handleSelectChange(e as SelectChangeEvent<string[]>)}
                   name="grades"
@@ -385,12 +457,13 @@ function SpeakerEditProfilePage() {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Bio (optional)"
+                  label="Bio (required)"
                   name="bio"
                   value={formState.bio || ''}
                   onChange={handleChange}
                   multiline
                   rows={4}
+                  required
                 />
               </Grid>
 
@@ -402,15 +475,26 @@ function SpeakerEditProfilePage() {
                   name="city"
                   value={formState.city || ''}
                   onChange={handleChange}
+                  required
                 />
               </Grid>
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="State"
+                  label="State (optional)"
                   name="state"
                   value={formState.state || ''}
                   onChange={handleChange}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Country"
+                  name="country"
+                  value={formState.country || ''}
+                  onChange={handleChange}
+                  required
                 />
               </Grid>
 
@@ -445,7 +529,7 @@ function SpeakerEditProfilePage() {
               {/* Speaking Formats */}
               <Grid item xs={12}>
                 <FormLabel component="legend" sx={{ mb: 1 }}>
-                  Preferred Speaking Format (optional)
+                  Preferred Speaking Format (required)
                 </FormLabel>
                 <FormControlLabel
                   control={
@@ -476,7 +560,7 @@ function SpeakerEditProfilePage() {
                 >
                   <Button
                     variant="outlined"
-                    onClick={() => navigate('/profile')}
+                    onClick={() => navigate('/speaker-dashboard')}
                     sx={{ height: 48 }}
                   >
                     Cancel

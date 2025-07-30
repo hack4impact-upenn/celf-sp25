@@ -29,6 +29,7 @@ import {
 import { IInvite } from "../models/invite.model.ts";
 import mixpanel from "../config/configMixpanel.ts";
 import { createTeacher } from "../services/teacher.service.ts";
+import { createSpeaker } from "../services/speaker.service.ts";
 
 /**
  * A controller function to login a user and create a session with Passport.
@@ -128,7 +129,7 @@ const register = async (
   res: express.Response,
   next: express.NextFunction
 ) => {
-  const { firstName, lastName, email, password, role, school, gradeLevel, location, subjects, bio } = req.body;
+  const { firstName, lastName, email, password, role, school, gradeLevel, location, subjects, bio, organization, city, state, country } = req.body;
   if (!firstName || !lastName || !email || !password) {
     next(
       ApiError.missingFields(["firstName", "lastName", "email", "password"])
@@ -212,6 +213,28 @@ const register = async (
       await createTeacher(user._id, school, gradeLevel, city, state, subjects, bio);
     }
 
+    // Create minimal speaker profile if role is speaker
+    if (role === 'speaker' && user) {
+      await createSpeaker(
+        user._id,
+        organization || '', // organization from form
+        '', // bio - will be updated later when completing profile
+        city || '', // city from form
+        state || '', // state from form
+        country || undefined, // country from form
+        false, // inperson - will be updated later
+        false, // virtual - will be updated later
+        undefined, // imageUrl
+        [], // industry - empty array, will be updated later
+        [], // grades - empty array, will be updated later
+        undefined, // coordinates
+        ['English'] // languages - default value
+      );
+    }
+
+    // Note: Speaker profiles are created with default values and visibility set to false
+    // Speakers must complete their profile through the speaker submission flow to become visible
+
     // If created by admin, automatically verify the user
     if (reqUser?.admin) {
       user!.verified = true;
@@ -223,7 +246,24 @@ const register = async (
       const verificationToken = crypto.randomBytes(32).toString("hex");
       user!.verificationToken = verificationToken;
       await user!.save();
-      await emailVerificationLink(lowercaseEmail, verificationToken);
+      
+      // Only send email if SendGrid is configured
+      if (process.env.SENDGRID_API_KEY && process.env.SENDGRID_API_KEY !== '') {
+        try {
+          await emailVerificationLink(lowercaseEmail, verificationToken);
+        } catch (emailError) {
+          console.error('Email sending failed:', emailError);
+          // Continue registration even if email fails
+        }
+      } else {
+        console.log('SendGrid not configured - skipping verification email');
+        // Auto-verify in development if no SendGrid
+        if (process.env.NODE_ENV === 'development') {
+          user!.verified = true;
+          user!.verificationToken = undefined;
+          await user!.save();
+        }
+      }
     }
     // Mixpanel Register tracking
     mixpanel.track("Register", {
@@ -233,6 +273,7 @@ const register = async (
 
     res.status(StatusCode.CREATED).send(user);
   } catch (err) {
+    console.error("Registration error:", err);
     next(ApiError.internal("Unable to register user."));
   }
 };
@@ -499,6 +540,68 @@ const registerInvite = async (
   }
 };
 
+/**
+ * A controller function to resend verification email to a user
+ */
+const resendVerificationEmail = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const { email } = req.body;
+  if (!email) {
+    next(ApiError.missingFields(["email"]));
+    return;
+  }
+  const lowercaseEmail = email.toLowerCase();
+
+  const user: IUser | null = await getUserByEmail(lowercaseEmail);
+  if (!user) {
+    next(
+      ApiError.notFound(`No user with email ${lowercaseEmail} is registered.`)
+    );
+    return;
+  }
+
+  if (user.verified) {
+    next(ApiError.badRequest("User account is already verified."));
+    return;
+  }
+
+  try {
+    // Generate a new verification token
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+    user.verificationToken = verificationToken;
+    await user.save();
+
+    // Only send email if SendGrid is configured
+    if (process.env.SENDGRID_API_KEY && process.env.SENDGRID_API_KEY !== '') {
+      try {
+        await emailVerificationLink(lowercaseEmail, verificationToken);
+      } catch (emailError) {
+        console.error('Email sending failed:', emailError);
+        // Continue even if email fails - just like in registration
+      }
+    } else {
+      console.log('SendGrid not configured - skipping verification email');
+      // Auto-verify in development if no SendGrid
+      if (process.env.NODE_ENV === 'development') {
+        user.verified = true;
+        user.verificationToken = undefined;
+        await user.save();
+      }
+    }
+
+    // Always return success, just like registration does
+    res.status(StatusCode.OK).send({
+      message: `Verification email has been sent to ${lowercaseEmail}`,
+    });
+  } catch (err) {
+    console.error("Resend verification error:", err);
+    next(ApiError.internal("Failed to resend verification email."));
+  }
+};
+
 export {
   login,
   logout,
@@ -509,4 +612,5 @@ export {
   resetPassword,
   registerInvite,
   changePassword,
+  resendVerificationEmail,
 };

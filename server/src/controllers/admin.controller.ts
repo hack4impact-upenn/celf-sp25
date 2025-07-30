@@ -22,7 +22,7 @@ import {
 import { IInvite } from "../models/invite.model.ts";
 import { emailInviteLink } from "../services/mail.service.ts";
 import { deleteTeacher } from "../services/teacher.service.ts";
-import { deleteSpeaker } from "../services/speaker.service.ts";
+import { deleteSpeaker, getSpeakerByUserId } from "../services/speaker.service.ts";
 import { deleteRequestsBySpeakerId, deleteRequestsByTeacherId } from "../services/request.service.ts";
 
 /**
@@ -33,16 +33,37 @@ const getAllUsers = async (
   res: express.Response,
   next: express.NextFunction
 ) => {
-  return (
-    getAllUsersFromDB()
-      .then((userList) => {
-        res.status(StatusCode.OK).send(userList);
+  try {
+    const userList = await getAllUsersFromDB();
+    
+    // Enrich user data with speaker visibility information
+    const enrichedUserList = await Promise.all(
+      userList.map(async (user) => {
+        const userObj = user.toObject();
+        
+        // If user is a speaker, add visibility status
+        if (user.role === 'speaker') {
+          const speakerProfile = await getSpeakerByUserId(user._id);
+          if (speakerProfile) {
+            userObj.speakerVisible = speakerProfile.visible;
+            userObj.profileComplete = speakerProfile.organization.trim() !== '' &&
+                                     speakerProfile.bio.trim() !== '' &&
+                                     speakerProfile.city.trim() !== '' &&
+                                     speakerProfile.country && speakerProfile.country.trim() !== '';
+          } else {
+            userObj.speakerVisible = false;
+            userObj.profileComplete = false;
+          }
+        }
+        
+        return userObj;
       })
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      .catch((e) => {
-        next(ApiError.internal("Unable to retrieve all users"));
-      })
-  );
+    );
+    
+    res.status(StatusCode.OK).send(enrichedUserList);
+  } catch (e) {
+    next(ApiError.internal("Unable to retrieve all users"));
+  }
 };
 
 /**
@@ -195,12 +216,12 @@ const inviteUser = async (
     }
   }
 
-  function sendInvite(combinedList: any[]) {
+  async function sendInvite(combinedList: any[]) {
     try {
       const email = combinedList[0];
       const verificationToken = combinedList[2];
 
-      emailInviteLink(email, verificationToken);
+      await emailInviteLink(email, verificationToken);
     } catch (err: any) {
       next(ApiError.internal(`Error sending invite: ${err.message}`));
     }
@@ -285,7 +306,7 @@ const inviteAdmin = async (
       await createInvite(lowercaseEmail, verificationToken, "admin");
     }
     // Send invite email (reuse emailInviteLink)
-    emailInviteLink(lowercaseEmail, verificationToken);
+    await emailInviteLink(lowercaseEmail, verificationToken);
     res.sendStatus(StatusCode.CREATED);
   } catch (err: any) {
     next(ApiError.internal(`Unable to invite admin: ${err.message}`));

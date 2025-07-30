@@ -14,6 +14,7 @@ import {
 } from "../controllers/admin.controller.ts";
 import { isAuthenticated } from "../controllers/auth.middleware.ts";
 import { approve } from "../controllers/auth.controller.ts";
+import { getAllSpeakersAdmin } from "../controllers/speaker.controller.ts";
 import "dotenv/config";
 
 const router = express.Router();
@@ -23,6 +24,11 @@ const router = express.Router();
  * authenticated and is an admin.
  */
 router.get("/all", isAuthenticated, isAdmin, getAllUsers);
+
+/**
+ * A GET route for admins to get all speakers including invisible ones
+ */
+router.get("/speakers", isAuthenticated, isAdmin, getAllSpeakersAdmin);
 
 /**
  * A GET route to check if the requestor is an admin. Checks first if the

@@ -44,7 +44,7 @@ function ProfileDropDown({ sx }: ProfileDropDownProps) {
     if (user.role === 'teacher') {
       navigate('/teacher-profile');
     } else {
-      navigate('/profile');
+      navigate('/speaker-dashboard');
     }
   };
 

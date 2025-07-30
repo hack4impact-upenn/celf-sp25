@@ -23,6 +23,7 @@ export interface Speaker {
   grades: string[];
   city: string;
   state: string;
+  country?: string;
   coordinates?: {
     lat: number;
     lng: number;

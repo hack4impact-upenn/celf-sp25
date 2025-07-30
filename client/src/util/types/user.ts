@@ -8,6 +8,9 @@ interface IUser {
   email: string;
   role: 'teacher' | 'admin' | 'speaker';
   admin: boolean;
+  // Speaker-specific fields for admin view
+  speakerVisible?: boolean;
+  profileComplete?: boolean;
 }
 
 interface ITeacherDetails {

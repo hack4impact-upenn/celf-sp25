@@ -139,7 +139,7 @@ function TeacherRequestSpeakerPage() {
     grades: [],
     city: '',
     state: '',
-    radius: 50,
+    country: '',
     formats: {
       inperson: false,
       virtual: false,
@@ -201,27 +201,6 @@ function TeacherRequestSpeakerPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Function to calculate distance between two points using Haversine formula
-  const calculateDistance = (
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number,
-  ): number => {
-    const R = 3958.8; // Earth's radius in miles
-    const dLat = ((lat2 - lat1) * Math.PI) / 180;
-    const dLon = ((lon2 - lon1) * Math.PI) / 180;
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos((lat1 * Math.PI) / 180) *
-        Math.cos((lat2 * Math.PI) / 180) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = R * c;
-    return distance;
   };
 
   const getFilteredRequests = () => {
@@ -287,20 +266,12 @@ function TeacherRequestSpeakerPage() {
       );
     }
 
-    // Apply radius filter if coordinates are available
-    if (filters.radius && filters.radius > 0 && filters.userCoordinates) {
-      const { lat: userLat, lng: userLng } = filters.userCoordinates;
-
-      result = result.filter((request) => {
-        if (!request.speaker.coordinates) return true;
-        const distance = calculateDistance(
-          userLat,
-          userLng,
-          request.speaker.coordinates.lat,
-          request.speaker.coordinates.lng,
-        );
-        return distance <= filters.radius;
-      });
+    if (filters.country && filters.country.trim() !== '') {
+      result = result.filter(
+        (request) =>
+          request.speaker.country &&
+          request.speaker.country.toLowerCase() === filters.country.toLowerCase(),
+      );
     }
 
     // Apply format filter
