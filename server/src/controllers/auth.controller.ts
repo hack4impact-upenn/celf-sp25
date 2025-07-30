@@ -129,7 +129,7 @@ const register = async (
   res: express.Response,
   next: express.NextFunction
 ) => {
-  const { firstName, lastName, email, password, role, school, gradeLevel, location, subjects, bio, organization, city, state, country } = req.body;
+  const { firstName, lastName, email, password, role, school, gradeLevel, city, state, country, subjects, bio, organization } = req.body;
   if (!firstName || !lastName || !email || !password) {
     next(
       ApiError.missingFields(["firstName", "lastName", "email", "password"])
@@ -139,9 +139,9 @@ const register = async (
 
   // If role is teacher, validate additional required fields
   if (role === 'teacher') {
-    if (!school || !gradeLevel || !location || !subjects || !bio) {
+    if (!school || !gradeLevel || !city || !country || !subjects || !bio) {
       next(
-        ApiError.missingFields(["school", "gradeLevel", "location", "subjects", "bio"])
+        ApiError.missingFields(["school", "gradeLevel", "city", "country", "subjects", "bio"])
       );
       return;
     }
@@ -205,12 +205,7 @@ const register = async (
 
     // Create teacher profile if role is teacher
     if (role === 'teacher' && user) {
-      // Parse city and state from location
-      const locationParts = location.split(',').map((part: string) => part.trim());
-      const city = locationParts[0] || '';
-      const state = locationParts[1] || '';
-
-      await createTeacher(user._id, school, gradeLevel, city, state, subjects, bio);
+      await createTeacher(user._id, school, gradeLevel, city, state, subjects, bio, country);
     }
 
     // Create minimal speaker profile if role is speaker

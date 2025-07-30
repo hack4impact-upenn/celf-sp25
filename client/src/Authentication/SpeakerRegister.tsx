@@ -167,9 +167,11 @@ function SpeakerRegisterPage() {
           minHeight: '100vh',
           width: '100%',
           display: 'flex',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           justifyContent: 'center',
           padding: 4,
+          paddingTop: 8,
+          paddingBottom: 8,
         }}
       >
         <Paper
@@ -180,6 +182,8 @@ function SpeakerRegisterPage() {
             width: '100%',
             maxWidth: 450,
             background: COLORS.white,
+            marginTop: 2,
+            marginBottom: 2,
           }}
         >
           <Box sx={{ width: '100%' }}>

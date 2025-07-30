@@ -62,10 +62,10 @@ const createTeacherProfile = async (
   res: express.Response,
   next: express.NextFunction
 ) => {
-  const { userId, school, gradeLevel, location, subjects, bio } = req.body;
+  const { userId, school, gradeLevel, city, state, country, subjects, bio } = req.body;
 
-  if (!userId || !school || !gradeLevel || !location || !subjects || !bio) {
-    next(ApiError.missingFields(["userId", "school", "gradeLevel", "location", "subjects", "bio"]));
+  if (!userId || !school || !gradeLevel || !city || !country || !subjects || !bio) {
+    next(ApiError.missingFields(["userId", "school", "gradeLevel", "city", "country", "subjects", "bio"]));
     return;
   }
 
@@ -76,12 +76,7 @@ const createTeacherProfile = async (
       return;
     }
 
-    // Parse city and state from location
-    const locationParts = location.split(',').map((part: string) => part.trim());
-    const city = locationParts[0] || '';
-    const state = locationParts[1] || '';
-
-    const teacher = await createTeacher(userId, school, gradeLevel, city, state, subjects, bio);
+    const teacher = await createTeacher(userId, school, gradeLevel, city, state, subjects, bio, country);
     res.status(StatusCode.CREATED).json(teacher);
   } catch (error) {
     next(ApiError.internal("Unable to create teacher profile"));
@@ -105,8 +100,13 @@ const updateTeacherProfile = async (
   }
 
   // Validate required fields
-  if (updateData.location !== undefined && (!updateData.location || updateData.location.trim() === '')) {
-    next(ApiError.badRequest("Location is required and cannot be empty"));
+  if (updateData.city !== undefined && (!updateData.city || updateData.city.trim() === '')) {
+    next(ApiError.badRequest("City is required and cannot be empty"));
+    return;
+  }
+
+  if (updateData.country !== undefined && (!updateData.country || updateData.country.trim() === '')) {
+    next(ApiError.badRequest("Country is required and cannot be empty"));
     return;
   }
 

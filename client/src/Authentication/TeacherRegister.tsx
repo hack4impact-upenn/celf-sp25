@@ -132,7 +132,7 @@ function TeacherRegisterPage() {
     let isValid = true;
 
     // Check required text fields
-    const requiredTextFields = ['firstName', 'lastName', 'email', 'password', 'confirmPassword', 'school', 'gradeLevel', 'city', 'bio'];
+    const requiredTextFields = ['firstName', 'lastName', 'email', 'password', 'confirmPassword', 'school', 'gradeLevel', 'city', 'country', 'bio'];
     
     for (const field of requiredTextFields) {
       const value = values[field as keyof typeof values];
@@ -399,7 +399,6 @@ function TeacherRegisterPage() {
                     error={showError.state}
                     helperText={errorMessage.state}
                     type="text"
-                    required
                     label="State"
                     value={values.state}
                     onChange={(e) => setValue('state', e.target.value)}
@@ -413,14 +412,15 @@ function TeacherRegisterPage() {
                     }}
                   />
                 </Grid>
-                {/* Country - full width, optional */}
+                {/* Country - full width, required */}
                 <Grid item sx={{ width: '100%' }}>
                   <TextField
                     fullWidth
                     error={showError.country}
                     helperText={errorMessage.country}
                     type="text"
-                    label="Country (optional)"
+                    required
+                    label="Country"
                     value={values.country}
                     onChange={(e) => setValue('country', e.target.value)}
                     placeholder="e.g., United States"
