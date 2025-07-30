@@ -67,12 +67,14 @@ const updateTeacher = async (userId: string, updateData: Partial<ITeacher>) => {
 };
 
 /**
- * Deletes a teacher profile
+ * Deletes a teacher profile and associated user account
  * @param userId - The userId of the teacher to delete
  * @returns The deleted teacher
  */
 const deleteTeacher = async (userId: string) => {
   const teacher = await Teacher.findOneAndDelete({ userId }).exec();
+  const user = await User.findOneAndDelete({ _id: userId }).exec();
+  console.log("Just deleted", user);
   return teacher;
 };
 

@@ -1,12 +1,11 @@
 import express from "express";
 import ApiError from "../util/apiError.ts";
 import StatusCode from "../util/statusCode.ts";
-import {
-  deleteUserById,
-  getAllUsersFromDB,
-  getUserById,
-  updateUser,
-} from "../services/user.service.ts";
+import { IUser } from "../models/user.model.ts";
+import { getUserById, getAllUsersFromDB, updateUser, deleteUserById } from "../services/user.service.ts";
+import { deleteSpeaker } from "../services/speaker.service.ts";
+import { deleteTeacher } from "../services/teacher.service.ts";
+import { deleteRequestsBySpeakerId, deleteRequestsByTeacherId } from "../services/request.service.ts";
 
 const getUser = async (
   req: express.Request,
@@ -118,11 +117,12 @@ const deleteCurrentUser = async (
       return;
     }
 
-    const user = await deleteUserById(currentUser._id);
-    if (!user) {
-      next(ApiError.notFound("User not found"));
-      return;
-    }
+    console.log(`Deleting user account for user ID: ${currentUser._id}, role: ${currentUser.role}`);
+
+    // Delete user and all associated data based on role
+    await deleteUserByRole(currentUser._id, currentUser.role);
+
+    console.log(`Successfully deleted user account and all associated data for user ID: ${currentUser._id}`);
 
     // Logout the user after deletion
     req.logout((err) => {
@@ -141,8 +141,104 @@ const deleteCurrentUser = async (
 
     res.status(StatusCode.OK).json({ message: "Account deleted successfully" });
   } catch (error) {
+    console.error("Error in deleteCurrentUser:", error);
     next(ApiError.internal("Unable to delete account"));
   }
 };
 
-export { getUser, getAllUsersHandler, updateUserProfile, deleteUserProfile, deleteCurrentUser };
+/**
+ * Helper function to delete a user and all associated data based on their role
+ * @param userId - The ID of the user to delete
+ * @param userRole - The role of the user (teacher, speaker, admin, etc.)
+ */
+const deleteUserByRole = async (userId: string, userRole: string) => {
+  console.log(`Starting role-based deletion for user ID: ${userId}, role: ${userRole}`);
+  
+  try {
+    switch (userRole) {
+      case 'teacher':
+        console.log(`Deleting teacher account for user ID: ${userId}`);
+        // Delete all requests made by this teacher
+        const deletedRequests = await deleteRequestsByTeacherId(userId);
+        console.log(`Deleted ${deletedRequests} requests for teacher ID: ${userId}`);
+        
+        // Delete the teacher profile (this also deletes the user)
+        const deletedTeacher = await deleteTeacher(userId);
+        console.log(`Deleted teacher profile for user ID: ${userId}`, deletedTeacher ? 'success' : 'not found');
+        break;
+        
+      case 'speaker':
+        console.log(`Deleting speaker account for user ID: ${userId}`);
+        // First get the speaker profile to get the speaker ID
+        const speaker = await deleteSpeaker(userId);
+        if (speaker) {
+          console.log(`Found speaker profile, deleting requests for speaker ID: ${speaker._id}`);
+          // Delete all requests that reference this speaker
+          const deletedSpeakerRequests = await deleteRequestsBySpeakerId(speaker._id);
+          console.log(`Deleted ${deletedSpeakerRequests} requests for speaker ID: ${speaker._id}`);
+        } else {
+          console.log(`No speaker profile found for user ID: ${userId}`);
+        }
+        // Note: deleteSpeaker already deletes the user
+        break;
+        
+      case 'admin':
+        console.log(`Admin cannot self delete`);
+        break;
+        
+      default:
+        console.log(`Deleting user with unknown role: ${userRole} for user ID: ${userId}`);
+        // For users without specific roles, just delete the user
+        const deletedUser = await deleteUserById(userId);
+        console.log(`Deleted user for user ID: ${userId}`, deletedUser ? 'success' : 'not found');
+        break;
+    }
+    
+    console.log(`Successfully completed role-based deletion for user ID: ${userId}, role: ${userRole}`);
+  } catch (error) {
+    console.error(`Error in deleteUserByRole for user ID: ${userId}, role: ${userRole}:`, error);
+    throw error; // Re-throw to be handled by the calling function
+  }
+};
+
+/**
+ * Delete a user profile with role-based cascading deletes
+ */
+const deleteUserProfileWithRole = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const { userId } = req.params;
+
+  if (!userId) {
+    next(ApiError.missingFields(["userId"]));
+    return;
+  }
+
+  try {
+    // First get the user to determine their role
+    const user = await getUserById(userId);
+    if (!user) {
+      next(ApiError.notFound("User not found"));
+      return;
+    }
+
+    // Delete user and all associated data based on role
+    await deleteUserByRole(userId, user.role);
+    
+    res.status(StatusCode.OK).json({ message: "User and all associated data deleted successfully" });
+  } catch (error) {
+    next(ApiError.internal("Unable to delete user profile"));
+  }
+};
+
+export { 
+  getUser, 
+  getAllUsersHandler, 
+  updateUserProfile, 
+  deleteUserProfile, 
+  deleteCurrentUser,
+  deleteUserByRole,
+  deleteUserProfileWithRole
+};

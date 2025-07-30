@@ -10,6 +10,7 @@ import {
   updateTeacher,
   deleteTeacher,
 } from "../services/teacher.service.ts";
+import { deleteUserById } from "../services/user.service.ts";
 import { deleteRequestsByTeacherId } from "../services/request.service.ts";
 
 /**
@@ -175,10 +176,64 @@ const deleteTeacherProfile = async (
   }
 };
 
+/**
+ * Delete the current user's teacher profile
+ */
+const deleteCurrentUserTeacherProfile = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  try {
+    const userId = (req.user as any)?._id;
+    if (!userId) {
+      next(ApiError.unauthorized("User not authenticated"));
+      return;
+    }
+
+    // Check if user is an admin (prevent admin self-deletion)
+    if ((req.user as any)?.admin) {
+      next(ApiError.forbidden("Admin accounts cannot be deleted"));
+      return;
+    }
+
+    const teacher = await deleteTeacher(userId);
+    if (!teacher) {
+      next(ApiError.notFound("Teacher profile not found"));
+      return;
+    }
+    
+    // Delete all requests made by this teacher
+    await deleteRequestsByTeacherId(userId);
+    
+    // Note: deleteTeacher already deletes the user account
+    
+    // Logout the user after deletion
+    req.logout((err) => {
+      if (err) {
+        console.error("Error during logout after account deletion:", err);
+      }
+      // Destroy the session
+      if (req.session) {
+        req.session.destroy((e) => {
+          if (e) {
+            console.error("Error destroying session after account deletion:", e);
+          }
+        });
+      }
+    });
+
+    res.status(StatusCode.OK).json({ message: "Teacher profile and account deleted successfully" });
+  } catch (error) {
+    next(ApiError.internal("Unable to delete teacher profile"));
+  }
+};
+
 export {
   getAllTeachersHandler as getAllTeachers,
   getTeacher,
   createTeacherProfile,
   updateTeacherProfile,
   deleteTeacherProfile,
+  deleteCurrentUserTeacherProfile,
 };

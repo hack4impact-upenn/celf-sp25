@@ -10,6 +10,7 @@ import {
   updateSpeakerProfile,
   updateSpeakerProfileByEmail,
   deleteSpeakerProfile,
+  deleteCurrentUserSpeakerProfile,
   filterSpeaker,
   getCurrentUserSpeakerProfile,
   updateCurrentUserSpeakerProfile,
@@ -26,6 +27,7 @@ router.post("/create", isAuthenticated, createSpeakerProfile);
 router.post("/profile", isAuthenticated, submitSpeakerProfile);
 router.get("/profile", isAuthenticated, getCurrentUserSpeakerProfile);
 router.put("/profile", isAuthenticated, updateCurrentUserSpeakerProfile);
+router.delete("/profile", isAuthenticated, deleteCurrentUserSpeakerProfile);
 
 // Admin routes
 router.post("/filter", isAuthenticated, filterSpeaker);

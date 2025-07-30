@@ -13,7 +13,7 @@ import {
   deleteSpeaker,
   getfilterSpeakeredList,
 } from "../services/speaker.service.ts";
-import { updateUser } from "../services/user.service.ts";
+import { updateUser, deleteUserById } from "../services/user.service.ts";
 import { updateRequestStatusHandler } from "./request.controller.ts";
 import { deleteRequestsBySpeakerId } from "../services/request.service.ts";
 
@@ -518,6 +518,59 @@ const updateCurrentUserSpeakerProfile = async (
   }
 };
 
+/**
+ * Delete the current user's speaker profile
+ */
+const deleteCurrentUserSpeakerProfile = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  try {
+    const userId = (req.user as any)?._id;
+    if (!userId) {
+      next(ApiError.unauthorized("User not authenticated"));
+      return;
+    }
+
+    // Check if user is an admin (prevent admin self-deletion)
+    if ((req.user as any)?.admin) {
+      next(ApiError.forbidden("Admin accounts cannot be deleted"));
+      return;
+    }
+
+    const speaker = await deleteSpeaker(userId);
+    if (!speaker) {
+      next(ApiError.notFound("Speaker profile not found"));
+      return;
+    }
+    
+    // Delete all requests that reference this speaker
+    await deleteRequestsBySpeakerId(speaker._id);
+    
+    // Note: deleteSpeaker already deletes the user account
+    
+    // Logout the user after deletion
+    req.logout((err) => {
+      if (err) {
+        console.error("Error during logout after account deletion:", err);
+      }
+      // Destroy the session
+      if (req.session) {
+        req.session.destroy((e) => {
+          if (e) {
+            console.error("Error destroying session after account deletion:", e);
+          }
+        });
+      }
+    });
+
+    res.status(StatusCode.OK).json({ message: "Speaker profile and account deleted successfully" });
+  } catch (error) {
+    next(ApiError.internal("Unable to delete speaker profile"));
+  }
+};
+
 export {
   getAllSpeakersAdminHandler as getAllSpeakersAdmin,
   getAllSpeakersHandler as getAllSpeakers,
@@ -528,6 +581,7 @@ export {
   updateSpeakerProfile,
   updateSpeakerProfileByEmail,
   deleteSpeakerProfile,
+  deleteCurrentUserSpeakerProfile,
   filterSpeaker,
   getCurrentUserSpeakerProfile,
   updateCurrentUserSpeakerProfile
