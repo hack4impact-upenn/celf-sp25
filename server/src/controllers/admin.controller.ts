@@ -12,6 +12,7 @@ import {
   getUserByEmail,
   getAllUsersFromDB,
   deleteUserById,
+  createUser,
 } from "../services/user.service.ts";
 import {
   createInvite,
@@ -20,9 +21,9 @@ import {
   updateInvite,
 } from "../services/invite.service.ts";
 import { IInvite } from "../models/invite.model.ts";
-import { emailInviteLink } from "../services/mail.service.ts";
+import { emailInviteLink, emailResetPasswordLink } from "../services/mail.service.ts";
 import { deleteTeacher } from "../services/teacher.service.ts";
-import { deleteSpeaker, getSpeakerByUserId } from "../services/speaker.service.ts";
+import { deleteSpeaker, getSpeakerByUserId, createSpeaker } from "../services/speaker.service.ts";
 import { deleteRequestsBySpeakerId, deleteRequestsByTeacherId } from "../services/request.service.ts";
 
 /**
@@ -278,4 +279,112 @@ const inviteAdmin = async (
   }
 };
 
-export { getAllUsers, deleteUser, verifyToken, inviteUser, inviteAdmin };
+/**
+ * Create a speaker directly with admin privileges
+ * Creates user account, speaker profile, and sends password reset email
+ */
+const createSpeakerDirectly = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const { email, firstName, lastName, organization, bio, city, state, country, industry, grades, languages } = req.body;
+  
+  if (!email || !firstName || !lastName || !organization || !bio || !city) {
+    next(ApiError.missingFields(["email", "firstName", "lastName", "organization", "bio", "city"]));
+    return;
+  }
+  
+  const emailRegex =
+    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/g;
+  if (!email.match(emailRegex)) {
+    next(ApiError.badRequest(`Invalid email: ${email}`));
+    return;
+  }
+  
+  const lowercaseEmail = email.toLowerCase();
+  const existingUser = await getUserByEmail(lowercaseEmail);
+  if (existingUser) {
+    next(ApiError.badRequest(`User with email ${lowercaseEmail} already exists`));
+    return;
+  }
+  
+  try {
+    // Generate a random password for the user
+    const tempPassword = crypto.randomBytes(16).toString("hex");
+    
+    // Create user account
+    const user = await createUser(
+      firstName,
+      lastName,
+      lowercaseEmail,
+      tempPassword,
+      "speaker"
+    );
+    
+    if (!user) {
+      next(ApiError.internal("Failed to create user account"));
+      return;
+    }
+    
+    // Create speaker profile with visibility = true
+    const speaker = await createSpeaker(
+      user._id,
+      organization,
+      bio,
+      city,
+      state || '',
+      country || undefined,
+      false, // inperson - will be updated by speaker
+      false, // virtual - will be updated by speaker
+      undefined, // imageUrl
+      industry || [],
+      grades || [],
+      undefined, // coordinates
+      languages || ['English'],
+      true // visible = true for admin-created speakers
+    );
+    
+    // Send password reset email
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordTokenExpiryDate = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    await user.save();
+    
+    // Send password reset email
+    if (process.env.SENDGRID_API_KEY && process.env.SENDGRID_API_KEY !== '') {
+      try {
+        await emailResetPasswordLink(lowercaseEmail, resetToken);
+      } catch (emailError) {
+        console.error('Password reset email sending failed:', emailError);
+        // Continue even if email fails
+      }
+    } else {
+      console.log('SendGrid not configured - skipping password reset email');
+    }
+    
+    res.status(StatusCode.CREATED).json({
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        verified: user.verified
+      },
+      speaker: {
+        _id: speaker._id,
+        organization: speaker.organization,
+        bio: speaker.bio,
+        city: speaker.city,
+        state: speaker.state,
+        country: speaker.country,
+        visible: speaker.visible
+      }
+    });
+  } catch (err: any) {
+    next(ApiError.internal(`Unable to create speaker: ${err.message}`));
+  }
+};
+
+export { getAllUsers, deleteUser, verifyToken, inviteUser, inviteAdmin, createSpeakerDirectly };

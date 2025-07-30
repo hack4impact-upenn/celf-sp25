@@ -141,6 +141,12 @@ function AdminUsersPage() {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Check if the file is an image
+      if (!file.type.startsWith('image/')) {
+        setError('Please select an image file (JPEG, PNG, GIF, etc.)');
+        return;
+      }
+      
       // Convert file to base64 data URL
       const reader = new FileReader();
       reader.onload = (event) => {
@@ -159,62 +165,65 @@ function AdminUsersPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccess(null);
+
+    // Validate required fields
+    if (!formState.industryFocuses || formState.industryFocuses.length === 0) {
+      setError('Please select at least one industry focus.');
+      setLoading(false);
+      return;
+    }
+
+    if (!formState.gradeSpecialties || formState.gradeSpecialties.length === 0) {
+      setError('Please select at least one age/grade specialty.');
+      setLoading(false);
+      return;
+    }
+
+    if (!formState.speakingFormats || formState.speakingFormats.length === 0) {
+      setError('Please select at least one speaking format.');
+      setLoading(false);
+      return;
+    }
 
     try {
-      // Create user first
-      const userPayload = {
-        firstName: formState.firstName,
-        lastName: formState.lastName,
-        email: formState.email,
-        password: 'tempPassword123!', // This will be changed by the user
-        role: 'speaker',
-      };
-
-      console.log('Creating user with payload:', userPayload);
-      const userResponse = await postData('auth/register', userPayload);
-      if (userResponse.error) {
-        throw new Error(userResponse.error.message);
-      }
-      console.log('User created:', userResponse.data);
+      // Map speaking formats to boolean values
+      const inperson = formState.speakingFormats.includes('In-Person');
+      const virtual = formState.speakingFormats.includes('Virtual');
 
       // Map grade specialties to the expected format
-      const mappedGrades = formState.gradeSpecialties.map(grade => {
+      const mappedGrades = formState.gradeSpecialties.map((grade) => {
         switch (grade) {
-          case 'Elementary School':
+          case 'elementary':
             return 'Elementary';
-          case 'Middle School':
+          case 'middle':
             return 'Middle School';
-          case 'High School':
+          case 'high school':
             return 'High School';
+          case 'all grades':
+            return 'All Grades';
           default:
             return grade;
         }
       });
 
-      // Map speaking formats to inperson/virtual booleans
-      const inperson = formState.speakingFormats.includes('In-Person');
-      const virtual = formState.speakingFormats.includes('Virtual');
-
+      // Create payload for the new admin endpoint
       const speakerPayload = {
-        userId: userResponse.data._id,
+        email: formState.email,
+        firstName: formState.firstName,
+        lastName: formState.lastName,
         organization: formState.organization || 'Unknown',
         bio: formState.bio || 'No bio provided',
         city: formState.city || 'Unknown',
-        state: formState.state || 'Unknown',
+        state: formState.state || '',
         country: formState.country || undefined,
-        inperson,
-        virtual,
-        imageUrl: formState.picture || undefined,
-        industry:
-          formState.industryFocuses.length > 0
-            ? formState.industryFocuses
-            : ['Other'],
+        industry: formState.industryFocuses,
         grades: mappedGrades,
         languages: formState.languages.length > 0 ? formState.languages : ['English'],
       };
 
       console.log('Creating speaker with payload:', speakerPayload);
-      const speakerResponse = await postData('speaker/create', speakerPayload);
+      const speakerResponse = await postData('admin/create-speaker', speakerPayload);
       if (speakerResponse.error) {
         throw new Error(speakerResponse.error.message);
       }
@@ -222,7 +231,7 @@ function AdminUsersPage() {
 
       // Reset form after successful submission
       setFormState(initialFormState);
-      setSuccess('Speaker created successfully!');
+      setSuccess('Speaker created successfully! The speaker account is now visible and a password reset email has been sent to their email address.');
     } catch (error) {
       console.error('Error creating speaker:', error);
       setError(
@@ -243,22 +252,15 @@ function AdminUsersPage() {
       {/* Main Content Area */}
       <Box className="main-window">
         <Typography variant="h4" gutterBottom>
-          Speaker Submission Form
+          Create Speaker Account
+        </Typography>
+        <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
+          Create a speaker account that will be immediately visible. A password reset email will be sent to the speaker.
         </Typography>
 
         {error && (
           <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
             {error}
-          </Alert>
-        )}
-
-        {success && (
-          <Alert
-            severity="success"
-            sx={{ mb: 2 }}
-            onClose={() => setSuccess(null)}
-          >
-            {success}
           </Alert>
         )}
 
@@ -294,13 +296,13 @@ function AdminUsersPage() {
             required
           />
           <TextField
-            label="Job Title (optional)"
+            label="Job Title"
             name="jobTitle"
             value={formState.jobTitle}
             onChange={handleChange}
           />
           <TextField
-            label="LinkedIn/Website (optional)"
+            label="LinkedIn/Website"
             name="website"
             value={formState.website}
             onChange={handleChange}
@@ -313,13 +315,14 @@ function AdminUsersPage() {
             required
           />
           <TextField
-            label="Bio (optional)"
+            label="Bio"
             name="bio"
             multiline
             rows={3}
             variant="outlined"
             value={formState.bio}
             onChange={handleChange}
+            required
           />
           <Box sx={{ display: 'flex', gap: 2 }}>
             <TextField
@@ -336,14 +339,14 @@ function AdminUsersPage() {
               value={formState.state}
               onChange={handleChange}
               sx={{ flex: 1 }}
-              required
             />
             <TextField
-              label="Country (optional)"
+              label="Country"
               name="country"
               value={formState.country}
               onChange={handleChange}
               sx={{ flex: 1 }}
+              required
             />
           </Box>
           <MultiSelect
@@ -377,8 +380,8 @@ function AdminUsersPage() {
           </FormControl>
 
           <FormControl component="fieldset">
-            <FormLabel component="legend">
-              Preferred Speaking Format (optional)
+            <FormLabel component="legend" required>
+              Preferred Speaking Format
             </FormLabel>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               {speakingFormatOptions.map((format) => (
@@ -397,8 +400,8 @@ function AdminUsersPage() {
           </FormControl>
 
           <FormControl component="fieldset">
-            <FormLabel component="legend">
-              Age/Grade Specialty (optional)
+            <FormLabel component="legend" required>
+              Age/Grade Specialty
             </FormLabel>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               {gradeOptions.map((grade) => (
@@ -416,7 +419,7 @@ function AdminUsersPage() {
             </Box>
           </FormControl>
           <Typography variant="subtitle1">Profile Picture</Typography>
-          <input type="file" onChange={handleFileChange} name="picture" />
+          <input type="file" accept="image/*" onChange={handleFileChange} name="picture" />
           <Button
             variant="contained"
             color="primary"
@@ -426,6 +429,16 @@ function AdminUsersPage() {
           >
             {loading ? 'Creating Speaker...' : 'Submit'}
           </Button>
+
+          {success && (
+            <Alert
+              severity="success"
+              sx={{ mt: 2 }}
+              onClose={() => setSuccess(null)}
+            >
+              {success}
+            </Alert>
+          )}
         </Box>
       </Box>
     </div>

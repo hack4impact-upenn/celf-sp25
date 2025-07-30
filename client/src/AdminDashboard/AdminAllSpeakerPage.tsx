@@ -46,6 +46,7 @@ import SpeakerFilterPanel, {
 import { getData, putData, deleteData } from '../util/api.tsx';
 import MultiSelect from './MultiSelect';
 import { getIndustryFocuses, IndustryFocus } from '../util/industryFocusApi';
+import { processImageUpload } from '../util/imageCompression.ts';
 
 // Updated Speaker interface with new fields for filtering
 interface Speaker {
@@ -185,6 +186,7 @@ function AdminAllSpeakerPage() {
   const [editFormState, setEditFormState] = useState({
     firstName: '',
     lastName: '',
+    email: '',
     organization: '',
     bio: '',
     city: '',
@@ -379,17 +381,21 @@ function AdminAllSpeakerPage() {
     if (!speaker) return;
     setSelectedSpeaker(speaker);
     
-    // Extract firstName and lastName from the populated userId object
+    // Extract firstName, lastName, and email from the populated userId object
     const firstName = typeof speaker.userId === 'object' && speaker.userId !== null 
       ? speaker.userId.firstName 
       : '';
     const lastName = typeof speaker.userId === 'object' && speaker.userId !== null 
       ? speaker.userId.lastName 
       : '';
+    const email = typeof speaker.userId === 'object' && speaker.userId !== null 
+      ? speaker.userId.email 
+      : '';
     
     setEditFormState({
       firstName,
       lastName,
+      email,
       organization: speaker.organization,
       bio: speaker.bio,
       city: speaker.city,
@@ -456,7 +462,7 @@ function AdminAllSpeakerPage() {
   };
 
   // Handle file input for image upload
-  const handleEditFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEditFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       // Limit file size to 1MB
@@ -469,15 +475,15 @@ function AdminAllSpeakerPage() {
         setError('Only image files are allowed.');
         return;
       }
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const result = event.target?.result as string;
+      try {
+        const compressedImageUrl = await processImageUpload(file);
         setEditFormState((prev) => ({
           ...prev,
-          imageUrl: result,
+          imageUrl: compressedImageUrl,
         }));
-      };
-      reader.readAsDataURL(file);
+      } catch (error: any) {
+        setError('Failed to compress image: ' + error.message);
+      }
     }
   };
 
@@ -488,6 +494,22 @@ function AdminAllSpeakerPage() {
   const handleSaveEdit = async () => {
     try {
       if (selectedSpeaker) {
+        // Validate required fields
+        if (!editFormState.industry || editFormState.industry.length === 0) {
+          setError('Please select at least one industry focus.');
+          return;
+        }
+
+        if (!editFormState.grades || editFormState.grades.length === 0) {
+          setError('Please select at least one grade level.');
+          return;
+        }
+
+        if (!editFormState.inperson && !editFormState.virtual) {
+          setError('Please select at least one speaking format (In-person or Virtual).');
+          return;
+        }
+
         // First check if user is authenticated and has admin privileges
         const authStatus = await getData('auth/authstatus');
         if (authStatus.error) {
@@ -929,6 +951,7 @@ function AdminAllSpeakerPage() {
                   value={editFormState.firstName}
                   onChange={handleEditFormChange}
                   sx={{ flex: 1 }}
+                  required
                 />
                 <TextField
                   label="Last Name"
@@ -936,17 +959,33 @@ function AdminAllSpeakerPage() {
                   value={editFormState.lastName}
                   onChange={handleEditFormChange}
                   sx={{ flex: 1 }}
+                  required
                 />
               </Box>
               <TextField
-                label="Job Title (optional)"
+                label="Email"
+                name="email"
+                value={editFormState.email}
+                disabled
+                fullWidth
+                sx={{
+                  '& .MuiInputBase-input.Mui-disabled': {
+                    WebkitTextFillColor: 'rgba(0, 0, 0, 0.6)',
+                  },
+                  '& .MuiInputLabel-root.Mui-disabled': {
+                    color: 'rgba(0, 0, 0, 0.6)',
+                  },
+                }}
+              />
+              <TextField
+                label="Job Title"
                 name="jobTitle"
                 value={editFormState.jobTitle}
                 onChange={handleEditFormChange}
                 fullWidth
               />
               <TextField
-                label="LinkedIn/Website (optional)"
+                label="LinkedIn/Website"
                 name="website"
                 value={editFormState.website}
                 onChange={handleEditFormChange}
@@ -958,6 +997,7 @@ function AdminAllSpeakerPage() {
                 value={editFormState.organization}
                 onChange={handleEditFormChange}
                 fullWidth
+                required
               />
               <TextField
                 label="Bio"
@@ -967,6 +1007,7 @@ function AdminAllSpeakerPage() {
                 fullWidth
                 multiline
                 rows={4}
+                required
               />
               <Box sx={{ display: 'flex', gap: 2 }}>
                 <TextField
@@ -983,14 +1024,14 @@ function AdminAllSpeakerPage() {
                   value={editFormState.state}
                   onChange={handleEditFormChange}
                   sx={{ flex: 1 }}
-                  required
                 />
                 <TextField
-                  label="Country (optional)"
+                  label="Country"
                   name="country"
                   value={editFormState.country}
                   onChange={handleEditFormChange}
                   sx={{ flex: 1 }}
+                  required
                 />
               </Box>
               <Typography variant="subtitle1" sx={{ mt: 2, mb: 1, fontWeight: 500 }}>
@@ -1070,7 +1111,7 @@ function AdminAllSpeakerPage() {
                 </Select>
               </FormControl>
               <Box sx={{ mt: 2 }}>
-                <FormLabel component="legend">Speaking Format</FormLabel>
+                <FormLabel component="legend" required>Speaking Format</FormLabel>
                 <FormControlLabel
                   control={
                     <Switch

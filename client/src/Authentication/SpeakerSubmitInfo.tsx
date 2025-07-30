@@ -1,26 +1,29 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
-  Box,
   TextField,
-  Typography,
   Button,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  FormLabel,
-  Paper,
   Grid,
+  Typography,
+  Box,
+  FormControl,
+  InputLabel,
   Select,
-  OutlinedInput,
   MenuItem,
   Chip,
-  SelectChangeEvent,
-  useTheme,
-  CircularProgress,
+  FormLabel,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
   Alert,
+  CircularProgress,
+  Paper,
+  OutlinedInput,
+  useTheme,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { postData } from '../util/api.tsx';
+import { SelectChangeEvent } from '@mui/material/Select';
+import { postData, getData } from '../util/api.tsx';
+import { processImageUpload } from '../util/imageCompression.ts';
 import { getIndustryFocuses, IndustryFocus } from '../util/industryFocusApi';
 import ScreenGrid from '../components/ScreenGrid.tsx';
 import AlertDialog from '../components/AlertDialog.tsx';
@@ -135,19 +138,21 @@ function SpeakerSubmitInfoPage() {
   };
 
   // Handle file upload for profile picture
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Convert file to base64 data URL
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const result = event.target?.result as string;
+      try {
+        const compressedImage = await processImageUpload(file);
         setFormState((prev) => ({
           ...prev,
-          picture: result,
+          picture: compressedImage,
         }));
-      };
-      reader.readAsDataURL(file);
+      } catch (error) {
+        console.error('Error compressing image:', error);
+        setAlertTitle('Error');
+        setAlertMessage('Failed to compress profile picture. Please try again.');
+        setShowAlert(true);
+      }
     }
   };
 

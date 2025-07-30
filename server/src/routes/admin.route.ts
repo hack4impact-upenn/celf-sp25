@@ -10,6 +10,7 @@ import {
   inviteUser,
   verifyToken,
   inviteAdmin,
+  createSpeakerDirectly,
 } from "../controllers/admin.controller.ts";
 import { isAuthenticated } from "../controllers/auth.middleware.ts";
 import { approve } from "../controllers/auth.controller.ts";
@@ -63,5 +64,22 @@ router.get("/invite/:token", verifyToken);
  * - lastName (string)
  */
 router.post("/invite-admin", isAuthenticated, isAdmin, inviteAdmin);
+
+/**
+ * A POST route to create a speaker directly with admin privileges
+ * Expects a JSON body with the following fields:
+ * - email (string)
+ * - firstName (string)
+ * - lastName (string)
+ * - organization (string)
+ * - bio (string)
+ * - city (string)
+ * - state (string, optional)
+ * - country (string, optional)
+ * - industry (string[], optional)
+ * - grades (string[], optional)
+ * - languages (string[], optional)
+ */
+router.post("/create-speaker", isAuthenticated, isAdmin, createSpeakerDirectly);
 
 export default router;

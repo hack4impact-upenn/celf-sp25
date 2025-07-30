@@ -29,6 +29,7 @@ import AlertDialog from '../components/AlertDialog.tsx';
 import COLORS from '../assets/colors.ts';
 import { useData, putData } from '../util/api.tsx';
 import { getIndustryFocuses, IndustryFocus } from '../util/industryFocusApi';
+import { processImageUpload } from '../util/imageCompression.ts';
 
 const languageOptions = ['English', 'Spanish', 'Mandarin', 'French', 'Other'];
 const gradeOptions = ['Elementary', 'Middle School', 'High School'];
@@ -146,19 +147,21 @@ function SpeakerEditProfilePage() {
     }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Convert file to base64 data URL
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const result = event.target?.result as string;
+      try {
+        const compressedImage = await processImageUpload(file);
         setFormState((prev) => ({
           ...prev,
-          picture: result,
+          picture: compressedImage,
         }));
-      };
-      reader.readAsDataURL(file);
+      } catch (error) {
+        console.error('Error compressing image:', error);
+        setAlertTitle('Error');
+        setAlertMessage('Failed to compress profile picture. Please try again.');
+        setShowAlert(true);
+      }
     }
   };
 
@@ -194,6 +197,14 @@ function SpeakerEditProfilePage() {
     if (!formState.grades || formState.grades.length === 0) {
       setAlertTitle('Error');
       setAlertMessage('Please select at least one grade level you want to speak to.');
+      setShowAlert(true);
+      setLoading(false);
+      return;
+    }
+
+    if (!formState.industry || formState.industry.length === 0) {
+      setAlertTitle('Error');
+      setAlertMessage('Please select at least one industry focus.');
       setShowAlert(true);
       setLoading(false);
       return;
@@ -374,7 +385,7 @@ function SpeakerEditProfilePage() {
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Job Title (optional)"
+                  label="Job Title"
                   name="jobTitle"
                   value={formState.jobTitle || ''}
                   onChange={handleChange}
@@ -383,7 +394,7 @@ function SpeakerEditProfilePage() {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="LinkedIn/Website (optional)"
+                  label="LinkedIn/Website"
                   name="website"
                   value={formState.website || ''}
                   onChange={handleChange}
@@ -392,12 +403,13 @@ function SpeakerEditProfilePage() {
 
               {/* Industry */}
               <Grid item xs={12}>
-                <FormLabel component="legend" sx={{ mb: 1 }}>
+                <FormLabel component="legend" sx={{ mb: 1 }} required>
                   Industry Focus
                 </FormLabel>
                 <Select
                   fullWidth
                   multiple
+                  required
                   value={formState.industry || []}
                   onChange={handleSelectChange}
                   name="industry"
@@ -426,8 +438,8 @@ function SpeakerEditProfilePage() {
 
               {/* Grades */}
               <Grid item xs={12}>
-                <FormLabel component="legend" sx={{ mb: 1 }}>
-                  Age/Grade Specialty (required)
+                <FormLabel component="legend" sx={{ mb: 1 }} required>
+                  Age/Grade Specialty
                 </FormLabel>
                 <Select
                   fullWidth
@@ -457,7 +469,7 @@ function SpeakerEditProfilePage() {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Bio (required)"
+                  label="Bio"
                   name="bio"
                   value={formState.bio || ''}
                   onChange={handleChange}
@@ -481,7 +493,7 @@ function SpeakerEditProfilePage() {
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="State (optional)"
+                  label="State"
                   name="state"
                   value={formState.state || ''}
                   onChange={handleChange}
@@ -528,8 +540,8 @@ function SpeakerEditProfilePage() {
 
               {/* Speaking Formats */}
               <Grid item xs={12}>
-                <FormLabel component="legend" sx={{ mb: 1 }}>
-                  Preferred Speaking Format (required)
+                <FormLabel component="legend" sx={{ mb: 1 }} required>
+                  Preferred Speaking Format
                 </FormLabel>
                 <FormControlLabel
                   control={
