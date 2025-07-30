@@ -94,91 +94,42 @@ afterAll(async () => {
 beforeEach(async () => {
   // Clear the database before each test
   dbConnection.clearInMemoryCollections();
+
+  // Create test users directly with admin status
+  await User.create(user1);
+  await User.create(user2);
+  await User.create(user3);
+  await User.create(user4);
+
+  // Login as admin user
+  const response = await agent.post("/api/auth/login").send({
+    email: testEmail,
+    password: testPassword,
+  });
+  expect(response.status).toBe(StatusCode.OK);
+  expect(await Session.countDocuments()).toBe(1);
 });
 
 describe("testing admin routes", () => {
   describe("testing admin routes as admin", () => {
-    // Want to log in a user and promote them to admin before each of these tests
+    // Set up test users and login as admin before each test
     beforeEach(async () => {
-      // Register users
-      let response = await agent.post("/api/auth/register").send({
-        email: testEmail,
-        password: testPassword,
-        firstName: testFirstName,
-        lastName: testLastName,
-      });
-      expect(response.status).toBe(StatusCode.CREATED);
-      expect(await User.findOne({ email: testEmail })).toBeTruthy();
-      expect(await Session.countDocuments()).toBe(0);
+      // Clear the database before each test
+      dbConnection.clearInMemoryCollections();
 
-      response = await agent.post("/api/auth/register").send({
-        email: testEmail2,
-        password: testPassword2,
-        firstName: testFirstName2,
-        lastName: testLastName2,
-      });
-      expect(response.status).toBe(StatusCode.CREATED);
-      expect(await User.findOne({ email: testEmail2 })).toBeTruthy();
-      expect(await Session.countDocuments()).toBe(0);
+      // Create test users directly with admin status
+      await User.create(user1);
+      await User.create(user2);
+      await User.create(user3);
+      await User.create(user4);
 
-      response = await agent.post("/api/auth/register").send({
-        email: testEmail3,
-        password: testPassword3,
-        firstName: testFirstName3,
-        lastName: testLastName3,
-      });
-      expect(response.status).toBe(StatusCode.CREATED);
-      expect(await User.findOne({ email: testEmail3 })).toBeTruthy();
-      expect(await Session.countDocuments()).toBe(0);
-
-      response = await agent.post("/api/auth/register").send({
-        email: testEmail4,
-        password: testPassword4,
-        firstName: testFirstName4,
-        lastName: testLastName4,
-      });
-      expect(response.status).toBe(StatusCode.CREATED);
-      expect(await User.findOne({ email: testEmail4 })).toBeTruthy();
-      expect(await Session.countDocuments()).toBe(0);
-
-      // Login user3, promote to admin, and then logout
-      response = await agent.post("/api/auth/login").send({
-        email: testEmail3,
-        password: testPassword3,
-      });
-      expect(response.status).toBe(StatusCode.OK);
-      expect(await Session.countDocuments()).toBe(1);
-
-      // Promote user3 to admin
-      response = await agent.put("/api/admin/autopromote").send({
-        email: testEmail3,
-      });
-      expect(response.status).toBe(StatusCode.OK);
-      const admin3 = await User.findOne({ email: testEmail3 });
-      expect(admin3).toBeTruthy();
-      expect(admin3!.admin).toBeTruthy();
-
-      // Logout user3
-      response = await agent.post("/api/auth/logout");
-      expect(response.status).toBe(StatusCode.OK);
-      expect(await Session.countDocuments()).toBe(0);
-
-      // Login user 1 and promote to admin
-      response = await agent.post("/api/auth/login").send({
+      // Login as admin user
+      const response = await agent.post("/api/auth/login").send({
         email: testEmail,
         password: testPassword,
       });
       expect(response.status).toBe(StatusCode.OK);
       expect(await Session.countDocuments()).toBe(1);
-
-      // Promote user to admin
-      response = await agent.put("/api/admin/autopromote").send({
-        email: testEmail,
-      });
-      expect(response.status).toBe(StatusCode.OK);
-      const admin = await User.findOne({ email: testEmail });
-      expect(admin).toBeTruthy();
-      expect(admin!.admin).toBeTruthy();
     });
 
     describe("testing GET /api/admin/users", () => {
@@ -198,49 +149,6 @@ describe("testing admin routes", () => {
         // check admin status
         const response = await agent.get("/api/admin/adminstatus").send();
         expect(response.status).toBe(StatusCode.OK);
-      });
-    });
-
-    describe("testing PUT /api/admin/promote", () => {
-      it("admin can promote user", async () => {
-        // promote user
-        const response = await agent
-          .put("/api/admin/promote")
-          .send({ email: testEmail2 });
-        expect(response.status).toBe(StatusCode.OK);
-        const newAdmin = await User.findOne({ email: testEmail2 });
-        expect(newAdmin).toBeTruthy();
-        expect(newAdmin!.admin).toBeTruthy();
-      });
-
-      it("admin promoting non-existant user throws error", async () => {
-        // promote user
-        const response = await agent
-          .put("/api/admin/promote")
-          .send({ email: "emaildoesnotexist@gmail.com" });
-        expect(response.status).toBe(StatusCode.NOT_FOUND);
-      });
-
-      it("admin promoting self throws error", async () => {
-        // promote user
-        const response = await agent
-          .put("/api/admin/promote")
-          .send({ email: testEmail });
-        expect(response.status).toBe(StatusCode.BAD_REQUEST);
-      });
-
-      it("admin promoting admin throws error", async () => {
-        // promote user
-        const response = await agent
-          .put("/api/admin/promote")
-          .send({ email: testEmail3 });
-        expect(response.status).toBe(StatusCode.BAD_REQUEST);
-      });
-
-      it("promoting without sending body throws email", async () => {
-        // promote user
-        const response = await agent.put("/api/admin/promote").send();
-        expect(response.status).toBe(StatusCode.BAD_REQUEST);
       });
     });
 
@@ -298,51 +206,20 @@ describe("testing admin routes", () => {
   });
 
   describe("testing admin routes as non-admin", () => {
-    // Want to log in a user and promote them to admin before each of these tests
+    // Set up test users and login as non-admin before each test
     beforeEach(async () => {
-      // Register users
-      let response = await agent.post("/api/auth/register").send({
-        email: testEmail,
-        password: testPassword,
-        firstName: testFirstName,
-        lastName: testLastName,
-      });
-      expect(response.status).toBe(StatusCode.CREATED);
-      expect(await User.findOne({ email: testEmail })).toBeTruthy();
-      expect(await Session.countDocuments()).toBe(0);
+      // Clear the database before each test
+      dbConnection.clearInMemoryCollections();
 
-      response = await agent.post("/api/auth/register").send({
-        email: testEmail2,
-        password: testPassword2,
-        firstName: testFirstName2,
-        lastName: testLastName2,
-      });
-      expect(response.status).toBe(StatusCode.CREATED);
-      expect(await User.findOne({ email: testEmail2 })).toBeTruthy();
-      expect(await Session.countDocuments()).toBe(0);
+      // Create test users - user1 as non-admin for testing
+      const nonAdminUser = { ...user1, admin: false };
+      await User.create(nonAdminUser);
+      await User.create(user2);
+      await User.create(user3);
+      await User.create(user4);
 
-      response = await agent.post("/api/auth/register").send({
-        email: testEmail3,
-        password: testPassword3,
-        firstName: testFirstName3,
-        lastName: testLastName3,
-      });
-      expect(response.status).toBe(StatusCode.CREATED);
-      expect(await User.findOne({ email: testEmail3 })).toBeTruthy();
-      expect(await Session.countDocuments()).toBe(0);
-
-      response = await agent.post("/api/auth/register").send({
-        email: testEmail4,
-        password: testPassword4,
-        firstName: testFirstName4,
-        lastName: testLastName4,
-      });
-      expect(response.status).toBe(StatusCode.CREATED);
-      expect(await User.findOne({ email: testEmail4 })).toBeTruthy();
-      expect(await Session.countDocuments()).toBe(0);
-
-      // Login user1
-      response = await agent.post("/api/auth/login").send({
+      // Login as non-admin user
+      const response = await agent.post("/api/auth/login").send({
         email: testEmail,
         password: testPassword,
       });
@@ -362,16 +239,6 @@ describe("testing admin routes", () => {
       it("non admin calling /adminstatus throwsError", async () => {
         // check admin status
         const response = await agent.get("/api/admin/adminstatus").send();
-        expect(response.status).toBe(StatusCode.UNAUTHORIZED);
-      });
-    });
-
-    describe("testing PUT /api/admin/promote", () => {
-      it("nonadmin attempting to promote user throws error", async () => {
-        // promote user
-        const response = await agent
-          .put("/api/admin/promote")
-          .send({ email: testEmail2 });
         expect(response.status).toBe(StatusCode.UNAUTHORIZED);
       });
     });

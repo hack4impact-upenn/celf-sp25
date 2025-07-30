@@ -5,55 +5,20 @@ import { Typography, Grid } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '../util/redux/hooks.ts';
 import {
   logout as logoutAction,
-  toggleAdmin,
   selectUser,
 } from '../util/redux/userSlice.ts';
-import { logout as logoutApi, selfUpgrade } from './api.tsx';
+import { logout as logoutApi } from './api.tsx';
 import ScreenGrid from '../components/ScreenGrid.tsx';
 import PrimaryButton from '../components/buttons/PrimaryButton.tsx';
 
-interface PromoteButtonProps {
-  admin: boolean | null;
-  handleSelfPromote: () => void;
-  navigator: NavigateFunction;
-}
-
 /**
- * A button which, when clicked, will promote the user to admin. If the user is already admin, the button will be a link to the admin dashboard.
- * @param admin - a boolean indicating whether the user is an admin
- * @param handleSelfPromote - a function which promotes the user to admin
- * @param navigator - a function which navigates to a new page (passed in from parent function)
- */
-function PromoteButton({
-  admin,
-  handleSelfPromote,
-  navigator,
-}: PromoteButtonProps) {
-  if (admin === null) {
-    return null;
-  }
-  return !admin ? (
-    <PrimaryButton variant="contained" onClick={handleSelfPromote}>
-      Promote self to admin
-    </PrimaryButton>
-  ) : (
-    <PrimaryButton
-      variant="contained"
-      onClick={() => navigator('/admin-dashboard', { replace: true })}
-    >
-      View all users
-    </PrimaryButton>
-  );
-}
-
-/**
- * The HomePage of the user dashboard. Displays a welcome message, a logout button and a button to promote the user to admin if they are not already an admin. If the user is an admin, the button will navigate them to the admin dashboard. This utilizes redux to access the current user's information.
+ * The HomePage of the user dashboard. Displays a welcome message and a logout button.
+ * This utilizes redux to access the current user's information.
  */
 function HomePage() {
   const user = useAppSelector(selectUser);
   const dispatch = useAppDispatch();
   const navigator = useNavigate();
-  const [admin, setAdmin] = useState(user.admin);
 
   useEffect(() => {
     console.log('User state:', user);
@@ -81,27 +46,14 @@ function HomePage() {
     }
   };
 
-  const handleSelfPromote = async () => {
-    const newAdminStatus = await selfUpgrade(user._id as string);
-    if (newAdminStatus) {
-      dispatch(toggleAdmin());
-      setAdmin(true);
-    }
-  };
-
   const message = `Welcome to the CELF Speaker Portal, ${user.firstName} ${user.lastName}!`;
   return (
     <ScreenGrid>
       <Typography variant="h2">{message}</Typography>
       <Grid item container justifyContent="center">
-        <PromoteButton
-          admin={admin}
-          handleSelfPromote={handleSelfPromote}
-          navigator={navigator}
-        />
-      </Grid>
-      <Grid item container justifyContent="center">
-        <Button onClick={handleLogout}>Logout</Button>
+        <PrimaryButton variant="contained" onClick={handleLogout}>
+          Logout
+        </PrimaryButton>
       </Grid>
     </ScreenGrid>
   );

@@ -6,7 +6,6 @@ import React, { useEffect, useState } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
 import { PaginationTable, TColumn } from '../components/PaginationTable.tsx';
 import DeleteUserButton from './DeleteUserButton.tsx';
-import PromoteUserButton from './PromoteUserButton.tsx';
 import { useData } from '../util/api.tsx';
 import { useAppSelector } from '../util/redux/hooks.ts';
 import { selectUser } from '../util/redux/userSlice.ts';
@@ -20,13 +19,12 @@ interface AdminDashboardRow {
   email: string;
   userType: React.ReactNode;
   status?: React.ReactNode;
-  promote: React.ReactElement;
   remove: React.ReactElement;
 }
 
 /**
  * The standalone table component for holding information about the users in
- * the database and allowing admins to remove users and promote users to admins.
+ * the database and allowing admins to remove users.
  */
 function UserTable() {
   // define columns for the table
@@ -36,14 +34,12 @@ function UserTable() {
     { id: 'email', label: 'Email' },
     { id: 'userType', label: 'User Type' },
     { id: 'status', label: 'Status' },
-    { id: 'promote', label: 'Promote to Admin' },
     { id: 'remove', label: 'Remove User' },
   ];
 
   // Used to create the data type to create a row in the table
   function createAdminDashboardRow(
     user: IUser,
-    promote: React.ReactElement,
     remove: React.ReactElement,
   ): AdminDashboardRow {
     const { _id, firstName, lastName, email, admin, role, speakerVisible, profileComplete } = user;
@@ -73,6 +69,9 @@ function UserTable() {
       } else {
         statusChip = <Chip label="Hidden: Incomplete" color="error" size="small" sx={{ fontWeight: 600, fontSize: '0.85em', borderRadius: '8px' }} />;
       }
+    } else {
+      // For non-speaker users, show N/A to maintain column alignment
+      statusChip = <Chip label="N/A" color="default" size="small" sx={{ fontWeight: 600, fontSize: '0.85em', borderRadius: '8px' }} />;
     }
 
     return {
@@ -82,7 +81,6 @@ function UserTable() {
       email,
       userType: <Chip label={label} color={color} size="small" sx={{ fontWeight: 600, fontSize: '0.95em', borderRadius: '8px' }} />,
       status: statusChip,
-      promote,
       remove,
     };
   }
@@ -91,14 +89,10 @@ function UserTable() {
   const users = useData('admin/all');
   const self = useAppSelector(selectUser);
 
-  // Upon getting the list of users for the database, set the state of the userList to contain all users except for logged in user
+  // Upon getting the list of users for the database, set the state of the userList to contain all users
   useEffect(() => {
-    setUserList(
-      users?.data.filter(
-        (entry: IUser) => entry && entry.email && entry.email !== self.email,
-      ),
-    );
-  }, [users, self]);
+    setUserList(users?.data || []);
+  }, [users]);
 
   // update state of userlist to remove a user from  the frontend representation of the data
   const removeUser = (user: IUser) => {
@@ -106,19 +100,6 @@ function UserTable() {
       userList.filter(
         (entry: IUser) => entry && entry.email && entry.email !== user.email,
       ),
-    );
-  };
-  // update state of userlist to promote a user on the frontend representation
-  const updateAdmin = (email: string) => {
-    setUserList(
-      userList.map((entry) => {
-        if (entry.email !== email) {
-          return entry;
-        }
-        const newEntry = entry;
-        newEntry.admin = true;
-        return newEntry;
-      }),
     );
   };
 
@@ -135,11 +116,6 @@ function UserTable() {
       rows={userList.map((user: IUser) =>
         createAdminDashboardRow(
           user,
-          <PromoteUserButton
-            admin={user.admin}
-            email={user.email}
-            updateAdmin={updateAdmin}
-          />,
           <DeleteUserButton
             user={user}
             removeRow={removeUser}

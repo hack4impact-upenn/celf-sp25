@@ -6,7 +6,6 @@ import express from "express";
 import { isAdmin } from "../controllers/admin.middleware.ts";
 import {
   getAllUsers,
-  upgradePrivilege,
   deleteUser,
   inviteUser,
   verifyToken,
@@ -35,22 +34,6 @@ router.get("/speakers", isAuthenticated, isAdmin, getAllSpeakersAdmin);
  * requestor is a authenticated. Throws an error if the requestor is not an admin.
  */
 router.get("/adminstatus", isAuthenticated, isAdmin, approve);
-
-/**
- * A PUT route to upgrade a user's privilege. Checks first if the requestor
- * is a authenticated and is an admin.
- * Expects a JSON body with the following fields:
- * - email (string) - The email of the user to be promoted
- */
-router.put("/promote", isAuthenticated, isAdmin, upgradePrivilege);
-
-/**
- * A PUT route to upgrade a user's privilege
- * Expects a JSON body with the following fields:
- * - email (string) - The email of the user to be promoted
- */
-// delete during deployment
-router.put("/autopromote", upgradePrivilege);
 
 /**
  * A PUT route to delete a user. Checks first if the requestor

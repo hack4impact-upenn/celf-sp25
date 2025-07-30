@@ -67,41 +67,6 @@ const getAllUsers = async (
 };
 
 /**
- * Upgrade a user to an admin. The email of the user is expected to be in the request body.
- * Upon success, return 200 OK status code.
- */
-const upgradePrivilege = async (
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
-) => {
-  const { email } = req.body;
-  if (!email) {
-    next(ApiError.missingFields(["email"]));
-    return;
-  }
-
-  const user: IUser | null = await getUserByEmail(email);
-  if (!user) {
-    next(ApiError.notFound(`User with email ${email} does not exist`));
-    return;
-  }
-  if (user.admin) {
-    next(ApiError.badRequest(`User is already an admin`));
-    return;
-  }
-
-  upgradeUserToAdmin(user._id)
-    .then(() => {
-      res.sendStatus(StatusCode.OK);
-    })
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    .catch((e) => {
-      next(ApiError.internal("Unable to upgrade user to admin."));
-    });
-};
-
-/**
  * Delete a user from the database. The email of the user is expected to be in the request parameter (url). Send a 200 OK status code on success.
  */
 const deleteUser = async (
@@ -313,4 +278,4 @@ const inviteAdmin = async (
   }
 };
 
-export { getAllUsers, upgradePrivilege, deleteUser, verifyToken, inviteUser, inviteAdmin };
+export { getAllUsers, deleteUser, verifyToken, inviteUser, inviteAdmin };

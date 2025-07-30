@@ -133,12 +133,22 @@ function LoginPage() {
         .catch((e) => {
           console.log('failed to login...');
           setShowError('alert', true);
-          setErrorMessage('alert', e.message);
           
-          // Check if this is a verification error
-          const isVerificationErr = e.message.toLowerCase().includes('verify') || 
-                                   e.message.toLowerCase().includes('verification');
-          setIsVerificationError(isVerificationErr);
+          // Check for specific error types and provide better messages
+          const errorMessage = e.message.toLowerCase();
+          let displayMessage = e.message;
+          
+          if (errorMessage.includes('already logged in') || errorMessage.includes('already authenticated')) {
+            displayMessage = 'You are already logged in. Please refresh the page or try again.';
+          } else if (errorMessage.includes('verify') || errorMessage.includes('verification')) {
+            setIsVerificationError(true);
+          } else if (errorMessage.includes('invalid credentials') || errorMessage.includes('wrong password')) {
+            displayMessage = 'Invalid email or password. Please check your credentials and try again.';
+          } else if (errorMessage.includes('user not found')) {
+            displayMessage = 'No account found with this email address. Please check your email or sign up for a new account.';
+          }
+          
+          setErrorMessage('alert', displayMessage);
         });
     }
   }
