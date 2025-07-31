@@ -189,14 +189,14 @@ function SpeakerRegisterPage() {
       <Box
         sx={{
           background: `linear-gradient(135deg, ${COLORS.background} 0%, ${COLORS.white} 100%)`,
-          minHeight: '100vh',
+          minHeight: '200vh',
           width: '100%',
           display: 'flex',
           alignItems: 'flex-start',
           justifyContent: 'center',
           padding: 4,
-          paddingTop: 8,
-          paddingBottom: 8,
+          paddingTop: 50,
+          paddingBottom: 16,
         }}
       >
         <Paper
