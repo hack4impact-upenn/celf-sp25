@@ -151,12 +151,14 @@ const isProfileComplete = (speaker: ISpeaker): boolean => {
 };
 
 /**
- * Deletes a speaker profile
+ * Deletes a speaker profile and associated user account
  * @param userId - The userId of the speaker to delete
  * @returns The deleted speaker
  */
 const deleteSpeaker = async (userId: string) => {
   const speaker = await Speaker.findOneAndDelete({ userId }).exec();
+  const user = await User.findOneAndDelete({ _id: userId }).exec();
+  console.log("Just deleted", user);
   return speaker;
 };
 
