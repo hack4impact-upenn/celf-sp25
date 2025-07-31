@@ -299,8 +299,37 @@ function AccountSettingsPage() {
               {/* Submit Button */}
               <Grid item xs={12}>
                 <Box
-                  sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}
+                  sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2, gap: 2 }}
                 >
+                  <Button
+                    variant="outlined"
+                    onClick={() => {
+                      // Navigate back to appropriate home page based on user type
+                      if (user.admin) {
+                        navigate('/admin-dashboard');
+                      } else if (user.role && user.role.toLowerCase() === 'speaker') {
+                        navigate('/speaker-dashboard');
+                      } else if (user.role && user.role.toLowerCase() === 'teacher') {
+                        navigate('/teacher-search-speaker');
+                      } else {
+                        navigate('/home');
+                      }
+                    }}
+                    sx={{
+                      height: 48,
+                      fontSize: '1rem',
+                      textTransform: 'none',
+                      borderColor: COLORS.primaryDark,
+                      color: COLORS.primaryDark,
+                      '&:hover': {
+                        borderColor: COLORS.primaryDark,
+                        backgroundColor: COLORS.primaryDark,
+                        color: COLORS.white,
+                      },
+                    }}
+                  >
+                    Cancel
+                  </Button>
                   <PrimaryButton
                     type="submit"
                     variant="contained"

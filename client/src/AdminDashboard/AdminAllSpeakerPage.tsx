@@ -24,7 +24,6 @@ import {
   Snackbar,
   Select,
   MenuItem,
-  TableSortLabel,
   Paper,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
@@ -209,10 +208,6 @@ function AdminAllSpeakerPage() {
   const [industryFocuses, setIndustryFocuses] = useState<IndustryFocus[]>([]);
   const [loadingFocuses, setLoadingFocuses] = useState(true);
   const [industryFocusError, setIndustryFocusError] = useState<string | null>(null);
-
-  // Sorting state
-  const [sortColumn, setSortColumn] = useState<string | null>(null);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc' | undefined>(undefined);
 
   // Load speakers from backend
   useEffect(() => {
@@ -644,57 +639,6 @@ function AdminAllSpeakerPage() {
     setSuccess(null);
   };
 
-  // Sorting function
-  const handleSort = (columnId: string) => {
-    const isAsc = sortColumn === columnId && sortDirection === 'asc';
-    const newDirection = isAsc ? 'desc' : 'asc';
-    setSortDirection(newDirection);
-    setSortColumn(columnId);
-  };
-
-  // Sort the filtered speakers based on current sort state
-  const sortedSpeakers = React.useMemo(() => {
-    if (!sortColumn || !sortDirection) {
-      return filteredSpeakers;
-    }
-
-    return [...filteredSpeakers].sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
-
-      switch (sortColumn) {
-        case 'name':
-          aValue = typeof a.userId === 'object' && a.userId !== null
-            ? `${a.userId.firstName} ${a.userId.lastName}`.toLowerCase()
-            : '';
-          bValue = typeof b.userId === 'object' && b.userId !== null
-            ? `${b.userId.firstName} ${b.userId.lastName}`.toLowerCase()
-            : '';
-          break;
-        case 'organization':
-          aValue = a.organization.toLowerCase();
-          bValue = b.organization.toLowerCase();
-          break;
-        case 'location':
-          aValue = [a.city, a.state, a.country].filter(Boolean).join(', ').toLowerCase();
-          bValue = [b.city, b.state, b.country].filter(Boolean).join(', ').toLowerCase();
-          break;
-        case 'visibility':
-          aValue = a.visible ? 'visible' : 'hidden';
-          bValue = b.visible ? 'visible' : 'hidden';
-          break;
-        default:
-          return 0;
-      }
-
-      if (sortDirection === 'asc') {
-        return aValue.localeCompare(bValue);
-      } else {
-        return bValue.localeCompare(aValue);
-      }
-    });
-  }, [filteredSpeakers, sortColumn, sortDirection]);
-
   return (
     <div className="flex-div">
       <TopBar />
@@ -734,56 +678,8 @@ function AdminAllSpeakerPage() {
             </FilterPanelContainer>
           </Collapse>
 
-          {/* Sortable Header */}
-          <Box sx={{ mb: 2, mt: 2 }}>
-            <Paper elevation={1} sx={{ p: 2, backgroundColor: '#f5f5f5' }}>
-              <Grid container spacing={2} alignItems="center">
-                <Grid item xs={3}>
-                  <TableSortLabel
-                    active={sortColumn === 'name'}
-                    direction={sortColumn === 'name' ? sortDirection : undefined}
-                    onClick={() => handleSort('name')}
-                    sx={{ cursor: 'pointer', fontWeight: 600 }}
-                  >
-                    Name
-                  </TableSortLabel>
-                </Grid>
-                <Grid item xs={3}>
-                  <TableSortLabel
-                    active={sortColumn === 'organization'}
-                    direction={sortColumn === 'organization' ? sortDirection : undefined}
-                    onClick={() => handleSort('organization')}
-                    sx={{ cursor: 'pointer', fontWeight: 600 }}
-                  >
-                    Organization
-                  </TableSortLabel>
-                </Grid>
-                <Grid item xs={3}>
-                  <TableSortLabel
-                    active={sortColumn === 'location'}
-                    direction={sortColumn === 'location' ? sortDirection : undefined}
-                    onClick={() => handleSort('location')}
-                    sx={{ cursor: 'pointer', fontWeight: 600 }}
-                  >
-                    Location
-                  </TableSortLabel>
-                </Grid>
-                <Grid item xs={3}>
-                  <TableSortLabel
-                    active={sortColumn === 'visibility'}
-                    direction={sortColumn === 'visibility' ? sortDirection : undefined}
-                    onClick={() => handleSort('visibility')}
-                    sx={{ cursor: 'pointer', fontWeight: 600 }}
-                  >
-                    Status
-                  </TableSortLabel>
-                </Grid>
-              </Grid>
-            </Paper>
-          </Box>
-
           <CardContainer>
-            {sortedSpeakers.map((speaker) => {
+            {filteredSpeakers.map((speaker) => {
               const speakerName =
                 typeof speaker.userId === 'object' && speaker.userId !== null
                   ? `${speaker.userId.firstName} ${speaker.userId.lastName}`
