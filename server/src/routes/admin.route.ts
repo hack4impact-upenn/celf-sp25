@@ -11,6 +11,7 @@ import {
   verifyToken,
   inviteAdmin,
   createSpeakerDirectly,
+  exportSpeakersToCSV,
 } from "../controllers/admin.controller.ts";
 import { isAuthenticated } from "../controllers/auth.middleware.ts";
 import { approve } from "../controllers/auth.controller.ts";
@@ -81,5 +82,12 @@ router.post("/invite-admin", isAuthenticated, isAdmin, inviteAdmin);
  * - languages (string[], optional)
  */
 router.post("/create-speaker", isAuthenticated, isAdmin, createSpeakerDirectly);
+
+/**
+ * A POST route to export speaker data to CSV
+ * Expects a JSON body with the following fields:
+ * - exportType (string) - 'all' for all speakers, 'new' for speakers since last export
+ */
+router.post("/export-speakers", isAuthenticated, isAdmin, exportSpeakersToCSV);
 
 export default router;

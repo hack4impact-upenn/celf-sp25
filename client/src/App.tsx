@@ -16,6 +16,7 @@ import AdminAddSpeakerPage from './AdminDashboard/AdminAddSpeakerPage.tsx';
 import AdminAllSpeakerPage from './AdminDashboard/AdminAllSpeakerPage.tsx';
 import AdminRequestsPage from './AdminDashboard/AdminRequestsPage';
 import AdminIndustryFocusPage from './AdminDashboard/AdminIndustryFocusPage.tsx';
+import AdminExportSpeakersPage from './AdminDashboard/AdminExportSpeakersPage.tsx';
 import SpeakerEditProfilePage from './SpeakerDashboard/SpeakerEditProfilePage.tsx';
 import SpeakerRequestsPage from './SpeakerDashboard/SpeakerRequestsPage.tsx';
 
@@ -163,6 +164,10 @@ function App() {
                   <Route
                     path="/admin-industry-focus"
                     element={<AdminIndustryFocusPage />}
+                  />
+                  <Route
+                    path="/admin-export-speakers"
+                    element={<AdminExportSpeakersPage />}
                   />
                 </Route>
 

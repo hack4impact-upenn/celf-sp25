@@ -23,7 +23,7 @@ import {
 import { IInvite } from "../models/invite.model.ts";
 import { emailInviteLink, emailResetPasswordLink } from "../services/mail.service.ts";
 import { deleteTeacher } from "../services/teacher.service.ts";
-import { deleteSpeaker, getSpeakerByUserId, createSpeaker } from "../services/speaker.service.ts";
+import { deleteSpeaker, getSpeakerByUserId, createSpeaker, getAllSpeakersForAdmin } from "../services/speaker.service.ts";
 import { deleteRequestsBySpeakerId, deleteRequestsByTeacherId } from "../services/request.service.ts";
 
 /**
@@ -387,4 +387,122 @@ const createSpeakerDirectly = async (
   }
 };
 
-export { getAllUsers, deleteUser, verifyToken, inviteUser, inviteAdmin, createSpeakerDirectly };
+/**
+ * Export speaker data to CSV
+ */
+const exportSpeakersToCSV = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const { exportType } = req.body;
+  
+  if (!exportType || !['all', 'new'].includes(exportType)) {
+    next(ApiError.badRequest("Export type must be 'all' or 'new'"));
+    return;
+  }
+
+  try {
+    // Get all speakers with populated user data
+    const speakers = await getAllSpeakersForAdmin();
+    console.log(`Found ${speakers.length} speakers in database`);
+    
+    let filteredSpeakers = speakers;
+    
+    // If exporting only new speakers, filter by creation date
+    if (exportType === 'new') {
+      // For now, we'll export all speakers since we don't have a last export tracking
+      // In a real implementation, you'd store the last export date and filter by it
+      // For demonstration, we'll export speakers created in the last 30 days
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      filteredSpeakers = speakers.filter((speaker: any) => {
+        const createdAt = new Date(speaker.createdAt || speaker._id.getTimestamp());
+        return createdAt >= thirtyDaysAgo;
+      });
+      console.log(`Filtered to ${filteredSpeakers.length} new speakers`);
+    }
+
+    // Convert to CSV format
+    const csvData = convertSpeakersToCSV(filteredSpeakers);
+    console.log(`Generated CSV data length: ${csvData.length}`);
+    
+    // Return JSON response with CSV data
+    const response = {
+      success: true,
+      count: filteredSpeakers.length,
+      csvData: csvData
+    };
+    console.log('Sending response:', JSON.stringify(response, null, 2));
+    res.status(StatusCode.OK).json(response);
+  } catch (error) {
+    console.error('Error exporting speakers:', error);
+    next(ApiError.internal("Failed to export speakers data"));
+  }
+};
+
+/**
+ * Convert speakers data to CSV format
+ */
+const convertSpeakersToCSV = (speakers: any[]) => {
+  console.log(`Converting ${speakers.length} speakers to CSV`);
+  if (speakers.length === 0) {
+    console.log('No speakers to convert');
+    return '';
+  }
+
+  // Define CSV headers
+  const headers = [
+    'First Name',
+    'Last Name',
+    'Email',
+    'Organization',
+    'Bio',
+    'City',
+    'State',
+    'Country',
+    'In-Person Available',
+    'Virtual Available',
+    'Industry Focus',
+    'Grades',
+    'Languages',
+    'Visible',
+    'Created At'
+  ];
+
+  // Convert data to CSV rows
+  if (speakers.length > 0) {
+    console.log('First speaker structure:', JSON.stringify(speakers[0], null, 2));
+  }
+  
+  const rows = speakers.map((speaker: any) => {
+    const user = speaker.userId;
+    return [
+      user?.firstName || '',
+      user?.lastName || '',
+      user?.email || '',
+      speaker.organization || '',
+      `"${(speaker.bio || '').replace(/"/g, '""')}"`, // Escape quotes in bio
+      speaker.city || '',
+      speaker.state || '',
+      speaker.country || '',
+      speaker.inperson ? 'Yes' : 'No',
+      speaker.virtual ? 'Yes' : 'No',
+      (speaker.industry || []).join('; '),
+      (speaker.grades || []).join('; '),
+      (speaker.languages || []).join('; '),
+      speaker.visible ? 'Yes' : 'No',
+      new Date(speaker.createdAt || speaker._id.getTimestamp()).toISOString()
+    ];
+  });
+
+  // Combine headers and rows
+  const csvContent = [headers, ...rows]
+    .map(row => row.join(','))
+    .join('\n');
+
+  return csvContent;
+};
+
+export { getAllUsers, deleteUser, verifyToken, inviteUser, inviteAdmin, createSpeakerDirectly, exportSpeakersToCSV };

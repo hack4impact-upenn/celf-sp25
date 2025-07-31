@@ -65,6 +65,15 @@ const Sidebar = () => {
           <span>Industry Focuses</span>
         </button>
       </div>
+
+      <div className="sidebar-card">
+        <button
+          className="sidebar-button"
+          onClick={() => handleNavigation('/admin-export-speakers')}
+        >
+          <span>Export Speakers</span>
+        </button>
+      </div>
     </div>
   );
 };
