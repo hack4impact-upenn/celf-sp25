@@ -8,6 +8,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  TableSortLabel,
 } from '@mui/material';
 
 /**
@@ -28,12 +29,14 @@ interface RowProps {
 /**
  * This column interface defines the properties necessary for each column in a table.
  * The align and minWidth props are specific to the MUI Table Cell component.
+ * The sortable prop indicates if the column can be sorted.
  */
 interface TColumn {
   id: string;
   label: string;
   minWidth?: number;
   align?: 'left' | 'right' | 'center' | 'justify' | 'inherit';
+  sortable?: boolean;
 }
 
 /**
@@ -43,6 +46,33 @@ interface TRow {
   key: string;
   [key: string]: any;
 }
+
+/**
+ * Sorting direction type
+ */
+type SortDirection = 'asc' | 'desc' | null;
+
+/**
+ * Extract text content from a value, handling React elements
+ */
+const extractTextContent = (value: any): string => {
+  if (value === null || value === undefined) {
+    return '';
+  }
+  
+  // If it's a React element, try to extract text from props
+  if (React.isValidElement(value)) {
+    const props = value.props as any;
+    const label = props?.label;
+    const children = props?.children;
+    if (label) return String(label);
+    if (children) return String(children);
+    return '';
+  }
+  
+  // Convert to string
+  return String(value);
+};
 
 /**
  * Our pagination table is set up by passing in a row component for each row.
@@ -78,6 +108,8 @@ function Row({ row, columns }: RowProps) {
 function PaginationTable({ rows, columns }: TableProps) {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [sortColumn, setSortColumn] = React.useState<string | null>(null);
+  const [sortDirection, setSortDirection] = React.useState<SortDirection>(null);
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -89,6 +121,36 @@ function PaginationTable({ rows, columns }: TableProps) {
     setRowsPerPage(+event.target.value);
     setPage(0);
   };
+
+  const handleSort = (columnId: string) => {
+    const isAsc = sortColumn === columnId && sortDirection === 'asc';
+    const newDirection = isAsc ? 'desc' : 'asc';
+    setSortDirection(newDirection);
+    setSortColumn(columnId);
+    setPage(0);
+  };
+
+  // Sort the rows based on current sort state
+  const sortedRows = React.useMemo(() => {
+    if (!sortColumn || !sortDirection) {
+      return rows;
+    }
+
+    return [...rows].sort((a, b) => {
+      const aValue = a[sortColumn];
+      const bValue = b[sortColumn];
+
+      // Extract text content from values
+      const aText = extractTextContent(aValue).toLowerCase();
+      const bText = extractTextContent(bValue).toLowerCase();
+
+      if (sortDirection === 'asc') {
+        return aText.localeCompare(bText);
+      } else {
+        return bText.localeCompare(aText);
+      }
+    });
+  }, [rows, sortColumn, sortDirection]);
 
   return (
     <Paper
@@ -108,14 +170,26 @@ function PaginationTable({ rows, columns }: TableProps) {
                   key={column.id}
                   align={column.align || 'left'}
                   style={{ minWidth: column.minWidth }}
+                  sortDirection={sortColumn === column.id ? sortDirection || undefined : undefined}
                 >
-                  {column.label}
+                  {column.sortable ? (
+                    <TableSortLabel
+                      active={sortColumn === column.id}
+                      direction={sortColumn === column.id ? (sortDirection || 'asc') : 'asc'}
+                      onClick={() => handleSort(column.id)}
+                      sx={{ cursor: 'pointer' }}
+                    >
+                      {column.label}
+                    </TableSortLabel>
+                  ) : (
+                    column.label
+                  )}
                 </TableCell>
               ))}
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows
+            {sortedRows
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((row) => {
                 return <Row row={row} key={row.key} columns={columns} />;
@@ -126,7 +200,7 @@ function PaginationTable({ rows, columns }: TableProps) {
       <TablePagination
         rowsPerPageOptions={[10, 25, 100]}
         component="div"
-        count={rows.length}
+        count={sortedRows.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}

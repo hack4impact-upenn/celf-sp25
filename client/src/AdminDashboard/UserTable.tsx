@@ -29,12 +29,12 @@ interface AdminDashboardRow {
 function UserTable() {
   // define columns for the table
   const columns: TColumn[] = [
-    { id: 'first', label: 'First Name' },
-    { id: 'last', label: 'Last Name' },
-    { id: 'email', label: 'Email' },
-    { id: 'userType', label: 'User Type' },
-    { id: 'status', label: 'Status' },
-    { id: 'remove', label: 'Remove User' },
+    { id: 'first', label: 'First Name', sortable: true },
+    { id: 'last', label: 'Last Name', sortable: true },
+    { id: 'email', label: 'Email', sortable: true },
+    { id: 'userType', label: 'User Type', sortable: true },
+    { id: 'status', label: 'Status', sortable: true },
+    { id: 'remove', label: 'Remove User', sortable: false },
   ];
 
   // Used to create the data type to create a row in the table
