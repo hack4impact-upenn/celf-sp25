@@ -138,11 +138,14 @@ const deleteCurrentUser = async (
           if (e) {
             console.error("Error destroying session after account deletion:", e);
           }
+          // Send response only after session is destroyed
+          res.status(StatusCode.OK).json({ message: "Account deleted successfully" });
         });
+      } else {
+        // Send response if no session to destroy
+        res.status(StatusCode.OK).json({ message: "Account deleted successfully" });
       }
     });
-
-    res.status(StatusCode.OK).json({ message: "Account deleted successfully" });
   } catch (error) {
     console.error("Error in deleteCurrentUser:", error);
     next(ApiError.internal("Unable to delete account"));

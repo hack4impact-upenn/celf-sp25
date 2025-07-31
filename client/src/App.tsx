@@ -65,6 +65,10 @@ function App() {
                     element={<AdminRegisterPage />}
                   />
                   <Route
+                    path="/admin-register/:token"
+                    element={<AdminRegisterPage />}
+                  />
+                  <Route
                     path="/teacher-register"
                     element={<TeacherRegisterPage />}
                   />

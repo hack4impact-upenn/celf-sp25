@@ -37,8 +37,6 @@ function LoginSelectPage() {
       navigate('/teacher-register');
     } else if (role === 'Speaker') {
       navigate('/speaker-register');
-    } else if (role === 'Admin') {
-      navigate('/admin-register');
     }
   };
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, TextField, Grid, Typography, Paper, Box } from '@mui/material';
-import { useNavigate, Link as RouterLink, useLocation } from 'react-router-dom';
+import { useNavigate, Link as RouterLink, useLocation, useParams } from 'react-router-dom';
 import FormCol from '../components/form/FormCol.tsx';
 import {
   emailRegex,
@@ -23,6 +23,7 @@ import COLORS from '../assets/colors.ts';
 function RegisterPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const params = useParams();
 
   // Default values for state
   const defaultValues = {
@@ -58,24 +59,42 @@ function RegisterPage() {
   const [isRegistered, setRegistered] = useState(false);
   const [inviteToken, setInviteToken] = useState<string | null>(null);
 
-  // Handle invite data from navigation state
+  // Handle invite data from navigation state or URL params
   useEffect(() => {
+    // Check for invite token in URL params first
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    const urlToken = params.token;
+    
     if (location.state) {
-      const { email, token, role, firstName, lastName } = location.state as { 
+      const { email, token: stateToken, role, firstName, lastName } = location.state as { 
         email: string; 
         token: string; 
         role: string;
         firstName?: string;
         lastName?: string;
       };
-      if (email && token && role === 'admin') {
+      if (email && stateToken && role === 'admin') {
         setValue('email', email);
         setValue('firstName', firstName || '');
         setValue('lastName', lastName || '');
-        setInviteToken(token);
+        setInviteToken(stateToken);
       }
+    } else if (urlToken) {
+      // If token is in URL path params, use it
+      setInviteToken(urlToken);
+    } else if (token) {
+      // If token is in URL query params, use it
+      setInviteToken(token);
+    } else {
+      // No valid invite token found, redirect to login
+      navigate('/login', { 
+        state: { 
+          error: 'Admin registration requires a valid invite link. Please contact an administrator.' 
+        } 
+      });
     }
-  }, [location.state]);
+  }, [location.state, navigate, params.token]);
 
   // Helper functions for changing only one field in a state object
   const setValue = (field: string, value: string) => {
@@ -153,17 +172,19 @@ function RegisterPage() {
   };
 
   async function handleSubmit() {
+    if (!inviteToken) {
+      setShowError('alert', true);
+      setErrorMessage('alert', 'Admin registration requires a valid invite token');
+      return;
+    }
+    
     if (validateInputs()) {
-      const registerFunction = inviteToken 
-        ? () => registerInvite(values.firstName, values.lastName, values.email, values.password, inviteToken)
-        : () => register(values.firstName, values.lastName, values.email, values.password);
-      
-      registerFunction()
+      registerInvite(values.firstName, values.lastName, values.email, values.password, inviteToken)
         .then(() => {
           setShowError('alert', true);
           setAlertTitle('');
           setRegistered(true);
-          setErrorMessage('alert', inviteToken ? 'Account created successfully!' : 'Check email to verify account');
+          setErrorMessage('alert', 'Account created successfully!');
         })
         .catch((e) => {
           setShowError('alert', true);
@@ -282,7 +303,7 @@ function RegisterPage() {
                   label="Email"
                   value={values.email}
                   onChange={(e) => setValue('email', e.target.value)}
-                  disabled={!!inviteToken}
+                  disabled={true}
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       '&:hover fieldset': {
