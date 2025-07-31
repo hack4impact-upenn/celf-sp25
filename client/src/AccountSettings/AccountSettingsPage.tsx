@@ -105,7 +105,6 @@ function AccountSettingsPage() {
       const updateResponse = await putData(`user/${userId}`, {
         firstName: formState.firstName,
         lastName: formState.lastName,
-        email: formState.email,
       });
       if (updateResponse.error) {
         setAlertTitle('Error');
@@ -237,8 +236,15 @@ function AccountSettingsPage() {
                       name="email"
                       type="email"
                       value={formState.email}
-                      onChange={handleChange}
-                      required
+                      disabled
+                      sx={{
+                        '& .MuiInputBase-input.Mui-disabled': {
+                          WebkitTextFillColor: 'rgba(0, 0, 0, 0.6)',
+                        },
+                        '& .MuiInputLabel-root.Mui-disabled': {
+                          color: 'rgba(0, 0, 0, 0.6)',
+                        },
+                      }}
                     />
                   </Grid>
                 </Grid>

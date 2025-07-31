@@ -54,6 +54,7 @@ interface TeacherProfile {
   bio?: string;
   city?: string;
   state?: string;
+  country?: string;
   picture?: string;
   userId?: string | { _id?: string; id?: string };
 }
@@ -68,6 +69,7 @@ const initialFormState: TeacherProfile = {
   bio: '',
   city: '',
   state: '',
+  country: '',
   picture: '',
 };
 
@@ -145,21 +147,6 @@ function TeacherProfilePage() {
     }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const result = event.target?.result as string;
-        setFormState(prev => ({
-          ...prev,
-          picture: result,
-        }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const handleCityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setCityInput(value);
@@ -188,8 +175,8 @@ function TeacherProfilePage() {
     if (!formState.city || formState.city.trim() === '') {
       requiredFields.push('City');
     }
-    if (!formState.state || formState.state.trim() === '') {
-      requiredFields.push('State');
+    if (!formState.country || formState.country.trim() === '') {
+      requiredFields.push('Country');
     }
     if (!formState.bio || formState.bio.trim() === '') {
       requiredFields.push('Bio');
@@ -328,36 +315,6 @@ function TeacherProfilePage() {
               </Grid>
               <Grid item xs={12}><Divider sx={{ my: 2 }} /></Grid>
               
-              {/* Profile Picture Section */}
-              <Grid item xs={12}>
-                <Typography
-                  variant="h6"
-                  sx={{ color: COLORS.primaryDark, mb: 2 }}
-                >
-                  Profile Picture
-                </Typography>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  style={{ marginBottom: '16px' }}
-                />
-                {formState.picture && (
-                  <Box
-                    component="img"
-                    src={formState.picture}
-                    alt="Profile"
-                    sx={{
-                      width: 150,
-                      height: 150,
-                      borderRadius: 2,
-                      objectFit: 'cover',
-                      border: '2px solid #e0e0e0',
-                    }}
-                  />
-                )}
-              </Grid>
-              <Grid item xs={12}><Divider sx={{ my: 2 }} /></Grid>
               {/* School Information Section */}
               <Grid item xs={12}>
                 <Typography variant="h6" sx={{ color: COLORS.primaryDark, mb: 2 }}>School Information</Typography>
@@ -470,6 +427,17 @@ function TeacherProfilePage() {
                       value={stateInput}
                       onChange={handleStateChange}
                       placeholder="e.g., PA"
+                      size="medium"
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Country"
+                      name="country"
+                      value={formState.country || ''}
+                      onChange={handleChange}
+                      placeholder="e.g., United States"
                       size="medium"
                       required
                     />

@@ -58,8 +58,11 @@ const updateUserProfile = async (
     return;
   }
 
+  // Remove email from update data to prevent email changes
+  const { email, ...safeUpdateData } = updateData;
+
   try {
-    const user = await updateUser(userId, updateData);
+    const user = await updateUser(userId, safeUpdateData);
     if (!user) {
       next(ApiError.notFound("User not found"));
       return;

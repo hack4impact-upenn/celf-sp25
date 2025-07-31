@@ -127,11 +127,10 @@ const updateTeacherProfile = async (
       return;
     }
 
-    // Update user document if firstName, lastName, or email are present
+    // Update user document if firstName or lastName are present
     const userFields: any = {};
     if (updateData.firstName !== undefined) userFields.firstName = updateData.firstName;
     if (updateData.lastName !== undefined) userFields.lastName = updateData.lastName;
-    if (updateData.email !== undefined) userFields.email = updateData.email;
 
     if (Object.keys(userFields).length > 0) {
       console.log(userFields)
