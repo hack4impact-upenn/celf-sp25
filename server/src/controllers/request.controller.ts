@@ -11,6 +11,7 @@ import {
   updateRequestStatus,
   deleteRequest,
 } from "../services/request.service.ts";
+import Request from "../models/request.model.ts";
 
 /**
  * Get all requests from the database
@@ -242,6 +243,53 @@ const updateRequestStatusHandler = async (
 };
 
 /**
+ * Update a request's status (teacher can only update their own requests)
+ */
+const updateOwnRequestStatusHandler = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const { requestId } = req.params;
+  const { status } = req.body;
+  const userId = (req.user as any)?._id;
+  
+  if (!requestId || !status) {
+    next(ApiError.missingFields(["requestId", "status"]));
+    return;
+  }
+
+  if (!userId) {
+    next(ApiError.unauthorized("User not authenticated"));
+    return;
+  }
+
+  try {
+    // First check if the request exists and belongs to the current user
+    const existingRequest = await Request.findById(requestId).populate('teacherId');
+    if (!existingRequest) {
+      next(ApiError.notFound("Request not found"));
+      return;
+    }
+
+    // Check if the request belongs to the current user
+    if (existingRequest.teacherId._id.toString() !== userId.toString()) {
+      next(ApiError.forbidden("You can only update your own requests"));
+      return;
+    }
+
+    const request = await updateRequestStatus(requestId, status as IRequest["status"]);
+    if (!request) {
+      next(ApiError.notFound("Request not found"));
+      return;
+    }
+    res.status(StatusCode.OK).json(request);
+  } catch (error) {
+    next(ApiError.internal("Unable to update request status"));
+  }
+};
+
+/**
  * Delete a request
  */
 const deleteRequestHandler = async (
@@ -275,5 +323,6 @@ export {
   getRequestByIdHandler,
   createRequestHandler,
   updateRequestStatusHandler,
+  updateOwnRequestStatusHandler,
   deleteRequestHandler,
 }; 

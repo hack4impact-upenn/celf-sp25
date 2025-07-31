@@ -16,6 +16,7 @@ import {
   CircularProgress,
   Divider,
   Grid,
+  DialogActions,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import EmailIcon from '@mui/icons-material/Email';
@@ -38,6 +39,7 @@ import {
   TeacherRequest,
   Speaker,
   Teacher,
+  updateRequestStatus,
 } from './teacherRequestApi';
 import { useAppSelector } from '../util/redux/hooks.ts';
 
@@ -132,8 +134,13 @@ function TeacherRequestSpeakerPage() {
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterPanelOpen, setFilterPanelOpen] = useState(false);
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false);
+  const [showUnarchiveDialog, setShowUnarchiveDialog] = useState(false);
+  const [requestToArchive, setRequestToArchive] = useState<string | null>(null);
+  const [requestToUnarchive, setRequestToUnarchive] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterState>({
     industry: [],
     grades: [],
@@ -330,6 +337,62 @@ function TeacherRequestSpeakerPage() {
     setFilterPanelOpen(false);
   };
 
+  const handleArchiveRequest = async (requestId: string) => {
+    setRequestToArchive(requestId);
+    setShowArchiveDialog(true);
+  };
+
+  const handleUnarchiveRequest = async (requestId: string) => {
+    setRequestToUnarchive(requestId);
+    setShowUnarchiveDialog(true);
+  };
+
+  const handleConfirmArchive = async () => {
+    if (!requestToArchive) return;
+    
+    try {
+      await updateRequestStatus(requestToArchive, 'Archived');
+      // Refresh the requests list
+      await fetchRequests();
+      setSuccess('Request archived successfully!');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (error) {
+      console.error('Error archiving request:', error);
+      setError('Failed to archive request. Please try again.');
+    } finally {
+      setShowArchiveDialog(false);
+      setRequestToArchive(null);
+    }
+  };
+
+  const handleConfirmUnarchive = async () => {
+    if (!requestToUnarchive) return;
+    
+    try {
+      await updateRequestStatus(requestToUnarchive, 'Pending Review');
+      // Refresh the requests list
+      await fetchRequests();
+      setSuccess('Request unarchived successfully!');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (error) {
+      console.error('Error unarchiving request:', error);
+      setError('Failed to unarchive request. Please try again.');
+    } finally {
+      setShowUnarchiveDialog(false);
+      setRequestToUnarchive(null);
+    }
+  };
+
+  const handleCancelArchive = () => {
+    setShowArchiveDialog(false);
+    setRequestToArchive(null);
+  };
+
+  const handleCancelUnarchive = () => {
+    setShowUnarchiveDialog(false);
+    setRequestToUnarchive(null);
+  };
+
   const getStatusTitle = (status: string) => {
     switch (status.toLowerCase()) {
       case 'pending review':
@@ -430,6 +493,11 @@ function TeacherRequestSpeakerPage() {
             {error}
           </Alert>
         )}
+        {success && (
+          <Alert severity="success" sx={{ mb: 3 }} onClose={() => setSuccess(null)}>
+            {success}
+          </Alert>
+        )}
 
         <SearchFilterContainer>
           <Box sx={{ flexGrow: 1 }}>
@@ -493,6 +561,7 @@ function TeacherRequestSpeakerPage() {
                           speaker={request.speaker}
                           teacher={request.teacher}
                           status={request.status}
+                          onUnarchive={() => handleUnarchiveRequest(request._id)}
                         />
                       </div>
                     ))}
@@ -517,6 +586,7 @@ function TeacherRequestSpeakerPage() {
                       speaker={request.speaker}
                       teacher={request.teacher}
                       status={request.status}
+                      onArchive={() => handleArchiveRequest(request._id)}
                     />
                   </div>
                 ))}
@@ -904,6 +974,79 @@ function TeacherRequestSpeakerPage() {
             </DialogContent>
           </>
         )}
+      </Dialog>
+
+      {/* Archive Confirmation Dialog */}
+      <Dialog open={showArchiveDialog} onClose={handleCancelArchive}>
+        <DialogTitle sx={{ color: '#e74c3c', fontWeight: 'bold' }}>
+          Archive Request
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ mb: 2 }}>
+            Are you sure you want to archive this request?
+          </Typography>
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            <Typography variant="body2">
+              <strong>Warning:</strong> This will reset the approval process and move the request to archived status.
+            </Typography>
+          </Alert>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelArchive}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmArchive}
+            color="error"
+            variant="contained"
+            sx={{
+              backgroundColor: '#e74c3c',
+              '&:hover': {
+                backgroundColor: '#c0392b',
+              },
+            }}
+          >
+            Archive Request
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Unarchive Confirmation Dialog */}
+      <Dialog open={showUnarchiveDialog} onClose={handleCancelUnarchive}>
+        <DialogTitle sx={{ color: '#3498db', fontWeight: 'bold' }}>
+          Unarchive Request
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ mb: 2 }}>
+            Are you sure you want to unarchive this request?
+          </Typography>
+          <Alert severity="info" sx={{ mb: 2 }}>
+            <Typography variant="body2">
+              This will move the request back to "Pending Review" status.
+            </Typography>
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              <strong>Note:</strong> If you want to submit another event request, it's recommended to create a new request instead of unarchiving this one.
+            </Typography>
+          </Alert>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelUnarchive}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmUnarchive}
+            color="primary"
+            variant="contained"
+            sx={{
+              backgroundColor: '#3498db',
+              '&:hover': {
+                backgroundColor: '#2980b9',
+              },
+            }}
+          >
+            Unarchive Request
+          </Button>
+        </DialogActions>
       </Dialog>
     </div>
   );

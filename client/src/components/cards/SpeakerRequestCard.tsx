@@ -5,10 +5,13 @@ import {
   Card as MuiCard,
   Chip,
   Box,
+  Button,
 } from '@mui/material';
 import React from 'react';
 import PersonIcon from '@mui/icons-material/Person';
 import VideocamIcon from '@mui/icons-material/Videocam';
+import ArchiveIcon from '@mui/icons-material/Archive';
+import UnarchiveIcon from '@mui/icons-material/Unarchive';
 import { getData } from '../../util/api.tsx';
 
 // Export this constant so it can be imported elsewhere
@@ -58,9 +61,11 @@ interface Request {
   speaker: Speaker;
   teacher?: Teacher;
   status: string;
+  onArchive?: () => void;
+  onUnarchive?: () => void;
 }
 
-function SpeakerRequestCard({ id, speaker, teacher, status }: Request) {
+function SpeakerRequestCard({ id, speaker, teacher, status, onArchive, onUnarchive }: Request) {
   const [teacherProfile, setTeacherProfile] = React.useState<Teacher | null>(null);
   const [loadingTeacher, setLoadingTeacher] = React.useState(false);
 
@@ -226,6 +231,48 @@ function SpeakerRequestCard({ id, speaker, teacher, status }: Request) {
         <Typography variant="body2" sx={{ mt: 1, fontSize: '0.875rem' }}>
           {bio.length > 100 ? `${bio.substring(0, 100)}...` : bio}
         </Typography>
+
+        {/* Archive/Unarchive buttons */}
+        {(onArchive || onUnarchive) && (
+          <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
+            {status === 'Archived' && onUnarchive && (
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<UnarchiveIcon />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onUnarchive();
+                }}
+                sx={{
+                  fontSize: '0.75rem',
+                  textTransform: 'none',
+                  flex: 1,
+                }}
+              >
+                Unarchive
+              </Button>
+            )}
+            {status !== 'Archived' && onArchive && (
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<ArchiveIcon />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onArchive();
+                }}
+                sx={{
+                  fontSize: '0.75rem',
+                  textTransform: 'none',
+                  flex: 1,
+                }}
+              >
+                Archive
+              </Button>
+            )}
+          </Box>
+        )}
       </CardContent>
     </MuiCard>
   );

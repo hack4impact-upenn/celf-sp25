@@ -1,7 +1,7 @@
 /**
  * API functions for teacher request management
  */
-import { getData, postData } from '../util/api.tsx';
+import { getData, postData, putData } from '../util/api.tsx';
 
 export type RequestStatus = 'Pending Review' | 'Pending Speaker Confirmation' | 'Approved' | 'Archived';
 
@@ -133,6 +133,28 @@ export async function createTeacherRequest(
     return response.data;
   } catch (error) {
     console.error('Error creating teacher request:', error);
+    throw error;
+  }
+}
+
+/**
+ * Updates the status of a teacher request
+ * @param requestId - The ID of the request to update
+ * @param status - The new status for the request
+ * @returns Promise<TeacherRequest> - The updated request
+ */
+export async function updateRequestStatus(
+  requestId: string,
+  status: RequestStatus
+): Promise<TeacherRequest> {
+  try {
+    const response = await putData(`request/${requestId}/status/own`, { status });
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    return response.data;
+  } catch (error) {
+    console.error('Error updating request status:', error);
     throw error;
   }
 } 
