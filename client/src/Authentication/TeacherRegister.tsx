@@ -219,7 +219,7 @@ function TeacherRegisterPage() {
             alignItems: 'flex-start',
             justifyContent: 'center',
             padding: 4,
-            paddingTop: 12,
+            paddingTop: 16,
             paddingBottom: 12,
             margin: 0,
           }}
@@ -233,7 +233,7 @@ function TeacherRegisterPage() {
               width: '100%',
               maxWidth: 650,
               background: COLORS.white,
-              marginTop: 40,
+              marginTop: 60,
             }}
           >
             <Box sx={{ width: '100%' }}>
