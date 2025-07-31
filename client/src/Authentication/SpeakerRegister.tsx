@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, TextField, Grid, Typography, Paper, Box } from '@mui/material';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useNavigate, Link as RouterLink, useLocation } from 'react-router-dom';
 import FormCol from '../components/form/FormCol.tsx';
 import {
   emailRegex,
@@ -8,7 +8,7 @@ import {
   nameRegex,
   passwordRegex,
 } from '../util/inputvalidation.ts';
-import { register } from './api.ts';
+import { register, registerInvite } from './api.ts';
 import AlertDialog from '../components/AlertDialog.tsx';
 import PrimaryButton from '../components/buttons/PrimaryButton.tsx';
 import ScreenGrid from '../components/ScreenGrid.tsx';
@@ -22,6 +22,7 @@ import COLORS from '../assets/colors.ts';
  */
 function SpeakerRegisterPage() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Default values for state
   const defaultValues = {
@@ -67,6 +68,18 @@ function SpeakerRegisterPage() {
   const [errorMessage, setErrorMessageState] = useState(defaultErrorMessages);
   const [alertTitle, setAlertTitle] = useState('Error');
   const [isRegistered, setRegistered] = useState(false);
+  const [inviteToken, setInviteToken] = useState<string | null>(null);
+
+  // Handle invite data from navigation state
+  useEffect(() => {
+    if (location.state) {
+      const { email, token, role } = location.state as { email: string; token: string; role: string };
+      if (email && token && role === 'speaker') {
+        setValue('email', email);
+        setInviteToken(token);
+      }
+    }
+  }, [location.state]);
 
   // Helper functions for changing only one field in a state object
   const setValue = (field: string, value: string) => {
@@ -145,12 +158,16 @@ function SpeakerRegisterPage() {
 
   async function handleSubmit() {
     if (validateInputs()) {
-      register(values.firstName, values.lastName, values.email, values.password, 'speaker', undefined, undefined, values.city, values.state, values.country, undefined, undefined, values.organization)
+      const registerFunction = inviteToken 
+        ? () => registerInvite(values.firstName, values.lastName, values.email, values.password, inviteToken)
+        : () => register(values.firstName, values.lastName, values.email, values.password, 'speaker', undefined, undefined, values.city, values.state, values.country, undefined, undefined, values.organization);
+      
+      registerFunction()
         .then(() => {
           setShowError('alert', true);
           setAlertTitle('');
           setRegistered(true);
-          setErrorMessage('alert', 'Check email to verify account');
+          setErrorMessage('alert', inviteToken ? 'Account created successfully!' : 'Check email to verify account');
         })
         .catch((e) => {
           setShowError('alert', true);

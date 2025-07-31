@@ -41,6 +41,7 @@ import AdminRegisterPage from './Authentication/AdminRegister.tsx';
 import SpeakerSubmitInfoPage from './Authentication/SpeakerSubmitInfo.tsx';
 import SpeakerDashboardPage from './SpeakerDashboard/SpeakerDashboardPage.tsx';
 import AccountSettingsPage from './AccountSettings/AccountSettingsPage.tsx';
+import InvitePage from './Authentication/InvitePage.tsx';
 import { useAppSelector } from './util/redux/hooks.ts';
 import { selectUser } from './util/redux/userSlice.ts';
 
@@ -85,6 +86,10 @@ function App() {
                   <Route
                     path="/reset-password/:token"
                     element={<ResetPasswordPage />}
+                  />
+                  <Route
+                    path="/invite/:token"
+                    element={<InvitePage />}
                   />
                 </Route>
 
