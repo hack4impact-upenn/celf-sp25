@@ -14,6 +14,8 @@ interface InviteData {
   email: string;
   role: 'teacher' | 'admin' | 'speaker';
   verificationToken: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 /**
@@ -34,14 +36,20 @@ function InvitePage() {
     }
 
     // Call the backend to verify the invite token
-    fetch(`/api/admin/invite/${token}`)
+    console.log('Verifying invite token:', token);
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000';
+    fetch(`${backendUrl}/api/admin/invite/${token}`, {
+      credentials: 'include',
+    })
       .then((response) => {
+        console.log('Response status:', response.status);
         if (!response.ok) {
           throw new Error('Invalid or expired invite');
         }
         return response.json();
       })
       .then((data: InviteData) => {
+        console.log('Invite data received:', data);
         // Redirect to the appropriate registration page based on role
         switch (data.role) {
           case 'admin':
@@ -49,7 +57,9 @@ function InvitePage() {
               state: { 
                 email: data.email, 
                 token: data.verificationToken,
-                role: data.role 
+                role: data.role,
+                firstName: data.firstName,
+                lastName: data.lastName
               } 
             });
             break;
@@ -58,7 +68,9 @@ function InvitePage() {
               state: { 
                 email: data.email, 
                 token: data.verificationToken,
-                role: data.role 
+                role: data.role,
+                firstName: data.firstName,
+                lastName: data.lastName
               } 
             });
             break;
@@ -67,7 +79,9 @@ function InvitePage() {
               state: { 
                 email: data.email, 
                 token: data.verificationToken,
-                role: data.role 
+                role: data.role,
+                firstName: data.firstName,
+                lastName: data.lastName
               } 
             });
             break;
@@ -78,7 +92,7 @@ function InvitePage() {
       })
       .catch((err) => {
         console.error('Error verifying invite:', err);
-        setError('Invalid or expired invite link');
+        setError(`Invalid or expired invite link: ${err.message}`);
         setLoading(false);
       });
   }, [token, navigate]);

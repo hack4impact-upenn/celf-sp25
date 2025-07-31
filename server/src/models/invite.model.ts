@@ -22,6 +22,14 @@ const InviteSchema = new mongoose.Schema({
     required: true,
     default: "speaker",
   },
+  firstName: {
+    type: String,
+    required: false,
+  },
+  lastName: {
+    type: String,
+    required: false,
+  },
 });
 
 interface IInvite extends mongoose.Document {
@@ -29,6 +37,8 @@ interface IInvite extends mongoose.Document {
   email: string;
   verificationToken: string;
   role: "teacher" | "admin" | "speaker";
+  firstName?: string;
+  lastName?: string;
 }
 
 const Invite = mongoose.model<IInvite>("Invite", InviteSchema);

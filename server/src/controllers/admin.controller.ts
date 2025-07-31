@@ -267,9 +267,9 @@ const inviteAdmin = async (
   const verificationToken = crypto.randomBytes(32).toString("hex");
   try {
     if (existingInvite) {
-      await updateInvite(existingInvite, verificationToken, "admin");
+      await updateInvite(existingInvite, verificationToken, "admin", firstName, lastName);
     } else {
-      await createInvite(lowercaseEmail, verificationToken, "admin");
+      await createInvite(lowercaseEmail, verificationToken, "admin", firstName, lastName);
     }
     // Send invite email (reuse emailInviteLink)
     await emailInviteLink(lowercaseEmail, verificationToken);

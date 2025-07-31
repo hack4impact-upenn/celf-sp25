@@ -61,9 +61,17 @@ function RegisterPage() {
   // Handle invite data from navigation state
   useEffect(() => {
     if (location.state) {
-      const { email, token, role } = location.state as { email: string; token: string; role: string };
+      const { email, token, role, firstName, lastName } = location.state as { 
+        email: string; 
+        token: string; 
+        role: string;
+        firstName?: string;
+        lastName?: string;
+      };
       if (email && token && role === 'admin') {
         setValue('email', email);
+        setValue('firstName', firstName || '');
+        setValue('lastName', lastName || '');
         setInviteToken(token);
       }
     }
@@ -274,10 +282,14 @@ function RegisterPage() {
                   label="Email"
                   value={values.email}
                   onChange={(e) => setValue('email', e.target.value)}
+                  disabled={!!inviteToken}
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       '&:hover fieldset': {
-                        borderColor: COLORS.primaryBlue,
+                        borderColor: inviteToken ? COLORS.gray : COLORS.primaryBlue,
+                      },
+                      '&.Mui-disabled': {
+                        backgroundColor: COLORS.lightGray,
                       },
                     },
                   }}
