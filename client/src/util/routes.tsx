@@ -1,6 +1,8 @@
 import React from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import { useData } from './api.tsx';
+import { useAppSelector } from './redux/hooks.ts';
+import { selectUser } from './redux/userSlice.ts';
 
 interface IDynamicElementProps {
   unAuthPath: string;
@@ -24,6 +26,7 @@ function ProtectedRoutesWrapper() {
   if (data === null) return null;
   return !data.error ? <Outlet /> : <Navigate to="/" />;
 }
+
 /**
  * A wrapper component whose children routes which can only be navigated to if the user is an admin.
  */
@@ -31,6 +34,28 @@ function AdminRoutesWrapper() {
   const data = useData('admin/adminstatus');
   if (data === null) return null;
   return !data.error ? <Outlet /> : <Navigate to="/" />;
+}
+
+/**
+ * A wrapper component whose children routes which can only be navigated to if the user is a teacher.
+ */
+function TeacherRoutesWrapper() {
+  const user = useAppSelector(selectUser);
+  if (!user || !user.role || user.role.toLowerCase() !== 'teacher') {
+    return <Navigate to="/" />;
+  }
+  return <Outlet />;
+}
+
+/**
+ * A wrapper component whose children routes which can only be navigated to if the user is a speaker.
+ */
+function SpeakerRoutesWrapper() {
+  const user = useAppSelector(selectUser);
+  if (!user || !user.role || user.role.toLowerCase() !== 'speaker') {
+    return <Navigate to="/" />;
+  }
+  return <Outlet />;
 }
 
 /**
@@ -52,5 +77,7 @@ export {
   UnauthenticatedRoutesWrapper,
   ProtectedRoutesWrapper,
   AdminRoutesWrapper,
+  TeacherRoutesWrapper,
+  SpeakerRoutesWrapper,
   DynamicRedirect,
 };

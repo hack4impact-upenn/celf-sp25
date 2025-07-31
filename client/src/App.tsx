@@ -24,6 +24,8 @@ import {
   ProtectedRoutesWrapper,
   DynamicRedirect,
   AdminRoutesWrapper,
+  TeacherRoutesWrapper,
+  SpeakerRoutesWrapper,
 } from './util/routes.tsx';
 import VerifyAccountPage from './Authentication/VerifyAccountPage.tsx';
 import RegisterPage from './Authentication/RegisterPage.tsx';
@@ -86,11 +88,17 @@ function App() {
                   />
                 </Route>
 
-                {/* Remove or import SearchSpeaker component */}
-                {/* <Route path="/search" element={<SearchSpeakerPage />} /> */}
                 {/* Routes accessed only if user is authenticated */}
                 <Route element={<ProtectedRoutesWrapper />}>
                   <Route path="/home" element={<HomePage />} />
+                  <Route
+                    path="/account-settings"
+                    element={<AccountSettingsPage />}
+                  />
+                </Route>
+
+                {/* Routes accessed only if user is a teacher */}
+                <Route element={<TeacherRoutesWrapper />}>
                   <Route
                     path="/teacher-search-speaker"
                     element={<TeacherSearchSpeakerPage />}
@@ -103,6 +111,10 @@ function App() {
                     path="/teacher-profile"
                     element={<TeacherProfilePage />}
                   />
+                </Route>
+
+                {/* Routes accessed only if user is a speaker */}
+                <Route element={<SpeakerRoutesWrapper />}>
                   <Route
                     path="/speaker-submit-info"
                     element={<SpeakerSubmitInfoPage />}
@@ -119,11 +131,9 @@ function App() {
                     path="/profile/edit"
                     element={<SpeakerEditProfilePage />}
                   />
-                  <Route
-                    path="/account-settings"
-                    element={<AccountSettingsPage />}
-                  />
                 </Route>
+
+                {/* Routes accessed only if user is an admin */}
                 <Route element={<AdminRoutesWrapper />}>
                   <Route
                     path="/admin-dashboard"
