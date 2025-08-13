@@ -1,4 +1,4 @@
-import Grid from '@mui/material/Unstable_Grid2';
+import Grid from '@mui/material/Grid2';
 import { styled } from '@mui/material/styles';
 import { Box, Paper, Typography, Link } from '@mui/material';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
