@@ -68,26 +68,25 @@
     "@types/react-dom": "^18.0.6",
     "@types/react-redux": "^7.1.24",
     "@types/styled-components": "^5.1.23",
-    "@typescript-eslint/eslint-plugin": "^7.0.0",
-    "@typescript-eslint/parser": "^7.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.57.0",
     "eslint-config-airbnb": "^19.0.4",
-    "eslint-config-airbnb-typescript": "^18.0.0",
-    "eslint-config-airbnb-typescript-prettier": "^5.0.0",
+    "eslint-config-airbnb-typescript": "^17.0.0",
+    "eslint-config-airbnb-typescript-prettier": "^4.0.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-react": "^7.37.4",
     "eslint-plugin-react-hooks": "^4.3.0",
-    "prettier": "^2.8.0",
-    "typescript": "^5.8.2"
+    "prettier": "^2.8.0"
   },
   "resolutions": {
-    "styled-components": "^5",
+    "styled-components": "^6.0.0",
     "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest",
-    "prettier": "^2.5.1",
-    "@typescript-eslint/eslint-plugin": "^5.10.1",
-    "@typescript-eslint/parser": "^5.10.1"
+    "prettier": "^2.8.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0"
   }
 }
