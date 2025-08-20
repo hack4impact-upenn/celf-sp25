@@ -69,7 +69,7 @@ function LoginSelectPage() {
         >
           <Box sx={{ width: '100%' }}>
             <Grid container direction="column" alignItems="center" spacing={3}>
-              <Grid sx={{ mb: 1 }}>
+              <Grid component="div" sx={{ mb: 1 }}>
                 <Box
                   component="img"
                   src="/images/celf-logo.png"
@@ -81,7 +81,7 @@ function LoginSelectPage() {
                   }}
                 />
               </Grid>
-              <Grid>
+              <Grid component="div">
                 <Typography
                   variant="h4"
                   textAlign="center"
@@ -105,7 +105,7 @@ function LoginSelectPage() {
                 </Typography>
               </Grid>
               <Grid container direction="column" alignItems="center" sx={{ width: '100%', mt: 1 }}>
-                <Grid xs={12} sx={{ width: '100%', mb: 1.5 }}>
+                <Grid component="div" sx={{ width: '100%', mb: 1.5 }}>
                   <ItemButton onClick={() => handleClick('Teacher')}>
                     <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.3rem', mb: 1 }}>
                       Teacher
@@ -115,7 +115,7 @@ function LoginSelectPage() {
                     </Typography>
                   </ItemButton>
                 </Grid>
-                <Grid xs={12} sx={{ width: '100%' }}>
+                <Grid component="div" sx={{ width: '100%' }}>
                   <ItemButton onClick={() => handleClick('Speaker')}>
                     <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.3rem', mb: 1 }}>
                       Speaker
@@ -126,7 +126,7 @@ function LoginSelectPage() {
                   </ItemButton>
                 </Grid>
               </Grid>
-              <Grid>
+              <Grid component="div">
                 <Link
                   component={RouterLink}
                   to="/login"
