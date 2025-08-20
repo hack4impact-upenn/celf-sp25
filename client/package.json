@@ -52,6 +52,7 @@
     "redux-persist": "^6.0.0",
     "styled-components": "^6.0.0",
     "typeface-hk-grotesk": "^1.0.0",
+    "typescript": "^5.8.2",
     "web-vitals": "^3.0.3"
   },
   "devDependencies": {
