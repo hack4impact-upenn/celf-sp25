@@ -38,8 +38,7 @@
     "@types/css-font-loading-module": "^0.0.8"
   },
   "overrides": {
-    "@types/css-font-loading-module": "0.0.8",
-    "**/@types/css-font-loading-module": "0.0.8"
+    "@types/css-font-loading-module": "0.0.8"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
