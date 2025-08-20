@@ -10,7 +10,6 @@ interface IConfirmModal {
   buttonText: string;
   title: string;
   body: string;
-  // eslint-disable-next-line @typescript-eslint/ban-types
   onConfirm: Function;
 }
 /**

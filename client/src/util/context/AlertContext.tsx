@@ -13,7 +13,6 @@ const ALERT_TIME = 5000;
 const AlertContext = createContext<Alert>({
   type: undefined,
   text: '',
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   setAlert: () => {},
 });
 
