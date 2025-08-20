@@ -61,7 +61,7 @@ const createExpressApp = (sessionStore: MongoStore): express.Express => {
       cookie: {
         maxAge: 1000 * 60 * 60 * 24, // 1 day
       },
-    }) as express.RequestHandler
+    })
   );
 
   // Init passport on every route call and allow it to use "express-session"
