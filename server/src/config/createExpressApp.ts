@@ -61,12 +61,12 @@ const createExpressApp = (sessionStore: MongoStore): express.Express => {
       cookie: {
         maxAge: 1000 * 60 * 60 * 24, // 1 day
       },
-    })
+    }) as any
   );
 
   // Init passport on every route call and allow it to use "express-session"
-  app.use(passport.initialize());
-  app.use(passport.session());
+  app.use(passport.initialize() as any);
+  app.use(passport.session() as any);
 
   // Inits routers listed in routers.ts file
   routers.forEach((entry) => app.use(entry.prefix, entry.router));
