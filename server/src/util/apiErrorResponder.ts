@@ -12,7 +12,7 @@ import StatusCode from "./statusCode.ts";
  * @param res Response object provided by Express
  * @param next NextFunction provided by Express
  */
-const apiErrorResponder = (
+const apiErrorResponder: express.ErrorRequestHandler = (
   err: Error,
   req: express.Request,
   res: express.Response,
