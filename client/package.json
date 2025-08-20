@@ -54,7 +54,7 @@
     "redux-persist": "^6.0.0",
     "styled-components": "^5.3.5",
     "typeface-hk-grotesk": "^1.0.0",
-    "typescript": "^5.8.2",
+    "typescript": "^4.9.5",
     "web-vitals": "^3.0.3"
   },
   "devDependencies": {
@@ -68,8 +68,8 @@
     "@types/react-dom": "^18.0.6",
     "@types/react-redux": "^7.1.24",
     "@types/styled-components": "^5.1.23",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.10.1",
+    "@typescript-eslint/parser": "^5.10.1",
     "eslint": "^8.57.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-airbnb-typescript": "^17.0.0",
@@ -86,8 +86,8 @@
     "styled-components": "^5.3.5",
     "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest",
     "prettier": "^2.8.0",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0"
+    "@typescript-eslint/eslint-plugin": "^5.10.1",
+    "@typescript-eslint/parser": "^5.10.1"
   }
 
 }
