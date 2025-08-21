@@ -32,7 +32,7 @@ const initialIndustryFocuses = [
 async function seedIndustryFocuses() {
   try {
     // Connect to MongoDB
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/celf';
+    const mongoUri = process.env.ATLAS_URI || 'mongodb://localhost:27017/celf';
     await mongoose.connect(mongoUri);
     console.log('Connected to MongoDB');
 
