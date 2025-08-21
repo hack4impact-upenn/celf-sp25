@@ -15,7 +15,7 @@
   "dependencies": {
     "@reduxjs/toolkit": "^1.8.1",
     "@sendgrid/mail": "^7.7.0",
-    "@types/mixpanel-browser": "^2.49.0",
+
     "bcrypt": "^5.0.1",
     "connect-mongo": "^4.6.0",
     "cookie-parser": "^1.4.6",
@@ -37,9 +37,7 @@
   "resolutions": {
     "@types/css-font-loading-module": "^0.0.8"
   },
-  "overrides": {
-    "@types/css-font-loading-module": "0.0.8"
-  },
+
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
     "@types/cookie-parser": "^1.4.2",
