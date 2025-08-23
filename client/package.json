@@ -82,6 +82,9 @@
     "eslint-plugin-react-hooks": "^4.3.0",
     "prettier": "^2.8.0"
   },
+  "engines": {
+    "node": "20.16.0"
+  },
   "resolutions": {
     "styled-components": "^5.3.5",
     "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest",
