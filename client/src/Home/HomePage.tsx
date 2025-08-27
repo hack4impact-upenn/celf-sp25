@@ -32,29 +32,16 @@ function HomePage() {
   }, [user.admin, user.role, navigator]);
 
   const logoutDispatch = () => dispatch(logoutAction());
-  const handleLogout = async () => {
-    try {
-      const success = await logoutApi();
-      if (success) {
-        logoutDispatch();
-        navigator('/login', { replace: true });
-      } else {
-        console.error('Logout failed');
-      }
-    } catch (error) {
-      console.error('Error during logout:', error);
-    }
-  };
 
-  const message = `Welcome to the CELF Speaker Portal, ${user.firstName} ${user.lastName}!`;
+  // Show loading screen while redirecting
   return (
     <ScreenGrid>
-      <Typography variant="h2">{message}</Typography>
-      <Grid item container justifyContent="center">
-        <PrimaryButton variant="contained" onClick={handleLogout}>
-          Logout
-        </PrimaryButton>
-      </Grid>
+      <Typography variant="h4" align="center" gutterBottom>
+        Redirecting to your dashboard...
+      </Typography>
+      <Typography variant="body1" align="center" color="textSecondary">
+        Please wait while we take you to the right place.
+      </Typography>
     </ScreenGrid>
   );
 }
