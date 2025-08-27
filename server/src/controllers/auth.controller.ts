@@ -69,6 +69,18 @@ const login = async (
           next(ApiError.internal("Failed to log in user"));
           return;
         }
+        // Send success response after successful login
+        res.status(StatusCode.OK).json({
+          message: "Login successful",
+          user: {
+            _id: user._id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            verified: user.verified,
+            admin: user.admin
+          }
+        });
       });
     }
   )(req, res, next);
@@ -97,8 +109,10 @@ const logout = async (
           res.sendStatus(StatusCode.OK);
         }
       });
+    } else {
+      // No session to destroy, send success response
+      res.sendStatus(StatusCode.OK);
     }
-
   });
 };
 
@@ -420,7 +434,7 @@ const registerInvite = async (
   next: express.NextFunction
 ) => {
   const { firstName, lastName, email, password, inviteToken } = req.body;
-  if (!firstName || !lastName || !email || !password) {
+  if (!firstName || !lastName || !email || !password || !inviteToken) {
     next(
       ApiError.missingFields([
         "firstName",
