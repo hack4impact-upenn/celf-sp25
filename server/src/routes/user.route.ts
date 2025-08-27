@@ -1,12 +1,12 @@
-import { isAdmin } from "../controllers/admin.middleware.ts";
-import { isAuthenticated } from "../controllers/auth.middleware.ts";
+import { isAdmin } from "../controllers/admin.middleware";
+import { isAuthenticated } from "../controllers/auth.middleware";
 import {
   deleteUserProfile,
   getAllUsersHandler,
   getUser,
   updateUserProfile,
   deleteCurrentUser,
-} from "../controllers/user.controller.ts";
+} from "../controllers/user.controller";
 import express from "express";
 
 const router = express.Router();

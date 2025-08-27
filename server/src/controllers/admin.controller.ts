@@ -4,27 +4,27 @@
  */
 import express from "express";
 import crypto from "crypto";
-import ApiError from "../util/apiError.ts";
-import StatusCode from "../util/statusCode.ts";
-import { IUser } from "../models/user.model.ts";
+import ApiError from "../util/apiError";
+import StatusCode from "../util/statusCode";
+import { IUser } from "../models/user.model";
 import {
   upgradeUserToAdmin,
   getUserByEmail,
   getAllUsersFromDB,
   deleteUserById,
   createUser,
-} from "../services/user.service.ts";
+} from "../services/user.service";
 import {
   createInvite,
   getInviteByEmail,
   getInviteByToken,
   updateInvite,
-} from "../services/invite.service.ts";
-import { IInvite } from "../models/invite.model.ts";
-import { emailInviteLink, emailResetPasswordLink } from "../services/mail.service.ts";
-import { deleteTeacher } from "../services/teacher.service.ts";
-import { deleteSpeaker, getSpeakerByUserId, createSpeaker, getAllSpeakersForAdmin } from "../services/speaker.service.ts";
-import { deleteRequestsBySpeakerId, deleteRequestsByTeacherId } from "../services/request.service.ts";
+} from "../services/invite.service";
+import { IInvite } from "../models/invite.model";
+import { emailInviteLink, emailResetPasswordLink } from "../services/mail.service";
+import { deleteTeacher } from "../services/teacher.service";
+import { deleteSpeaker, getSpeakerByUserId, createSpeaker, getAllSpeakersForAdmin } from "../services/speaker.service";
+import { deleteRequestsBySpeakerId, deleteRequestsByTeacherId } from "../services/request.service";
 
 /**
  * Get all users from the database. Upon success, send the a list of all users in the res body with 200 OK status code.

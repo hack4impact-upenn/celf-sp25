@@ -1,5 +1,5 @@
-import { ISpeaker, Speaker } from "../models/speaker.model.ts";
-import { User } from "../models/user.model.ts";
+import { ISpeaker, Speaker } from "../models/speaker.model";
+import { User } from "../models/user.model";
 
 /**
  * Creates a new speaker profile in the database.

@@ -3,12 +3,12 @@
  * user's authentication such as login, logout, and registration.
  */
 import express from "express";
-import { logger_info } from "../config/configDatadog.ts";
+import { logger_info } from "../config/configDatadog";
 import passport from "passport";
 import crypto from "crypto";
 import { hash, compare } from "bcrypt";
-import { IUser } from "../models/user.model.ts";
-import StatusCode from "../util/statusCode.ts";
+import { IUser } from "../models/user.model";
+import StatusCode from "../util/statusCode";
 import {
   passwordHashSaltRounds,
   createUser,
@@ -16,20 +16,20 @@ import {
   getUserByResetPasswordToken,
   getUserByVerificationToken,
   getUserByEmailWithPassword,
-} from "../services/user.service.ts";
+} from "../services/user.service";
 import {
   emailResetPasswordLink,
   emailVerificationLink,
-} from "../services/mail.service.ts";
-import ApiError from "../util/apiError.ts";
+} from "../services/mail.service";
+import ApiError from "../util/apiError";
 import {
   getInviteByToken,
   removeInviteByToken,
-} from "../services/invite.service.ts";
-import { IInvite } from "../models/invite.model.ts";
-import mixpanel from "../config/configMixpanel.ts";
-import { createTeacher } from "../services/teacher.service.ts";
-import { createSpeaker } from "../services/speaker.service.ts";
+} from "../services/invite.service";
+import { IInvite } from "../models/invite.model";
+import mixpanel from "../config/configMixpanel";
+import { createTeacher } from "../services/teacher.service";
+import { createSpeaker } from "../services/speaker.service";
 
 /**
  * A controller function to login a user and create a session with Passport.
@@ -52,7 +52,7 @@ const login = async (
     {
       failureMessage: true,
     },
-    // Callback function defined by passport strategy in configPassport.ts
+    // Callback function defined by passport strategy in configPassport
     (err: Error | null, user: any, _info: any) => {
       if (err) {
         next(ApiError.internal("Failed to authenticate user."));
