@@ -1,6 +1,6 @@
 import React from 'react';
 import { Grid } from '@mui/material';
-import { AnyChildren } from '../../util/types/generic.ts';
+import { AnyChildren } from '../../util/types/generic';
 
 /**
  * A component for formatting rows in {@link FormGrid}

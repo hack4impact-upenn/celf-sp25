@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import Button from '@mui/material/Button';
-import { deleteUser } from './api.tsx';
-import LoadingButton from '../components/buttons/LoadingButton.tsx';
-import ConfirmationModal from '../components/ConfirmationModal.tsx';
-import AlertType from '../util/types/alert.ts';
-import useAlert from '../util/hooks/useAlert.tsx';
-import { IUser } from '../util/types/user.ts';
+import { deleteUser } from './api';
+import LoadingButton from '../components/buttons/LoadingButton';
+import ConfirmationModal from '../components/ConfirmationModal';
+import AlertType from '../util/types/alert';
+import useAlert from '../util/hooks/useAlert';
+import { IUser } from '../util/types/user';
 
 interface DeleteUserButtonProps {
   user: IUser;

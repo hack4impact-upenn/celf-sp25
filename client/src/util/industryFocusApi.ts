@@ -1,4 +1,4 @@
-import { getData } from './api.tsx';
+import { getData } from './api';
 
 export interface IndustryFocus {
   _id: string;

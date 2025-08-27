@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { RootState } from './store.ts';
+import type { RootState } from './store';
 
 export interface UserState {
   _id: string | null;

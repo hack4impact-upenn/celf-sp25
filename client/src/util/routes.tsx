@@ -1,8 +1,8 @@
 import React from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
-import { useData } from './api.tsx';
-import { useAppSelector } from './redux/hooks.ts';
-import { selectUser } from './redux/userSlice.ts';
+import { useData } from './api';
+import { useAppSelector } from './redux/hooks';
+import { selectUser } from './redux/userSlice';
 
 interface IDynamicElementProps {
   unAuthPath: string;

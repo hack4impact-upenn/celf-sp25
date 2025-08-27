@@ -24,8 +24,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import AdminSidebar from '../components/admin_sidebar/AdminSidebar';
 import TopBar from '../components/top_bar/TopBar';
-import { getData, postData, putData, deleteData } from '../util/api.tsx';
-import COLORS from '../assets/colors.ts';
+import { getData, postData, putData, deleteData } from '../util/api';
+import COLORS from '../assets/colors';
 
 interface IndustryFocus {
   _id: string;
