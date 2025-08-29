@@ -22,14 +22,22 @@ function HomePage() {
 
   useEffect(() => {
     console.log('User state:', user);
+    console.log('User admin:', user.admin);
+    console.log('User role:', user.role);
+    
     if (user.admin) {
+      console.log('Redirecting to admin dashboard');
       navigator('/admin-dashboard', { replace: true });
     } else if (user.role && user.role.toLowerCase() === 'speaker') {
+      console.log('Redirecting to speaker dashboard');
       navigator('/speaker-dashboard', { replace: true });
     } else if (user.role && user.role.toLowerCase() === 'teacher') {
+      console.log('Redirecting to teacher search');
       navigator('/teacher-search-speaker', { replace: true });
+    } else {
+      console.log('No valid role found, user:', user);
     }
-  }, [user.admin, user.role, navigator]);
+  }, [user.admin, user.role]); // Remove navigator from dependencies
 
   const logoutDispatch = () => dispatch(logoutAction());
 
