@@ -42,6 +42,13 @@ function HomePage() {
     }
     
     // Check if user data is loaded (not just the initial state)
+    console.log('User ID:', user._id);
+    console.log('User email:', user.email);
+    console.log('User admin:', user.admin);
+    console.log('User role:', user.role);
+    console.log('Auth status:', authStatus);
+    console.log('Auth status error:', authStatus.error);
+    console.log('Auth status data:', authStatus.data);
     if (user._id && user.email) {
       if (user.admin) {
         console.log('Redirecting to admin dashboard');
