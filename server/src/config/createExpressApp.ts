@@ -76,6 +76,9 @@ const createExpressApp = (sessionStore: MongoStore): express.Express => {
       store: sessionStore, // use MongoDB to store session info
       cookie: {
         maxAge: 1000 * 60 * 60 * 24, // 1 day
+        secure: false, // Set to true in production with HTTPS
+        httpOnly: false, // Allow client-side access for debugging
+        sameSite: 'lax', // Allow cross-origin requests
       },
     }) as any
   );

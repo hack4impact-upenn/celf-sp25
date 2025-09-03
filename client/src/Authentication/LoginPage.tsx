@@ -119,8 +119,10 @@ function LoginPage() {
   async function handleSubmit() {
     if (validateInputs()) {
       loginUser(values.email, values.password)
-        .then((user) => {
-          console.log('Login response user data:', user);
+        .then((response) => {
+          console.log('Login response:', response);
+          const user = response.user;
+          console.log('User data:', user);
           console.log('User role:', user.role);
           console.log('User firstName:', user.firstName);
           console.log('User lastName:', user.lastName);
