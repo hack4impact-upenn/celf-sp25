@@ -78,7 +78,8 @@ const login = async (
             lastName: user.lastName,
             email: user.email,
             verified: user.verified,
-            admin: user.admin
+            admin: user.admin,
+            role: user.role
           }
         });
       });
