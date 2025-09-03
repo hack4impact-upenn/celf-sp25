@@ -79,6 +79,7 @@ function LoginPage() {
     admin: boolean,
     role: string,
   ) {
+    console.log('Dispatching user data to Redux:', { _id, email: userEmail, firstName, lastName, admin, role });
     dispatch(loginRedux({ _id, email: userEmail, firstName, lastName, admin, role }));
   }
 
@@ -119,7 +120,10 @@ function LoginPage() {
     if (validateInputs()) {
       loginUser(values.email, values.password)
         .then((user) => {
-          console.log('navigating to home!');
+          console.log('Login response user data:', user);
+          console.log('User role:', user.role);
+          console.log('User firstName:', user.firstName);
+          console.log('User lastName:', user.lastName);
           dispatchUser(
             user._id!,
             user.email!,
