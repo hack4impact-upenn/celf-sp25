@@ -200,7 +200,7 @@ function LoginPage() {
                     mb: 1,
                   }}
                 >
-                  Welcome to CELF
+                  Welcome to the CELF Green Careers Portal
                 </Typography>
                 <Typography
                   variant="subtitle1"
