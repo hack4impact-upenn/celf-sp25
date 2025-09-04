@@ -22,14 +22,14 @@ import {
   useTheme,
 } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material/Select';
-import { postData, getData } from '../util/api.tsx';
-import { processImageUpload } from '../util/imageCompression.ts';
+import { postData, getData } from '../util/api';
+import { processImageUpload } from '../util/imageCompression';
 import { getIndustryFocuses, IndustryFocus } from '../util/industryFocusApi';
-import ScreenGrid from '../components/ScreenGrid.tsx';
-import AlertDialog from '../components/AlertDialog.tsx';
-import PrimaryButton from '../components/buttons/PrimaryButton.tsx';
-import COLORS from '../assets/colors.ts';
-import TopBar from '../components/top_bar/TopBar.tsx';
+import ScreenGrid from '../components/ScreenGrid';
+import AlertDialog from '../components/AlertDialog';
+import PrimaryButton from '../components/buttons/PrimaryButton';
+import COLORS from '../assets/colors';
+import TopBar from '../components/top_bar/TopBar';
 
 // same as admin side
 const languageOptions = ['English', 'Spanish', 'Mandarin', 'French', 'Other'];

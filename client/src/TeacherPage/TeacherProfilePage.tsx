@@ -19,11 +19,11 @@ import {
   InputLabel,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useAppSelector, useAppDispatch } from '../util/redux/hooks.ts';
-import { selectUser, login } from '../util/redux/userSlice.ts';
+import { useAppSelector, useAppDispatch } from '../util/redux/hooks';
+import { selectUser, login } from '../util/redux/userSlice';
 import TopBar from '../components/top_bar/TopBar';
-import { getData, putData } from '../util/api.tsx';
-import COLORS from '../assets/colors.ts';
+import { getData, putData } from '../util/api';
+import COLORS from '../assets/colors';
 
 const subjectOptions = [
   'Mathematics',

@@ -3,7 +3,7 @@
  * relating to admin users.
  */
 import express from "express";
-import { isAdmin } from "../controllers/admin.middleware.ts";
+import { isAdmin } from "../controllers/admin.middleware";
 import {
   getAllUsers,
   deleteUser,
@@ -12,10 +12,10 @@ import {
   inviteAdmin,
   createSpeakerDirectly,
   exportSpeakersToCSV,
-} from "../controllers/admin.controller.ts";
-import { isAuthenticated } from "../controllers/auth.middleware.ts";
-import { approve } from "../controllers/auth.controller.ts";
-import { getAllSpeakersAdmin } from "../controllers/speaker.controller.ts";
+} from "../controllers/admin.controller";
+import { isAuthenticated } from "../controllers/auth.middleware";
+import { approve } from "../controllers/auth.controller";
+import { getAllSpeakersAdmin } from "../controllers/speaker.controller";
 import "dotenv/config";
 
 const router = express.Router();

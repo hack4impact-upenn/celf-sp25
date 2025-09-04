@@ -38,7 +38,7 @@ import {
 } from './requestApi';
 import './AdminDashboard.css';
 import { DEFAULT_IMAGE } from '../components/cards/SpeakerCard';
-import { getData } from '../util/api.tsx';
+import { getData } from '../util/api';
 
 const Section = styled('div')({
   marginBottom: '40px',

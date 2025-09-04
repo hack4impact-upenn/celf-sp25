@@ -1,6 +1,6 @@
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 
-import { AppDispatch, RootState } from './store.ts';
+import { AppDispatch, RootState } from './store';
 
 /**
  * A hook that returns the redux store's dispatch function. This is used to dispatch actions to the redux store. This is a typed version of the `useDispatch` hook from react-redux.

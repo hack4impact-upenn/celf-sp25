@@ -8,9 +8,9 @@ import {
   Box,
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
-import { verifyAccount } from './api.ts';
-import ScreenGrid from '../components/ScreenGrid.tsx';
-import COLORS from '../assets/colors.ts';
+import { verifyAccount } from './api';
+import ScreenGrid from '../components/ScreenGrid';
+import COLORS from '../assets/colors';
 
 /**
  * A page users visit to verify their account. Page should be accessed via

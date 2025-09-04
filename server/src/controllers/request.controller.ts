@@ -1,7 +1,7 @@
 import express from "express";
-import ApiError from "../util/apiError.ts";
-import StatusCode from "../util/statusCode.ts";
-import { IRequest } from "../models/request.model.ts";
+import ApiError from "../util/apiError";
+import StatusCode from "../util/statusCode";
+import { IRequest } from "../models/request.model";
 import {
   getAllRequests,
   getRequestsByTeacherId,
@@ -10,8 +10,8 @@ import {
   createRequest,
   updateRequestStatus,
   deleteRequest,
-} from "../services/request.service.ts";
-import Request from "../models/request.model.ts";
+} from "../services/request.service";
+import Request from "../models/request.model";
 
 /**
  * Get all requests from the database

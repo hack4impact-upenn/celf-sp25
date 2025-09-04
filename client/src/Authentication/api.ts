@@ -2,7 +2,7 @@
  * A file for defining functions used to interact with the backend server
  * for authentication purposes.
  */
-import { postData, deleteData } from '../util/api.tsx';
+import { postData, deleteData } from '../util/api';
 
 /**
  * Sends a request to the server to log in a user

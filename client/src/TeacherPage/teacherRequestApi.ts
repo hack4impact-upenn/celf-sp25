@@ -1,7 +1,7 @@
 /**
  * API functions for teacher request management
  */
-import { getData, postData, putData } from '../util/api.tsx';
+import { getData, postData, putData } from '../util/api';
 
 export type RequestStatus = 'Pending Review' | 'Pending Speaker Confirmation' | 'Approved' | 'Archived';
 

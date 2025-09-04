@@ -1,8 +1,8 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import reportWebVitals from './reportWebVitals.ts';
-import App from './App.tsx';
-import { AlertProvider } from './util/context/AlertContext.tsx';
+import reportWebVitals from './reportWebVitals';
+import App from './App';
+import { AlertProvider } from './util/context/AlertContext';
 
 const container = document.getElementById('root');
 const root = createRoot(container!); // createRoot(container!) if you use TypeScript

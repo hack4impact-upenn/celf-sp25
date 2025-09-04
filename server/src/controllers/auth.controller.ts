@@ -3,12 +3,11 @@
  * user's authentication such as login, logout, and registration.
  */
 import express from "express";
-import { logger_info } from "../config/configDatadog.ts";
 import passport from "passport";
 import crypto from "crypto";
 import { hash, compare } from "bcrypt";
-import { IUser } from "../models/user.model.ts";
-import StatusCode from "../util/statusCode.ts";
+import { IUser } from "../models/user.model";
+import StatusCode from "../util/statusCode";
 import {
   passwordHashSaltRounds,
   createUser,
@@ -16,20 +15,19 @@ import {
   getUserByResetPasswordToken,
   getUserByVerificationToken,
   getUserByEmailWithPassword,
-} from "../services/user.service.ts";
+} from "../services/user.service";
 import {
   emailResetPasswordLink,
   emailVerificationLink,
-} from "../services/mail.service.ts";
-import ApiError from "../util/apiError.ts";
+} from "../services/mail.service";
+import ApiError from "../util/apiError";
 import {
   getInviteByToken,
   removeInviteByToken,
-} from "../services/invite.service.ts";
-import { IInvite } from "../models/invite.model.ts";
-import mixpanel from "../config/configMixpanel.ts";
-import { createTeacher } from "../services/teacher.service.ts";
-import { createSpeaker } from "../services/speaker.service.ts";
+} from "../services/invite.service";
+import { IInvite } from "../models/invite.model";
+import { createTeacher } from "../services/teacher.service";
+import { createSpeaker } from "../services/speaker.service";
 
 /**
  * A controller function to login a user and create a session with Passport.
@@ -52,7 +50,7 @@ const login = async (
     {
       failureMessage: true,
     },
-    // Callback function defined by passport strategy in configPassport.ts
+    // Callback function defined by passport strategy in configPassport
     (err: Error | null, user: any, _info: any) => {
       if (err) {
         next(ApiError.internal("Failed to authenticate user."));
@@ -71,16 +69,19 @@ const login = async (
           next(ApiError.internal("Failed to log in user"));
           return;
         }
-
-        // Mixpanel login tracking
-        mixpanel.track("Login", {
-          distinct_id: user._id,
-          email: user.email,
+        // Send success response after successful login
+        res.status(StatusCode.OK).json({
+          message: "Login successful",
+          user: {
+            _id: user._id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            verified: user.verified,
+            admin: user.admin,
+            role: user.role
+          }
         });
-
-        // Datadog login
-        logger_info.info("Login");
-        res.status(StatusCode.OK).send(user);
       });
     }
   )(req, res, next);
@@ -109,15 +110,10 @@ const logout = async (
           res.sendStatus(StatusCode.OK);
         }
       });
+    } else {
+      // No session to destroy, send success response
+      res.sendStatus(StatusCode.OK);
     }
-    // Datadog logout
-    logger_info.info("Logout");
-
-    // Mixpanel logout tracking
-    mixpanel.track("Logout", {
-      distinct_id: req.user ? (req.user as IUser)._id : undefined,
-      email: req.user ? (req.user as IUser).email : undefined,
-    });
   });
 };
 
@@ -260,12 +256,6 @@ const register = async (
         }
       }
     }
-    // Mixpanel Register tracking
-    mixpanel.track("Register", {
-      distinct_id: user?._id,
-      email: user?.email,
-    });
-
     res.status(StatusCode.CREATED).send(user);
   } catch (err) {
     console.error("Registration error:", err);
@@ -303,11 +293,6 @@ const verifyAccount = async (
   user!.verified = true;
   try {
     await user!.save();
-    // mixpanel tracking
-    mixpanel.track("Verify Account", {
-      distinct_id: user._id,
-      email: user.email,
-    });
     res.sendStatus(StatusCode.OK);
   } catch (err) {
     next(ApiError.internal("Unable to verify the account."));
@@ -450,7 +435,7 @@ const registerInvite = async (
   next: express.NextFunction
 ) => {
   const { firstName, lastName, email, password, inviteToken } = req.body;
-  if (!firstName || !lastName || !email || !password) {
+  if (!firstName || !lastName || !email || !password || !inviteToken) {
     next(
       ApiError.missingFields([
         "firstName",

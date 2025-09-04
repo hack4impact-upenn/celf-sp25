@@ -41,7 +41,7 @@ import {
   Teacher,
   updateRequestStatus,
 } from './teacherRequestApi';
-import { useAppSelector } from '../util/redux/hooks.ts';
+import { useAppSelector } from '../util/redux/hooks';
 
 interface Request {
   _id: string;

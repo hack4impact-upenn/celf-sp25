@@ -2,9 +2,9 @@
  * All the functions for interacting with user data in the MongoDB database
  */
 import { hash } from "bcrypt";
-import { IUser, User } from "../models/user.model.ts";
-import { getSpeakerByUserId } from "./speaker.service.ts";
-import { getTeacherByUserId } from "./teacher.service.ts";
+import { IUser, User } from "../models/user.model";
+import { getSpeakerByUserId } from "./speaker.service";
+import { getTeacherByUserId } from "./teacher.service";
 
 const passwordHashSaltRounds = 10;
 const removeSensitiveDataQuery = [

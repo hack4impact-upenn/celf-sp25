@@ -7,8 +7,8 @@ import {
   Box,
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
-import ScreenGrid from '../components/ScreenGrid.tsx';
-import COLORS from '../assets/colors.ts';
+import ScreenGrid from '../components/ScreenGrid';
+import COLORS from '../assets/colors';
 
 interface InviteData {
   email: string;

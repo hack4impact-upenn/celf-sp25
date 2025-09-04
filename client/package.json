@@ -1,7 +1,6 @@
 {
   "name": "client",
   "version": "1.0.0",
-  "license": "MIT",
   "scripts": {
     "start": "react-scripts start",
     "client": "yarn start",
@@ -33,17 +32,17 @@
     ]
   },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@mui/icons-material": "^6",
-    "@mui/material": "^6",
+    "@emotion/react": "^11.11.3",
+    "@emotion/styled": "^11.11.0",
+    "@material-ui/icons": "^4.11.2",
+    "@mui/icons-material": "^5.15.9",
+    "@mui/material": "^5.5.3",
     "@mui/system": "^5.5.2",
+    "@mui/x-date-pickers": "^6.19.6",
+    "@mui/x-date-pickers-pro": "^7.1.1",
     "@reduxjs/toolkit": "^1.8.1",
-    "@types/react": "^18.0.21",
-    "@types/react-dom": "^18.0.6",
     "axios": "^1.1.2",
-    "cross-env": "^7.0.3",
-    "globals": "^16.0.0",
+    "dayjs": "^1.11.10",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -54,11 +53,9 @@
     "redux-persist": "^6.0.0",
     "styled-components": "^5.3.5",
     "typeface-hk-grotesk": "^1.0.0",
-    "typescript": "^5.8.2",
     "web-vitals": "^3.0.3"
   },
   "devDependencies": {
-    "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^14.4.3",
@@ -68,28 +65,20 @@
     "@types/react-dom": "^18.0.6",
     "@types/react-redux": "^7.1.24",
     "@types/styled-components": "^5.1.23",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
-    "eslint": "^8.57.0",
+    "eslint": "^8.8.0",
     "eslint-config-airbnb": "^19.0.4",
-    "eslint-config-airbnb-typescript": "^17.0.0",
-    "eslint-config-airbnb-typescript-prettier": "^4.0.0",
-    "eslint-config-prettier": "^10.1.1",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-jsx-a11y": "^6.10.2",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-react": "^7.37.4",
+    "eslint-config-airbnb-typescript-prettier": "^5.0.0",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "eslint-plugin-react": "^7.28.0",
     "eslint-plugin-react-hooks": "^4.3.0",
-    "prettier": "^2.8.0"
-  },
-  "engines": {
-    "node": "20.16.0"
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.2"
   },
   "resolutions": {
-    "styled-components": "^5.3.5",
-    "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest",
-    "prettier": "^2.8.0",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0"
+    "styled-components": "^5",
+    "prettier": "^2.5.1",
+    "@typescript-eslint/eslint-plugin": "^5.10.1",
+    "@typescript-eslint/parser": "^5.10.1"
   }
 }

@@ -1,7 +1,7 @@
 /**
  * A file containing all the api calls for the admin dashboard.
  */
-import { deleteData, getData, postData } from '../util/api.tsx';
+import { deleteData, getData, postData } from '../util/api';
 
 /**
  * Sends a request to the server to delete a user

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Typography, Button, Grid } from '@mui/material';
-import ScreenGrid from '../components/ScreenGrid.tsx';
+import ScreenGrid from '../components/ScreenGrid';
 
 /**
  * A page for showing a 404 error to the user and offering a rediect to the

@@ -22,7 +22,7 @@ import {
 import AdminSidebar from '../components/admin_sidebar/AdminSidebar';
 import TopBar from '../components/top_bar/TopBar';
 import MultiSelect from './MultiSelect';
-import { postData } from '../util/api.tsx';
+import { postData } from '../util/api';
 import { getIndustryFocuses, IndustryFocus } from '../util/industryFocusApi';
 
 const languageOptions = ['English', 'Spanish', 'Mandarin', 'French', 'Other'];
@@ -67,10 +67,10 @@ const initialFormState: SpeakerFormState = {
 
 function AdminUsersPage() {
   const [formState, setFormState] =
-    React.useState<SpeakerFormState>(initialFormState);
-  const [error, setError] = React.useState<string | null>(null);
-  const [success, setSuccess] = React.useState<string | null>(null);
-  const [loading, setLoading] = React.useState(false);
+    useState<SpeakerFormState>(initialFormState);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const [industryFocuses, setIndustryFocuses] = useState<IndustryFocus[]>([]);
   const [loadingFocuses, setLoadingFocuses] = useState(true);
   const [industryFocusError, setIndustryFocusError] = useState<string | null>(null);

@@ -1,6 +1,6 @@
 import express from "express";
-import { isAdmin } from "../controllers/admin.middleware.ts";
-import { isAuthenticated } from "../controllers/auth.middleware.ts";
+import { isAdmin } from "../controllers/admin.middleware";
+import { isAuthenticated } from "../controllers/auth.middleware";
 import {
   getAllTeachers,
   getTeacher,
@@ -8,7 +8,7 @@ import {
   updateTeacherProfile,
   deleteTeacherProfile,
   deleteCurrentUserTeacherProfile,
-} from "../controllers/teacher.controller.ts";
+} from "../controllers/teacher.controller";
 
 const router = express.Router();
 

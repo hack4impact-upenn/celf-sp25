@@ -1,7 +1,7 @@
 /**
  * API functions for admin request management
  */
-import { getData, putData } from '../util/api.tsx';
+import { getData, putData } from '../util/api';
 
 export type RequestStatus =
   | 'Pending Review'

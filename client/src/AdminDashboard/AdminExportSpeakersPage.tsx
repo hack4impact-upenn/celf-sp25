@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { styled } from '@mui/system';
-import AdminSidebar from '../components/admin_sidebar/AdminSidebar.tsx';
-import TopBar from '../components/top_bar/TopBar.tsx';
+import AdminSidebar from '../components/admin_sidebar/AdminSidebar';
+import TopBar from '../components/top_bar/TopBar';
 import './AdminDashboard.css';
 import { 
   Typography, 
@@ -17,7 +17,7 @@ import {
   CircularProgress
 } from '@mui/material';
 import { Download, Refresh } from '@mui/icons-material';
-import { exportSpeakersData } from './api.tsx';
+import { exportSpeakersData } from './api';
 
 const ExportButton = styled(Button)(({ theme }) => ({
   margin: theme.spacing(1),

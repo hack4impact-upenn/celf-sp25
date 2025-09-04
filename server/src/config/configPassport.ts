@@ -4,7 +4,7 @@ import { compare } from "bcrypt";
 import {
   getUserByEmailWithPassword,
   getUserById,
-} from "../services/user.service.ts";
+} from "../services/user.service";
 
 interface IUserWithPassword {
   _id: string;
@@ -68,10 +68,10 @@ const initializePassport = (passport: passportStrat.PassportStatic) => {
   );
 
   // Set up serialization and deserialization of user objects
-  passport.serializeUser((user: any, done: any) => {
+  passport.serializeUser((user: any, done: (error: any, id?: any) => void) => {
     done(null, user._id);
   });
-  passport.deserializeUser((id: any, done: any) => {
+  passport.deserializeUser((id: any, done: (error: any, user?: any) => void) => {
     getUserById(id)
       .then((user) => done(null, user))
       .catch((err) => done(err, null));

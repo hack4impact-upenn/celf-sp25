@@ -1,17 +1,17 @@
 import express from "express";
-import ApiError from "../util/apiError.ts";
-import StatusCode from "../util/statusCode.ts";
-import { ITeacher } from "../models/teacher.model.ts";
-import { User } from "../models/user.model.ts";
+import ApiError from "../util/apiError";
+import StatusCode from "../util/statusCode";
+import { ITeacher } from "../models/teacher.model";
+import { User } from "../models/user.model";
 import {
   createTeacher,
   getTeacherByUserId,
   getAllTeachers,
   updateTeacher,
   deleteTeacher,
-} from "../services/teacher.service.ts";
-import { deleteUserById } from "../services/user.service.ts";
-import { deleteRequestsByTeacherId } from "../services/request.service.ts";
+} from "../services/teacher.service";
+import { deleteUserById } from "../services/user.service";
+import { deleteRequestsByTeacherId } from "../services/request.service";
 
 /**
  * Get all teachers from the database

@@ -14,7 +14,7 @@ import {
   Chip,
   Button,
 } from '@mui/material';
-import { getIndustryFocuses, IndustryFocus } from '../util/industryFocusApi.ts';
+import { getIndustryFocuses, IndustryFocus } from '../util/industryFocusApi';
 
 const gradeOptions = ['Elementary', 'Middle School', 'High School'];
 const languageOptions = ['English', 'Spanish', 'Mandarin', 'French', 'Other'];

@@ -20,16 +20,16 @@ import {
   Divider,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useAppSelector } from '../util/redux/hooks.ts';
-import { selectUser } from '../util/redux/userSlice.ts';
-import ScreenGrid from '../components/ScreenGrid.tsx';
-import TopBar from '../components/top_bar/TopBar.tsx';
-import PrimaryButton from '../components/buttons/PrimaryButton.tsx';
-import AlertDialog from '../components/AlertDialog.tsx';
-import COLORS from '../assets/colors.ts';
-import { useData, putData } from '../util/api.tsx';
+import { useAppSelector } from '../util/redux/hooks';
+import { selectUser } from '../util/redux/userSlice';
+import ScreenGrid from '../components/ScreenGrid';
+import TopBar from '../components/top_bar/TopBar';
+import PrimaryButton from '../components/buttons/PrimaryButton';
+import AlertDialog from '../components/AlertDialog';
+import COLORS from '../assets/colors';
+import { useData, putData } from '../util/api';
 import { getIndustryFocuses, IndustryFocus } from '../util/industryFocusApi';
-import { processImageUpload } from '../util/imageCompression.ts';
+import { processImageUpload } from '../util/imageCompression';
 
 const languageOptions = ['English', 'Spanish', 'Mandarin', 'French', 'Other'];
 const gradeOptions = ['Elementary', 'Middle School', 'High School'];

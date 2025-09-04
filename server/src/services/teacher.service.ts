@@ -1,5 +1,5 @@
-import { ITeacher, Teacher } from "../models/teacher.model.ts";
-import { User } from "../models/user.model.ts";
+import { ITeacher, Teacher } from "../models/teacher.model";
+import { User } from "../models/user.model";
 
 /**
  * Creates a new teacher profile in the database.

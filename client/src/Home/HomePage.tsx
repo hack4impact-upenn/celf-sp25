@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import Button from '@mui/material/Button';
 import { NavigateFunction, useNavigate } from 'react-router-dom';
 import { Typography, Grid } from '@mui/material';
-import { useAppDispatch, useAppSelector } from '../util/redux/hooks.ts';
+import { useAppDispatch, useAppSelector } from '../util/redux/hooks';
 import {
   logout as logoutAction,
   selectUser,
-} from '../util/redux/userSlice.ts';
-import { logout as logoutApi } from './api.tsx';
-import ScreenGrid from '../components/ScreenGrid.tsx';
-import PrimaryButton from '../components/buttons/PrimaryButton.tsx';
+} from '../util/redux/userSlice';
+import { logout as logoutApi } from './api';
+import ScreenGrid from '../components/ScreenGrid';
+import PrimaryButton from '../components/buttons/PrimaryButton';
 
 /**
  * The HomePage of the user dashboard. Displays a welcome message and a logout button.
@@ -21,7 +21,6 @@ function HomePage() {
   const navigator = useNavigate();
 
   useEffect(() => {
-    console.log('User state:', user);
     if (user.admin) {
       navigator('/admin-dashboard', { replace: true });
     } else if (user.role && user.role.toLowerCase() === 'speaker') {

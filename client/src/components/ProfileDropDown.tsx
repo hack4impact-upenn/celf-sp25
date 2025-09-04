@@ -4,9 +4,9 @@ import AccountCircle from '@mui/icons-material/AccountCircle';
 import { Link, useNavigate } from 'react-router-dom';
 import { SxProps, Theme } from '@mui/material/styles';
 import COLORS from '../assets/colors';
-import { useAppSelector, useAppDispatch } from '../util/redux/hooks.ts';
-import { selectUser, logout as logoutAction } from '../util/redux/userSlice.ts';
-import { logout as logoutApi } from '../Home/api.tsx';
+import { useAppSelector, useAppDispatch } from '../util/redux/hooks';
+import { selectUser, logout as logoutAction } from '../util/redux/userSlice';
+import { logout as logoutApi } from '../Home/api';
 
 interface ProfileDropDownProps {
   sx?: SxProps<Theme>;

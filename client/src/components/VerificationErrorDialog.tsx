@@ -9,7 +9,7 @@ import {
   CircularProgress,
   Alert,
 } from '@mui/material';
-import { resendVerificationEmail } from '../Authentication/api.ts';
+import { resendVerificationEmail } from '../Authentication/api';
 
 interface VerificationErrorDialogProps {
   showAlert: boolean;

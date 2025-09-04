@@ -4,8 +4,8 @@
 import "dotenv/config";
 import SGmail, { MailDataRequired } from "@sendgrid/mail";
 
-const appName = "Boilerplate"; // Replace with a relevant project name
-const senderName = "Hack4Impact UPenn"; // Replace with a relevant project sender
+const appName = "CELF Speaker Portal"; 
+const senderName = "CELF Team"; 
 const baseUrl = process.env.FRONTEND_URL || "http://localhost:3000";
 
 // eslint-disable-next-line no-useless-concat

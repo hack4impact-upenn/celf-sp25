@@ -22,11 +22,11 @@ import PersonIcon from '@mui/icons-material/Person';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import TopBar from '../components/top_bar/TopBar.tsx';
-import COLORS from '../assets/colors.ts';
-import { getData } from '../util/api.tsx';
-import { useAppSelector } from '../util/redux/hooks.ts';
-import { selectUser } from '../util/redux/userSlice.ts';
+import TopBar from '../components/top_bar/TopBar';
+import COLORS from '../assets/colors';
+import { getData } from '../util/api';
+import { useAppSelector } from '../util/redux/hooks';
+import { selectUser } from '../util/redux/userSlice';
 
 interface Teacher {
   _id: string;

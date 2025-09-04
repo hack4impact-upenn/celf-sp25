@@ -21,11 +21,11 @@ import {
   SelectChangeEvent,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useAppSelector } from '../util/redux/hooks.ts';
-import { selectUser } from '../util/redux/userSlice.ts';
-import TopBar from '../components/top_bar/TopBar.tsx';
-import COLORS from '../assets/colors.ts';
-import { getData, putData } from '../util/api.tsx';
+import { useAppSelector } from '../util/redux/hooks';
+import { selectUser } from '../util/redux/userSlice';
+import TopBar from '../components/top_bar/TopBar';
+import COLORS from '../assets/colors';
+import { getData, putData } from '../util/api';
 import { getIndustryFocuses, IndustryFocus } from '../util/industryFocusApi';
 
 const languageOptions = ['English', 'Spanish', 'Mandarin', 'French', 'Other'];
