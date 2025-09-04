@@ -21,14 +21,6 @@ function HomePage() {
   const navigator = useNavigate();
 
   useEffect(() => {
-    console.log('User state:', user);
-    console.log('User _id:', user._id);
-    console.log('User email:', user.email);
-    console.log('User firstName:', user.firstName);
-    console.log('User lastName:', user.lastName);
-    console.log('User admin:', user.admin);
-    console.log('User role:', user.role);
-    
     if (user.admin) {
       navigator('/admin-dashboard', { replace: true });
     } else if (user.role && user.role.toLowerCase() === 'speaker') {
