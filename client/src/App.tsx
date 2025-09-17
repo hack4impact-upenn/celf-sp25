@@ -22,7 +22,7 @@ import SpeakerRequestsPage from './SpeakerDashboard/SpeakerRequestsPage';
 
 import {
   UnauthenticatedRoutesWrapper,
-  InviteRoutesWrapper,
+  PasswordResetRoutesWrapper,
   ProtectedRoutesWrapper,
   DynamicRedirect,
   AdminRoutesWrapper,
@@ -89,17 +89,17 @@ function App() {
                     path="/email-reset"
                     element={<EmailResetPasswordPage />}
                   />
-                  <Route
-                    path="/reset-password/:token"
-                    element={<ResetPasswordPage />}
-                  />
                 </Route>
 
-                {/* Routes for invite pages - accessible regardless of authentication status */}
-                <Route element={<InviteRoutesWrapper />}>
+                {/* Routes for invite and password reset - shows warning if user is already logged in */}
+                <Route element={<PasswordResetRoutesWrapper />}>
                   <Route
                     path="/invite/:token"
                     element={<InvitePage />}
+                  />
+                  <Route
+                    path="/reset-password/:token"
+                    element={<ResetPasswordPage />}
                   />
                 </Route>
 
