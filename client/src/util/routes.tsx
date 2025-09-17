@@ -19,6 +19,14 @@ function UnauthenticatedRoutesWrapper() {
 }
 
 /**
+ * A wrapper component for invite pages that allows access regardless of authentication status.
+ * This is needed because users might click invite links while already logged in.
+ */
+function InviteRoutesWrapper() {
+  return <Outlet />;
+}
+
+/**
  * A wrapper component whose children routes which can only be navigated to if the user is  authenticated.
  */
 function ProtectedRoutesWrapper() {
@@ -75,6 +83,7 @@ function DynamicRedirect({ unAuthPath, authPath }: IDynamicElementProps) {
 
 export {
   UnauthenticatedRoutesWrapper,
+  InviteRoutesWrapper,
   ProtectedRoutesWrapper,
   AdminRoutesWrapper,
   TeacherRoutesWrapper,
