@@ -107,7 +107,7 @@ function LoginSelectPage() {
               </Grid>
               <Grid container direction="column" alignItems="center" justifyContent="center" sx={{ width: '100%', mt: 2 }}>
                 <Grid item sx={{ width: '100%', mb: 2, display: 'flex', justifyContent: 'center' }}>
-                  <Box sx={{ width: '100%', maxWidth: 400 }}>
+                  <Box sx={{ width: '100%', maxWidth: 400, display: 'flex', justifyContent: 'center' }}>
                     <ItemButton onClick={() => handleClick('Teacher')}>
                       <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.3rem', mb: 1 }}>
                         Teacher
@@ -119,7 +119,7 @@ function LoginSelectPage() {
                   </Box>
                 </Grid>
                 <Grid item sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-                  <Box sx={{ width: '100%', maxWidth: 400 }}>
+                  <Box sx={{ width: '100%', maxWidth: 400, display: 'flex', justifyContent: 'center' }}>
                     <ItemButton onClick={() => handleClick('Speaker')}>
                       <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.3rem', mb: 1 }}>
                         Speaker

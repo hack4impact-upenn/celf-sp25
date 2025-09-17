@@ -352,7 +352,7 @@ const createSpeakerDirectly = async (
     await user.save();
     
     // Send password reset email
-    if (process.env.SENDGRID_API_KEY && process.env.SENDGRID_API_KEY !== '') {
+    if (process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== '') {
       try {
         await emailResetPasswordLink(lowercaseEmail, resetToken);
       } catch (emailError) {
@@ -360,7 +360,7 @@ const createSpeakerDirectly = async (
         // Continue even if email fails
       }
     } else {
-      console.log('SendGrid not configured - skipping password reset email');
+      console.log('Resend not configured - skipping password reset email');
     }
     
     res.status(StatusCode.CREATED).json({

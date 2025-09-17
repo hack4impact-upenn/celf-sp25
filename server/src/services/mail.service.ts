@@ -1,15 +1,14 @@
 /**
- * All the functions related to sending emails with SendGrid
+ * All the functions related to sending emails with Resend
  */
 import "dotenv/config";
-import SGmail, { MailDataRequired } from "@sendgrid/mail";
+import { Resend } from "resend";
 
 const appName = "CELF Speaker Portal"; 
 const senderName = "CELF Team"; 
 const baseUrl = process.env.FRONTEND_URL || "http://localhost:3000";
 
-// eslint-disable-next-line no-useless-concat
-SGmail.setApiKey(`${process.env.SENDGRID_API_KEY}`);
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
  * Sends a reset password link to a user
@@ -19,12 +18,11 @@ SGmail.setApiKey(`${process.env.SENDGRID_API_KEY}`);
 const emailResetPasswordLink = async (email: string, token: string) => {
   // TODO DURING DEVELOPMENT: use a template to make this prettier and match client's style
   const resetLink = `${baseUrl}/reset-password/${token}`;
-  const mailSettings: MailDataRequired = {
-    from: {
-      email: process.env.SENDGRID_EMAIL_ADDRESS || "missing@mail.com",
-      name: senderName,
-    },
-    to: email,
+  const fromEmail = process.env.RESEND_FROM_EMAIL || "missing@mail.com";
+  
+  await resend.emails.send({
+    from: `${senderName} <${fromEmail}>`,
+    to: [email],
     subject: "Link to Reset Password",
     html:
       `<p>You are receiving this because you (or someone else) have requested ` +
@@ -34,10 +32,7 @@ const emailResetPasswordLink = async (email: string, token: string) => {
       `<p><strong>Important:</strong> If you are currently logged into any account, please log out first before clicking the reset link, otherwise the reset will not work properly.</p>` +
       `<p>If you did not request this change, please ignore this email and your ` +
       `account will remain secured.</p>`,
-  };
-
-  // Send the email and propogate the error up if one exists
-  await SGmail.send(mailSettings);
+  });
 };
 
 /**
@@ -47,12 +42,11 @@ const emailResetPasswordLink = async (email: string, token: string) => {
  */
 const emailVerificationLink = async (email: string, token: string) => {
   const resetLink = `${baseUrl}/verify-account/${token}`;
-  const mailSettings: MailDataRequired = {
-    from: {
-      email: process.env.SENDGRID_EMAIL_ADDRESS || "missing@mail.com",
-      name: senderName,
-    },
-    to: email,
+  const fromEmail = process.env.RESEND_FROM_EMAIL || "missing@mail.com";
+  
+  await resend.emails.send({
+    from: `${senderName} <${fromEmail}>`,
+    to: [email],
     subject: "Verify account",
     html:
       `<p> Please visit the following ` +
@@ -61,9 +55,7 @@ const emailVerificationLink = async (email: string, token: string) => {
       `<p><strong>Important:</strong> If you are currently logged into any account, please log out first before clicking the verification link, otherwise the verification will not work properly.</p>` +
       `<p>If you did not attempt to register an account with this email address, ` +
       `please ignore this message.</p>`,
-  };
-  // Send the email and propogate the error up if one exists
-  await SGmail.send(mailSettings);
+  });
 };
 
 /**
@@ -73,12 +65,11 @@ const emailVerificationLink = async (email: string, token: string) => {
  */
 const emailInviteLink = async (email: string, token: string) => {
   const resetLink = `${baseUrl}/invite/${token}`;
-  const mailSettings: MailDataRequired = {
-    from: {
-      email: process.env.SENDGRID_EMAIL_ADDRESS || "missing@mail.com",
-      name: senderName,
-    },
-    to: email,
+  const fromEmail = process.env.RESEND_FROM_EMAIL || "missing@mail.com";
+  
+  await resend.emails.send({
+    from: `${senderName} <${fromEmail}>`,
+    to: [email],
     subject: "Verify account",
     html:
       `<p> Please visit the following ` +
@@ -87,9 +78,7 @@ const emailInviteLink = async (email: string, token: string) => {
       `<p><strong>Important:</strong> If you are currently logged into any account, please log out first before clicking the invite link, otherwise the registration will not work properly.</p>` +
       `<p>If you did not attempt to register an account with this email address, ` +
       `please ignore this message.</p>`,
-  };
-  // Send the email and propogate the error up if one exists
-  await SGmail.send(mailSettings);
+  });
 };
 
 export { emailVerificationLink, emailResetPasswordLink, emailInviteLink };
