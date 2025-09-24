@@ -4,6 +4,7 @@
 import "dotenv/config";
 import SGmail, { MailDataRequired } from "@sendgrid/mail";
 
+
 const appName = "CELF Speaker Portal"; 
 const senderName = "CELF Team"; 
 const baseUrl = process.env.FRONTEND_URL || "http://localhost:3000";
