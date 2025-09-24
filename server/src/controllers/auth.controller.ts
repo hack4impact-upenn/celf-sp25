@@ -238,8 +238,8 @@ const register = async (
       user!.verificationToken = verificationToken;
       await user!.save();
       
-      // Only send email if Resend is configured
-      if (process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== '') {
+      // Only send email if SendGrid is configured
+      if (process.env.SENDGRID_API_KEY && process.env.SENDGRID_API_KEY !== '') {
         try {
           await emailVerificationLink(lowercaseEmail, verificationToken);
         } catch (emailError) {
@@ -247,8 +247,8 @@ const register = async (
           // Continue registration even if email fails
         }
       } else {
-        console.log('Resend not configured - skipping verification email');
-        // Auto-verify in development if no Resend
+        console.log('SendGrid not configured - skipping verification email');
+        // Auto-verify in development if no SendGrid
         if (process.env.NODE_ENV === 'development') {
           user!.verified = true;
           user!.verificationToken = undefined;
@@ -554,8 +554,8 @@ const resendVerificationEmail = async (
     user.verificationToken = verificationToken;
     await user.save();
 
-    // Only send email if Resend is configured
-    if (process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== '') {
+    // Only send email if SendGrid is configured
+    if (process.env.SENDGRID_API_KEY && process.env.SENDGRID_API_KEY !== '') {
       try {
         await emailVerificationLink(lowercaseEmail, verificationToken);
       } catch (emailError) {
@@ -563,8 +563,8 @@ const resendVerificationEmail = async (
         // Continue even if email fails - just like in registration
       }
     } else {
-      console.log('Resend not configured - skipping verification email');
-      // Auto-verify in development if no Resend
+      console.log('SendGrid not configured - skipping verification email');
+      // Auto-verify in development if no SendGrid
       if (process.env.NODE_ENV === 'development') {
         user.verified = true;
         user.verificationToken = undefined;
