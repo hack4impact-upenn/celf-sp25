@@ -18,6 +18,7 @@ SGmail.setApiKey(`${process.env.SENDGRID_API_KEY}`);
  * @param token The unique token identifying this reset attempt for the user
  */
 const emailResetPasswordLink = async (email: string, token: string) => {
+  const resetLink = `${baseUrl}/reset-password/${token}`;
   const mailSettings: MailDataRequired = {
     from: {
       email: process.env.SENDGRID_EMAIL_ADDRESS || "missing@mail.com",
