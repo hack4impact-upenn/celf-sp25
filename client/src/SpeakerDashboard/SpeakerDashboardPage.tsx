@@ -12,13 +12,13 @@ import {
   Alert,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import PrimaryButton from '../components/buttons/PrimaryButton.tsx';
-import ScreenGrid from '../components/ScreenGrid.tsx';
-import TopBar from '../components/top_bar/TopBar.tsx';
-import { useAppSelector } from '../util/redux/hooks.ts';
-import { selectUser } from '../util/redux/userSlice.ts';
-import { getData } from '../util/api.tsx';
-import COLORS from '../assets/colors.ts';
+import PrimaryButton from '../components/buttons/PrimaryButton';
+import ScreenGrid from '../components/ScreenGrid';
+import TopBar from '../components/top_bar/TopBar';
+import { useAppSelector } from '../util/redux/hooks';
+import { selectUser } from '../util/redux/userSlice';
+import { getData } from '../util/api';
+import COLORS from '../assets/colors';
 
 function SpeakerDashboardPage() {
   const navigate = useNavigate();

@@ -1,4 +1,4 @@
-import { IInvite, Invite } from "../models/invite.model.ts";
+import { IInvite, Invite } from "../models/invite.model";
 
 const removeSensitiveDataQuery = ["-verificationToken"];
 

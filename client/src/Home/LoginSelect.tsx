@@ -1,9 +1,9 @@
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import { Box, Paper, Typography, Link } from '@mui/material';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import COLORS from '../assets/colors.ts';
-import ScreenGrid from '../components/ScreenGrid.tsx';
+import COLORS from '../assets/colors';
+import ScreenGrid from '../components/ScreenGrid';
 
 const ItemButton = styled(Box)(({ theme }) => ({
   backgroundColor: 'white',
@@ -13,7 +13,7 @@ const ItemButton = styled(Box)(({ theme }) => ({
   transition: 'transform 0.2s ease, box-shadow 0.2s ease',
   display: 'flex',
   flexDirection: 'column',
-  alignItems: 'flex-start',
+  alignItems: 'center',
   justifyContent: 'center',
   padding: theme.spacing(3, 3),
   color: COLORS.primaryDark,
@@ -21,6 +21,7 @@ const ItemButton = styled(Box)(({ theme }) => ({
   boxShadow: '0px 6px 24px rgba(0, 0, 0, 0.10)',
   fontSize: '1.1rem',
   marginBottom: theme.spacing(1.5),
+  textAlign: 'center',
 
   '&:hover': {
     transform: 'translateY(-4px) scale(1.02)',
@@ -69,7 +70,7 @@ function LoginSelectPage() {
         >
           <Box sx={{ width: '100%' }}>
             <Grid container direction="column" alignItems="center" spacing={3}>
-              <Grid component="div" sx={{ mb: 1 }}>
+              <Grid item sx={{ mb: 1 }}>
                 <Box
                   component="img"
                   src="/images/celf-logo.png"
@@ -81,7 +82,7 @@ function LoginSelectPage() {
                   }}
                 />
               </Grid>
-              <Grid component="div">
+              <Grid item>
                 <Typography
                   variant="h4"
                   textAlign="center"
@@ -104,29 +105,33 @@ function LoginSelectPage() {
                   Select your role to get started
                 </Typography>
               </Grid>
-              <Grid container direction="column" alignItems="center" sx={{ width: '100%', mt: 1 }}>
-                <Grid component="div" sx={{ width: '100%', mb: 1.5 }}>
-                  <ItemButton onClick={() => handleClick('Teacher')}>
-                    <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.3rem', mb: 1 }}>
-                      Teacher
-                    </Typography>
-                    <Typography variant="body2" sx={{ opacity: 0.9, lineHeight: 1.4 }}>
-                      Register as a teacher to view and request speakers
-                    </Typography>
-                  </ItemButton>
+              <Grid item container direction="column" alignItems="center" justifyContent="center" sx={{ width: '100%', mt: 2 }}>
+                <Grid item sx={{ width: '100%', mb: 2, display: 'flex', justifyContent: 'center' }}>
+                  <Box sx={{ width: '100%', maxWidth: 400, display: 'flex', justifyContent: 'center' }}>
+                    <ItemButton onClick={() => handleClick('Teacher')}>
+                      <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.3rem', mb: 1 }}>
+                        Teacher
+                      </Typography>
+                      <Typography variant="body2" sx={{ opacity: 0.9, lineHeight: 1.4 }}>
+                        Register as a teacher to view and request speakers
+                      </Typography>
+                    </ItemButton>
+                  </Box>
                 </Grid>
-                <Grid component="div" sx={{ width: '100%' }}>
-                  <ItemButton onClick={() => handleClick('Speaker')}>
-                    <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.3rem', mb: 1 }}>
-                      Speaker
-                    </Typography>
-                    <Typography variant="body2" sx={{ opacity: 0.9, lineHeight: 1.4 }}>
-                      Register as a speaker to share your expertise
-                    </Typography>
-                  </ItemButton>
+                <Grid item sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                  <Box sx={{ width: '100%', maxWidth: 400, display: 'flex', justifyContent: 'center' }}>
+                    <ItemButton onClick={() => handleClick('Speaker')}>
+                      <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.3rem', mb: 1 }}>
+                        Speaker
+                      </Typography>
+                      <Typography variant="body2" sx={{ opacity: 0.9, lineHeight: 1.4 }}>
+                        Register as a speaker to share your expertise
+                      </Typography>
+                    </ItemButton>
+                  </Box>
                 </Grid>
               </Grid>
-              <Grid component="div">
+              <Grid item>
                 <Link
                   component={RouterLink}
                   to="/login"

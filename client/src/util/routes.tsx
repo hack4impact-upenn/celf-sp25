@@ -1,8 +1,8 @@
 import React from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
-import { useData } from './api.tsx';
-import { useAppSelector } from './redux/hooks.ts';
-import { selectUser } from './redux/userSlice.ts';
+import { useData } from './api';
+import { useAppSelector } from './redux/hooks';
+import { selectUser } from './redux/userSlice';
 
 interface IDynamicElementProps {
   unAuthPath: string;
@@ -17,6 +17,8 @@ function UnauthenticatedRoutesWrapper() {
   if (data === null) return null;
   return !data.error ? <Navigate to="/" /> : <Outlet />;
 }
+
+
 
 /**
  * A wrapper component whose children routes which can only be navigated to if the user is  authenticated.

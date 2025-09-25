@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import { TextField, Link, Typography, Grid, Paper, Box } from '@mui/material';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { useAppDispatch } from '../util/redux/hooks.ts';
-import { login as loginRedux } from '../util/redux/userSlice.ts';
-import FormGrid from '../components/form/FormGrid.tsx';
-import FormCol from '../components/form/FormCol.tsx';
-import FormRow from '../components/form/FormRow.tsx';
-import { emailRegex, InputErrorMessage } from '../util/inputvalidation.ts';
-import { loginUser } from './api.ts';
-import AlertDialog from '../components/AlertDialog.tsx';
-import VerificationErrorDialog from '../components/VerificationErrorDialog.tsx';
-import PrimaryButton from '../components/buttons/PrimaryButton.tsx';
-import ScreenGrid from '../components/ScreenGrid.tsx';
-import COLORS from '../assets/colors.ts';
+import { useAppDispatch } from '../util/redux/hooks';
+import { login as loginRedux } from '../util/redux/userSlice';
+import FormGrid from '../components/form/FormGrid';
+import FormCol from '../components/form/FormCol';
+import FormRow from '../components/form/FormRow';
+import { emailRegex, InputErrorMessage } from '../util/inputvalidation';
+import { loginUser } from './api';
+import AlertDialog from '../components/AlertDialog';
+import VerificationErrorDialog from '../components/VerificationErrorDialog';
+import PrimaryButton from '../components/buttons/PrimaryButton';
+import ScreenGrid from '../components/ScreenGrid';
+import COLORS from '../assets/colors';
 
 /**
  * A page allowing users to input their email and password to login. The default
@@ -118,8 +118,8 @@ function LoginPage() {
   async function handleSubmit() {
     if (validateInputs()) {
       loginUser(values.email, values.password)
-        .then((user) => {
-          console.log('navigating to home!');
+        .then((response) => {
+          const user = response.user;
           dispatchUser(
             user._id!,
             user.email!,
@@ -200,7 +200,7 @@ function LoginPage() {
                     mb: 1,
                   }}
                 >
-                  Welcome to CELF
+                  Welcome to the CELF Green Careers Portal
                 </Typography>
                 <Typography
                   variant="subtitle1"

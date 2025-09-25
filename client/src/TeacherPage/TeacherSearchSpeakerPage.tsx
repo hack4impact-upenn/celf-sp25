@@ -45,7 +45,7 @@ import SpeakerFilterPanel, {
   FilterState,
 } from '../components/SpeakerFilterPanel';
 import { SelectChangeEvent } from '@mui/material';
-import { getData } from '../util/api.tsx';
+import { getData } from '../util/api';
 import { createTeacherRequest } from './teacherRequestApi';
 
 interface Speaker {

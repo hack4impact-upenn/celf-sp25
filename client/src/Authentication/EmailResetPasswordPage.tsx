@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { TextField, Typography, Link, Grid, Paper, Box } from '@mui/material';
-import { sendResetPasswordEmail } from './api.ts';
-import AlertDialog from '../components/AlertDialog.tsx';
-import { emailRegex, InputErrorMessage } from '../util/inputvalidation.ts';
-import PrimaryButton from '../components/buttons/PrimaryButton.tsx';
-import ScreenGrid from '../components/ScreenGrid.tsx';
-import COLORS from '../assets/colors.ts';
+import { sendResetPasswordEmail } from './api';
+import AlertDialog from '../components/AlertDialog';
+import { emailRegex, InputErrorMessage } from '../util/inputvalidation';
+import PrimaryButton from '../components/buttons/PrimaryButton';
+import ScreenGrid from '../components/ScreenGrid';
+import COLORS from '../assets/colors';
 
 /**
  * A page allowing users to input their email so a reset password link can be

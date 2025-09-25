@@ -1,5 +1,5 @@
-import { IRequest } from "../models/request.model.ts";
-import Request from "../models/request.model.ts";
+import { IRequest } from "../models/request.model";
+import Request from "../models/request.model";
 
 /**
  * Get all requests from the database with populated speaker and teacher data

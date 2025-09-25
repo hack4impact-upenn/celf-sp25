@@ -24,21 +24,50 @@
     "heroku-postbuild": "cd client && yarn install && yarn build && cd ../server && yarn install --production=false && yarn build"
   },
   "dependencies": {
+    "@emotion/react": "^11.7.1",
+    "@emotion/styled": "^11.6.0",
+    "@mui/icons-material": "^5.15.9",
+    "@mui/material": "^5.4.1",
+    "@mui/system": "^5.5.1",
+    "@mui/x-charts": "^6.19.8",
+    "@mui/x-date-pickers": "^6.19.9",
+    "@mui/x-date-pickers-pro": "^7.2.0",
+    "axios": "^1.1.2",
     "concurrently": "^7.0.0",
     "cross-env": "^7.0.3",
-    "dd-trace": "^5.23.0",
-    "winston": "^3.14.2"
+    "dayjs": "^1.11.10",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.2.2",
+    "styled-components": "^5.3.3",
+    "eslint": "^8.8.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-airbnb-typescript-prettier": "^5.0.0",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "eslint-plugin-react": "^7.28.0",
+    "eslint-plugin-react-hooks": "^4.3.0"
   },
   "devDependencies": {
-    "concurrently": "^7.0.0",
-    "cross-env": "^7.0.3",
+    "@types/babel__core": "^7.1.19",
+    "@types/react": "^18.0.21",
+    "@types/react-dom": "^18.0.6",
+    "@types/styled-components": "^5.1.24",
+    "@typescript-eslint/eslint-plugin": "^5.10.1",
+    "@typescript-eslint/parser": "^5.10.1",
+    "eslint": "^8.8.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-airbnb-typescript-prettier": "^5.0.0",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "eslint-plugin-react": "^7.28.0",
+    "eslint-plugin-react-hooks": "^4.3.0",
     "husky": "^8.0.1",
     "lint-staged": "^13.0.3",
-    "prettier": "^2.5.1"
-  },
-
-  "engines": {
-    "node": "20.16.0"
-  },
-  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
+    "prettier": "^2.5.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^4.5.5"
+  }
 }

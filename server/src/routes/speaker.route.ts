@@ -1,6 +1,6 @@
 import express from "express";
-import { isAdmin } from "../controllers/admin.middleware.ts";
-import { isAuthenticated } from "../controllers/auth.middleware.ts";
+import { isAdmin } from "../controllers/admin.middleware";
+import { isAuthenticated } from "../controllers/auth.middleware";
 import {
   getAllSpeakers,
   getSpeaker,
@@ -14,7 +14,7 @@ import {
   filterSpeaker,
   getCurrentUserSpeakerProfile,
   updateCurrentUserSpeakerProfile,
-} from "../controllers/speaker.controller.ts";
+} from "../controllers/speaker.controller";
 
 const router = express.Router();
 

@@ -1,8 +1,8 @@
 import express from "express";
-import ApiError from "../util/apiError.ts";
-import StatusCode from "../util/statusCode.ts";
-import { ISpeaker } from "../models/speaker.model.ts";
-import { User } from "../models/user.model.ts";
+import ApiError from "../util/apiError";
+import StatusCode from "../util/statusCode";
+import { ISpeaker } from "../models/speaker.model";
+import { User } from "../models/user.model";
 import {
   createSpeaker,
   getSpeakerByUserId,
@@ -12,10 +12,10 @@ import {
   updateSpeaker,
   deleteSpeaker,
   getfilterSpeakeredList,
-} from "../services/speaker.service.ts";
-import { updateUser, deleteUserById } from "../services/user.service.ts";
-import { updateRequestStatusHandler } from "./request.controller.ts";
-import { deleteRequestsBySpeakerId } from "../services/request.service.ts";
+} from "../services/speaker.service";
+import { updateUser, deleteUserById } from "../services/user.service";
+import { updateRequestStatusHandler } from "./request.controller";
+import { deleteRequestsBySpeakerId } from "../services/request.service";
 
 /**
  * Get all speakers from the database (including invisible ones) for admin use

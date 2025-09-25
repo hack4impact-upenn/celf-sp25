@@ -14,16 +14,16 @@ import {
   Alert,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useAppSelector, useAppDispatch } from '../util/redux/hooks.ts';
-import { selectUser, logout as logoutAction } from '../util/redux/userSlice.ts';
-import ScreenGrid from '../components/ScreenGrid.tsx';
-import TopBar from '../components/top_bar/TopBar.tsx';
-import PrimaryButton from '../components/buttons/PrimaryButton.tsx';
-import AlertDialog from '../components/AlertDialog.tsx';
-import COLORS from '../assets/colors.ts';
-import { deleteAccount, changePassword } from '../Authentication/api.ts';
-import { putData, getData } from '../util/api.tsx';
-import { login } from '../util/redux/userSlice.ts';
+import { useAppSelector, useAppDispatch } from '../util/redux/hooks';
+import { selectUser, logout as logoutAction } from '../util/redux/userSlice';
+import ScreenGrid from '../components/ScreenGrid';
+import TopBar from '../components/top_bar/TopBar';
+import PrimaryButton from '../components/buttons/PrimaryButton';
+import AlertDialog from '../components/AlertDialog';
+import COLORS from '../assets/colors';
+import { deleteAccount, changePassword } from '../Authentication/api';
+import { putData, getData } from '../util/api';
+import { login } from '../util/redux/userSlice';
 
 function AccountSettingsPage() {
   const navigate = useNavigate();

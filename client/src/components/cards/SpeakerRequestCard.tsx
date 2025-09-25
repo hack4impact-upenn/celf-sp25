@@ -12,7 +12,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import UnarchiveIcon from '@mui/icons-material/Unarchive';
-import { getData } from '../../util/api.tsx';
+import { getData } from '../../util/api';
 
 // Export this constant so it can be imported elsewhere
 export const DEFAULT_IMAGE = '/defaultprofile.jpg';

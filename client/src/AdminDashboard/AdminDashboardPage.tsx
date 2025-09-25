@@ -1,14 +1,14 @@
 import React from 'react';
 import { styled } from '@mui/system';
-import SearchBar from '../components/search_bar/SearchBar.tsx';
-import SpeakerCard from '../components/cards/SpeakerCard.tsx';
-import AdminSidebar from '../components/admin_sidebar/AdminSidebar.tsx';
-import TopBar from '../components/top_bar/TopBar.tsx';
+import SearchBar from '../components/search_bar/SearchBar';
+import SpeakerCard from '../components/cards/SpeakerCard';
+import AdminSidebar from '../components/admin_sidebar/AdminSidebar';
+import TopBar from '../components/top_bar/TopBar';
 import './AdminDashboard.css';
 import { Typography, Grid, Box } from '@mui/material';
-import ScreenGrid from '../components/ScreenGrid.tsx';
-import UserTable from './UserTable.tsx';
-import InviteAdminButton from '../components/buttons/InviteAdminButton.tsx';
+import ScreenGrid from '../components/ScreenGrid';
+import UserTable from './UserTable';
+import InviteAdminButton from '../components/buttons/InviteAdminButton';
 
 function AdminDashboardPage() {
   return (

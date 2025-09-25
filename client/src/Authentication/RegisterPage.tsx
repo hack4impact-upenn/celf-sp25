@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
 import { Link, TextField, Grid, Typography, Paper, Box } from '@mui/material';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import FormCol from '../components/form/FormCol.tsx';
+import FormCol from '../components/form/FormCol';
 import {
   emailRegex,
   InputErrorMessage,
   nameRegex,
   passwordRegex,
-} from '../util/inputvalidation.ts';
-import { register } from './api.ts';
-import AlertDialog from '../components/AlertDialog.tsx';
-import PrimaryButton from '../components/buttons/PrimaryButton.tsx';
-import ScreenGrid from '../components/ScreenGrid.tsx';
-import FormRow from '../components/form/FormRow.tsx';
-import FormGrid from '../components/form/FormGrid.tsx';
-import COLORS from '../assets/colors.ts';
+} from '../util/inputvalidation';
+import { register } from './api';
+import AlertDialog from '../components/AlertDialog';
+import PrimaryButton from '../components/buttons/PrimaryButton';
+import ScreenGrid from '../components/ScreenGrid';
+import FormRow from '../components/form/FormRow';
+import FormGrid from '../components/form/FormGrid';
+import COLORS from '../assets/colors';
 
 /**
  * A page users visit to be able to register for a new account by inputting

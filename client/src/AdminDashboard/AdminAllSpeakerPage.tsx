@@ -44,10 +44,10 @@ import { DEFAULT_IMAGE } from '../components/cards/SpeakerCard';
 import SpeakerFilterPanel, {
   FilterState,
 } from '../components/SpeakerFilterPanel';
-import { getData, putData, deleteData } from '../util/api.tsx';
+import { getData, putData, deleteData } from '../util/api';
 import MultiSelect from './MultiSelect';
 import { getIndustryFocuses, IndustryFocus } from '../util/industryFocusApi';
-import { processImageUpload } from '../util/imageCompression.ts';
+import { processImageUpload } from '../util/imageCompression';
 
 // Updated Speaker interface with new fields for filtering
 interface Speaker {

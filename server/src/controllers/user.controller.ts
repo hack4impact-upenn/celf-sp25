@@ -1,11 +1,11 @@
 import express from "express";
-import ApiError from "../util/apiError.ts";
-import StatusCode from "../util/statusCode.ts";
-import { IUser } from "../models/user.model.ts";
-import { getUserById, getAllUsersFromDB, updateUser, deleteUserById } from "../services/user.service.ts";
-import { deleteSpeaker } from "../services/speaker.service.ts";
-import { deleteTeacher } from "../services/teacher.service.ts";
-import { deleteRequestsBySpeakerId, deleteRequestsByTeacherId } from "../services/request.service.ts";
+import ApiError from "../util/apiError";
+import StatusCode from "../util/statusCode";
+import { IUser } from "../models/user.model";
+import { getUserById, getAllUsersFromDB, updateUser, deleteUserById } from "../services/user.service";
+import { deleteSpeaker } from "../services/speaker.service";
+import { deleteTeacher } from "../services/teacher.service";
+import { deleteRequestsBySpeakerId, deleteRequestsByTeacherId } from "../services/request.service";
 
 const getUser = async (
   req: express.Request,
