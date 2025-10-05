@@ -122,27 +122,47 @@ To format the code appropriately with Prettier (don't need this if format on sav
 $ yarn format
 ```
 
-## Deployment (WIP)
+## Deployment (Heroku)
 
-The boilerplate is designed to be easily deployed on [AWS ECS](https://aws.amazon.com/ecs/) using [Terraform](https://www.terraform.io).
+> **Status:** The app is already live on Heroku. This section documents what maintainers need to know for redeploys, config updates, and troubleshooting.
 
-You will need to [install Terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) first. For Mac users, we recommend following the Homebrew installation.
+### Live URLs
+- **Production:** https://https://celf-8cf1adc15f9c.herokuapp.com/login.herokuapp.com  
 
-You will then need to create a file called `.auto.tfvars`, and you can follow the format as in the `.auto.tfvars.example` file. Variables in here correspond to the same environment variables in the `server` folder, except for `aws_account_id` which is the account ID for your AWS account (can be found by clicking your username in the top-right of the AWS console).
+### Deployment Overview
+- **Platform:** [Heroku](https://www.heroku.com/)  
+- **Target:** `server/` directory (the API). The client is built and served by Express during deployment.  
+- **Branch:** `main`  
+- **Method:**  
+  - **Automatic:** via GitHub → Heroku Dashboard → *Deploy* → *Connect to GitHub* → Enable Automatic Deploys (recommended)  
+  - **Manual:** via CLI → `git push heroku main`
 
-To deploy, run
+### Environment Variables
+Set these in **Heroku → Settings → Config Vars** (same as `.env`):
 
+ATLAS_URI=your-mongodb-uri
+
+COOKIE_SECRET=your-secret
+
+SENDGRID_API_KEY=your-sendgrid-key
+
+SENDGRID_EMAIL_ADDRESS=your-sender-email
+
+MIXPANEL_TOKEN=your-mixpanel-token
+
+
+> **Do not** set `PORT`, Heroku provides it automatically.
+
+### Build & Run
+Heroku runs `npm start` (or `yarn start`) from the **server** directory.  
+Make sure `server/package.json` includes:
+
+```json
+"scripts": {
+  "start": "node dist/index.js",
+  "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix ../client && npm run build --prefix ../client"
+}
 ```
-./deploy.sh
-```
-
-To tear down all infrastructure, run
-
-```
-terraform destroy
-```
-
-Due to the new (as of early 2024) nature of this AWS configuration, if you are encountering issues with deploying the project on AWS, then please use the old boilerplate and deploy on Heroku or another cloud platform as we have done in the past.
 
 ## Setting Up Datadog
 
