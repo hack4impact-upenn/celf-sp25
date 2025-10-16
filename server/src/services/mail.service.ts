@@ -28,13 +28,12 @@ const emailResetPasswordLink = async (email: string, token: string) => {
     to: email,
     subject: "Link to Reset Password",
     html:
-      `<p>You are receiving this because you (or someone else) have requested ` +
-      `the reset of your account password for ${appName}. Please visit this ` +
-      `<a href=${resetLink}>link</a> ` +
-      `within an hour of receiving this email to successfully reset your password </p>` +
-      `<p><strong>Important:</strong> If you are currently logged into any account, please log out first before clicking the reset link, otherwise the reset will not work properly.</p>` +
-      `<p>If you did not request this change, please ignore this email and your ` +
-      `account will remain secured.</p>`,
+      <p>Hello,</p>
+      <p>We received a request to reset your password for the ${APP_NAME}.</p>
+      <p><a href="${resetLink}">Click here to set a new password</a>.</p>
+      <p>If you didn’t request this change, you can safely ignore this email—your account will remain secure.</p>
+      <p>— The ${SENDER_NAME}</p>
+    `,
     };
     // Send the email and propogate the error up if one exists
     await SGmail.send(mailSettings);
