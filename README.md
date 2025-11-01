@@ -1,5 +1,7 @@
 # CELF
 
+Speaker management system to manage green careers speakers for the Children's Environmental Literacy Foundation. Created by Hack4Impact at UPenn (Spring 2025).
+
 ## Features
 
 - Session based authentication with [Passport](https://www.passportjs.org)
