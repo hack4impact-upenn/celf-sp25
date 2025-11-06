@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   TextField,
@@ -18,7 +18,13 @@ import {
   Chip,
   FormControl,
   Checkbox,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from '@mui/material';
+import { useNavigate, useLocation } from 'react-router-dom';
 import AdminSidebar from '../components/admin_sidebar/AdminSidebar';
 import TopBar from '../components/top_bar/TopBar';
 import MultiSelect from './MultiSelect';
@@ -66,6 +72,8 @@ const initialFormState: SpeakerFormState = {
 };
 
 function AdminUsersPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [formState, setFormState] =
     useState<SpeakerFormState>(initialFormState);
   const [error, setError] = useState<string | null>(null);
@@ -74,6 +82,15 @@ function AdminUsersPage() {
   const [industryFocuses, setIndustryFocuses] = useState<IndustryFocus[]>([]);
   const [loadingFocuses, setLoadingFocuses] = useState(true);
   const [industryFocusError, setIndustryFocusError] = useState<string | null>(null);
+  const [showLeaveDialog, setShowLeaveDialog] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+  const formHasChanges = useRef(false);
+  const isNavigatingAway = useRef(false);
+
+  // Check if form has unsaved changes
+  const hasUnsavedChanges = () => {
+    return JSON.stringify(formState) !== JSON.stringify(initialFormState);
+  };
 
   // Fetch industry focuses on component mount
   useEffect(() => {
@@ -92,6 +109,102 @@ function AdminUsersPage() {
 
     fetchIndustryFocuses();
   }, []);
+
+  // Handle browser beforeunload event
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges()) {
+        e.preventDefault();
+        e.returnValue = ''; // Chrome requires returnValue to be set
+        return ''; // For older browsers
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [formState]);
+
+  // Create a safe navigate function that checks for unsaved changes
+  const safeNavigate = (path: string) => {
+    if (hasUnsavedChanges()) {
+      setPendingNavigation(path);
+      setShowLeaveDialog(true);
+    } else {
+      navigate(path);
+    }
+  };
+
+  // Intercept navigation attempts via links
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const link = target.closest('a[href]') as HTMLAnchorElement;
+      
+      if (link && hasUnsavedChanges()) {
+        const href = link.getAttribute('href');
+        if (href && href.startsWith('/') && href !== location.pathname) {
+          e.preventDefault();
+          e.stopPropagation();
+          setPendingNavigation(href);
+          setShowLeaveDialog(true);
+        }
+      }
+    };
+
+    document.addEventListener('click', handleClick, true);
+    return () => {
+      document.removeEventListener('click', handleClick, true);
+    };
+  }, [formState, location.pathname]);
+
+  // Intercept browser back/forward buttons
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      if (hasUnsavedChanges() && !isNavigatingAway.current) {
+        e.preventDefault();
+        // Push current state back
+        window.history.pushState(null, '', location.pathname);
+        setShowLeaveDialog(true);
+        setPendingNavigation(null); // Will use browser back if confirmed
+      }
+    };
+
+    // Push initial state to history
+    window.history.pushState(null, '', location.pathname);
+    
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [formState, location.pathname]);
+
+  // Handle component unmount (when navigating away programmatically)
+  useEffect(() => {
+    return () => {
+      // This runs when component unmounts
+      // If there are unsaved changes and we're not intentionally navigating away,
+      // we can't block it here, but the beforeunload will catch page refreshes
+    };
+  }, []);
+
+  const handleConfirmLeave = () => {
+    isNavigatingAway.current = true;
+    setShowLeaveDialog(false);
+    if (pendingNavigation) {
+      navigate(pendingNavigation);
+      setPendingNavigation(null);
+    } else {
+      // Handle browser back/forward
+      window.history.back();
+    }
+  };
+
+  const handleCancelLeave = () => {
+    setShowLeaveDialog(false);
+    setPendingNavigation(null);
+  };
 
   // Update text/textarea fields
   const handleChange = (
@@ -215,6 +328,7 @@ function AdminUsersPage() {
 
       // Reset form after successful submission
       setFormState(initialFormState);
+      formHasChanges.current = false;
       setSuccess('Speaker created successfully! The speaker account is now visible and a password reset email has been sent to their email address.');
     } catch (error) {
       console.error('Error creating speaker:', error);
@@ -425,6 +539,31 @@ function AdminUsersPage() {
           )}
         </Box>
       </Box>
+
+      {/* Leave Confirmation Dialog */}
+      <Dialog
+        open={showLeaveDialog}
+        onClose={handleCancelLeave}
+        aria-labelledby="leave-dialog-title"
+        aria-describedby="leave-dialog-description"
+      >
+        <DialogTitle id="leave-dialog-title">
+          Unsaved Changes
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="leave-dialog-description">
+            You have unsaved changes. If you leave this page, all your edits will be lost. Are you sure you want to leave?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelLeave} color="primary">
+            Stay on Page
+          </Button>
+          <Button onClick={handleConfirmLeave} color="error" variant="contained">
+            Leave Page
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
