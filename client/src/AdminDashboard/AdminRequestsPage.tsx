@@ -20,6 +20,7 @@ import {
   Chip,
   Divider,
   Collapse,
+  TextField,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import EmailIcon from '@mui/icons-material/Email';
@@ -33,6 +34,7 @@ import SpeakerRequestCard from '../components/cards/SpeakerRequestCard';
 import {
   getAllRequests,
   updateRequestStatus,
+  updateAdminNotes,
   Request,
   RequestStatus,
 } from './requestApi';
@@ -77,6 +79,8 @@ function AdminRequestsPage() {
   const [showArchived, setShowArchived] = useState(false);
   const [teacherProfile, setTeacherProfile] = useState<any>(null);
   const [loadingTeacherProfile, setLoadingTeacherProfile] = useState(false);
+  const [adminNotes, setAdminNotes] = useState<string>('');
+  const [updatingNotes, setUpdatingNotes] = useState(false);
 
   useEffect(() => {
     fetchRequests();
@@ -127,6 +131,7 @@ function AdminRequestsPage() {
     console.log('Teacher data:', request.teacher);
     console.log('TeacherId data:', request.teacherId);
     setSelectedRequest(request);
+    setAdminNotes(request.adminNotes || '');
     setOpen(true);
     
     // Fetch teacher profile data for the dialog
@@ -149,6 +154,31 @@ function AdminRequestsPage() {
     setOpen(false);
     setSelectedRequest(null);
     setTeacherProfile(null);
+    setAdminNotes('');
+  };
+
+  const handleSaveNotes = async () => {
+    if (!selectedRequest) return;
+    
+    try {
+      setUpdatingNotes(true);
+      const updatedRequest = await updateAdminNotes(selectedRequest._id, adminNotes);
+      
+      setRequests(
+        requests.map((request) =>
+          request._id === selectedRequest._id ? updatedRequest : request,
+        ),
+      );
+      
+      if (selectedRequest._id === selectedRequest._id) {
+        setSelectedRequest(updatedRequest);
+      }
+    } catch (err) {
+      setError('Failed to update admin notes. Please try again.');
+      console.error('Error updating admin notes:', err);
+    } finally {
+      setUpdatingNotes(false);
+    }
   };
 
   const formatDateTime = (dateTime: string, timezone: string) => {
@@ -788,6 +818,51 @@ function AdminRequestsPage() {
                         </Grid>
                       )}
                     </Grid>
+
+                    {/* Admin Notes Section */}
+                    <Divider sx={{ my: 3 }} />
+                    <Typography
+                      variant="h6"
+                      sx={{ mb: 2, fontWeight: 600, color: '#2c3e50' }}
+                    >
+                      Admin Notes
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ mb: 1, color: 'text.secondary', fontStyle: 'italic' }}
+                    >
+                      These notes are only visible to admins and will not be shown to teachers or speakers.
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      multiline
+                      rows={4}
+                      value={adminNotes}
+                      onChange={(e) => setAdminNotes(e.target.value)}
+                      placeholder="Add notes about this request..."
+                      variant="outlined"
+                      sx={{ mb: 2 }}
+                    />
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleSaveNotes}
+                      disabled={updatingNotes}
+                      sx={{ mb: 3 }}
+                    >
+                      {updatingNotes ? 'Saving...' : 'Save Notes'}
+                    </Button>
+                    {updatingNotes && (
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'center',
+                          mt: 1,
+                        }}
+                      >
+                        <CircularProgress size={20} />
+                      </Box>
+                    )}
 
                     {/* Status Update Section */}
                     <Divider sx={{ my: 3 }} />

@@ -29,6 +29,7 @@ export interface IRequest extends mongoose.Document {
   goals: string;
   budget?: string;
   engagementFormat: string;
+  adminNotes?: string;
   
   createdAt: Date;
   updatedAt: Date;
@@ -133,6 +134,10 @@ const RequestSchema = new mongoose.Schema(
     engagementFormat: {
       type: String,
       required: true,
+    },
+    adminNotes: {
+      type: String,
+      required: false,
     },
   },
   {
