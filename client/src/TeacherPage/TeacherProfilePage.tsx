@@ -42,7 +42,7 @@ const subjectOptions = [
   'Other'
 ];
 
-const gradeOptions = ['Elementary', 'Middle School', 'High School'];
+const gradeOptions = ['Elementary School', 'Middle School', 'High School'];
 
 interface TeacherProfile {
   firstName?: string;

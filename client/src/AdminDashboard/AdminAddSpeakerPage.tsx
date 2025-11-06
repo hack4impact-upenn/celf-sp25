@@ -191,22 +191,6 @@ function AdminUsersPage() {
       const inperson = formState.speakingFormats.includes('In-Person');
       const virtual = formState.speakingFormats.includes('Virtual');
 
-      // Map grade specialties to the expected format
-      const mappedGrades = formState.gradeSpecialties.map((grade) => {
-        switch (grade) {
-          case 'elementary':
-            return 'Elementary';
-          case 'middle':
-            return 'Middle School';
-          case 'high school':
-            return 'High School';
-          case 'all grades':
-            return 'All Grades';
-          default:
-            return grade;
-        }
-      });
-
       // Create payload for the new admin endpoint
       const speakerPayload = {
         email: formState.email,
@@ -218,7 +202,7 @@ function AdminUsersPage() {
         state: formState.state || '',
         country: formState.country || undefined,
         industry: formState.industryFocuses,
-        grades: mappedGrades,
+        grades: formState.gradeSpecialties,
         languages: formState.languages.length > 0 ? formState.languages : ['English'],
       };
 

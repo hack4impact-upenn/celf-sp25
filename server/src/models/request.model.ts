@@ -57,7 +57,7 @@ const RequestSchema = new mongoose.Schema(
     gradeLevels: [{
       type: String,
       required: true,
-      enum: ['Elementary', 'Middle School', 'High School', 'K-5', '6-8', '9-12', 'K-12']
+      enum: ['Elementary School', 'Middle School', 'High School', 'K-5', '6-8', '9-12', 'K-12']
     }],
     subjects: [{
       type: String,

@@ -152,7 +152,7 @@ const createSpeakerProfile = async (
   }
 
   // Validate grades enum (only if grades array is not empty)
-  const validGrades = ["Elementary", "Middle School", "High School"];
+  const validGrades = ["Elementary School", "Middle School", "High School"];
   if (grades.length > 0 && !grades.every(grade => validGrades.includes(grade))) {
     next(ApiError.badRequest("Invalid grade values"));
     return;
@@ -240,13 +240,13 @@ const submitSpeakerProfile = async (
   // Convert age group to grades array
   let grades: string[] = [];
   if (ageGroup === 'elementary') {
-    grades = ['Elementary'];
+    grades = ['Elementary School'];
   } else if (ageGroup === 'middle') {
     grades = ['Middle School'];
   } else if (ageGroup === 'high school') {
     grades = ['High School'];
   } else if (ageGroup === 'all grades') {
-    grades = ['Elementary', 'Middle School', 'High School'];
+    grades = ['Elementary School', 'Middle School', 'High School'];
   }
 
   console.log("right before create speaker");
@@ -294,7 +294,7 @@ const updateSpeakerProfile = async (
 
   // Validate grades if provided
   if (updateData.grades) {
-    const validGrades = ["Elementary", "Middle School", "High School"];
+    const validGrades = ["Elementary School", "Middle School", "High School"];
     if (!Array.isArray(updateData.grades) || 
         !updateData.grades.every((grade: string) => validGrades.includes(grade))) {
       next(ApiError.badRequest("Invalid grade values"));
@@ -483,7 +483,7 @@ const updateCurrentUserSpeakerProfile = async (
 
     // Validate grades if provided
     if (updateData.grades) {
-      const validGrades = ["Elementary", "Middle School", "High School"];
+      const validGrades = ["Elementary School", "Middle School", "High School"];
       if (!Array.isArray(updateData.grades) || 
           !updateData.grades.every((grade: string) => validGrades.includes(grade))) {
         next(ApiError.badRequest("Invalid grade values"));

@@ -32,7 +32,7 @@ import { getIndustryFocuses, IndustryFocus } from '../util/industryFocusApi';
 import { processImageUpload } from '../util/imageCompression';
 
 const languageOptions = ['English', 'Spanish', 'Mandarin', 'French', 'Other'];
-const gradeOptions = ['Elementary', 'Middle School', 'High School'];
+const gradeOptions = ['Elementary School', 'Middle School', 'High School'];
 
 interface SpeakerProfile {
   firstName?: string;

@@ -55,7 +55,7 @@ const SpeakerSchema = new mongoose.Schema({
   grades: [{
     type: String,
     required: false,
-    enum: ['Elementary', 'Middle School', 'High School']
+    enum: ['Elementary School', 'Middle School', 'High School']
   }],
   coordinates: {
     lat: {

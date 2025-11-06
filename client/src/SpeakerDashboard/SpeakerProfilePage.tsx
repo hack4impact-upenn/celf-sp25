@@ -29,7 +29,7 @@ import { getData, putData } from '../util/api';
 import { getIndustryFocuses, IndustryFocus } from '../util/industryFocusApi';
 
 const languageOptions = ['English', 'Spanish', 'Mandarin', 'French', 'Other'];
-const gradeOptions = ['Elementary', 'Middle School', 'High School'];
+const gradeOptions = ['Elementary School', 'Middle School', 'High School'];
 
 interface SpeakerProfile {
   picture?: string;
