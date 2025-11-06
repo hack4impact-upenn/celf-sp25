@@ -136,21 +136,32 @@ function AdminUsersPage() {
     }
   };
 
-  // Intercept navigation attempts via links
+  // Store the current location to detect changes
+  const currentLocationRef = useRef(location.pathname);
+
+  // Intercept navigation attempts via links and buttons
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
+      if (!hasUnsavedChanges()) return;
+
       const target = e.target as HTMLElement;
-      const link = target.closest('a[href]') as HTMLAnchorElement;
       
-      if (link && hasUnsavedChanges()) {
+      // Check for links
+      const link = target.closest('a[href]') as HTMLAnchorElement;
+      if (link) {
         const href = link.getAttribute('href');
         if (href && href.startsWith('/') && href !== location.pathname) {
           e.preventDefault();
           e.stopPropagation();
           setPendingNavigation(href);
           setShowLeaveDialog(true);
+          return;
         }
       }
+
+      // For sidebar buttons and other programmatic navigation,
+      // we'll let the navigation happen and catch it in the location change handler
+      // This is because we can't easily determine the target path from the button
     };
 
     document.addEventListener('click', handleClick, true);
@@ -159,20 +170,46 @@ function AdminUsersPage() {
     };
   }, [formState, location.pathname]);
 
+  // Detect location changes and block if needed
+  useEffect(() => {
+    const newPath = location.pathname;
+    const oldPath = currentLocationRef.current;
+    
+    if (newPath !== oldPath) {
+      // Location changed
+      if (hasUnsavedChanges() && !isNavigatingAway.current) {
+        // Store the intended destination
+        const intendedPath = newPath;
+        
+        // Immediately block the navigation by navigating back
+        // Use replace to avoid adding to history
+        navigate(oldPath, { replace: true });
+        
+        // Show the dialog
+        setPendingNavigation(intendedPath);
+        setShowLeaveDialog(true);
+        
+        // Don't update currentLocationRef yet - wait for confirmation
+      } else {
+        // No unsaved changes or intentionally navigating - allow it
+        currentLocationRef.current = newPath;
+      }
+    }
+  }, [location.pathname, formState, navigate]);
+
   // Intercept browser back/forward buttons
   useEffect(() => {
     const handlePopState = (e: PopStateEvent) => {
       if (hasUnsavedChanges() && !isNavigatingAway.current) {
-        e.preventDefault();
-        // Push current state back
-        window.history.pushState(null, '', location.pathname);
+        // Push current state back to prevent navigation
+        window.history.pushState(null, '', currentLocationRef.current);
         setShowLeaveDialog(true);
         setPendingNavigation(null); // Will use browser back if confirmed
       }
     };
 
-    // Push initial state to history
-    window.history.pushState(null, '', location.pathname);
+    // Store initial location
+    currentLocationRef.current = location.pathname;
     
     window.addEventListener('popstate', handlePopState);
     return () => {
@@ -193,12 +230,17 @@ function AdminUsersPage() {
     isNavigatingAway.current = true;
     setShowLeaveDialog(false);
     if (pendingNavigation) {
+      currentLocationRef.current = pendingNavigation;
       navigate(pendingNavigation);
       setPendingNavigation(null);
     } else {
       // Handle browser back/forward
       window.history.back();
     }
+    // Reset flag after a short delay to allow navigation to complete
+    setTimeout(() => {
+      isNavigatingAway.current = false;
+    }, 100);
   };
 
   const handleCancelLeave = () => {
