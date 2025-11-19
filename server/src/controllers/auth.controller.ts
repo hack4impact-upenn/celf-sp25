@@ -21,7 +21,6 @@ import {
   emailVerificationLink,
 } from "../services/mail.service";
 import ApiError from "../util/apiError";
-import { logError } from "../util/logger";
 import {
   getInviteByToken,
   removeInviteByToken,
@@ -259,7 +258,7 @@ const register = async (
     }
     res.status(StatusCode.CREATED).send(user);
   } catch (err) {
-    logError("Registration error:", err);
+    console.error("Registration error:", err);
     next(ApiError.internal("Unable to register user."));
   }
 };
@@ -578,7 +577,7 @@ const resendVerificationEmail = async (
       message: `Verification email has been sent to ${lowercaseEmail}`,
     });
   } catch (err) {
-    logError("Resend verification error:", err);
+    console.error("Resend verification error:", err);
     next(ApiError.internal("Failed to resend verification email."));
   }
 };

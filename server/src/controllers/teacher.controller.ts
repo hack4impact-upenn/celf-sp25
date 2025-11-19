@@ -1,7 +1,6 @@
 import express from "express";
 import ApiError from "../util/apiError";
 import StatusCode from "../util/statusCode";
-import { logError } from "../util/logger";
 import { ITeacher } from "../models/teacher.model";
 import { User } from "../models/user.model";
 import {
@@ -81,7 +80,7 @@ const createTeacherProfile = async (
     const teacher = await createTeacher(userId, school, gradeLevel, city, state, subjects, bio, country);
     res.status(StatusCode.CREATED).json(teacher);
   } catch (error) {
-    logError("Error creating teacher profile:", error);
+    console.error("Error creating teacher profile:", error);
     next(ApiError.internal("Unable to create teacher profile"));
   }
 };

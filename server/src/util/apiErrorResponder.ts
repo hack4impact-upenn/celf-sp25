@@ -1,7 +1,6 @@
 import express from "express";
 import ApiError from "./apiError";
 import StatusCode from "./statusCode";
-import { logErrorMultiLine } from "./logger";
 
 /**
  * The final error handler for all errors encountered in the server. Responsible
@@ -20,11 +19,6 @@ const apiErrorResponder: express.ErrorRequestHandler = (
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: express.NextFunction // Need this param so express actually calls handler
 ) => {
-  // Log full error details for debugging
-  if (!(err instanceof ApiError)) {
-    logErrorMultiLine("Unhandled error in API error responder:", err);
-  }
-  
   // .send() populates res.error.response.data
   if (err instanceof ApiError) {
     res.status(err.code).send({ message: err.message });
