@@ -21,6 +21,11 @@ const sesClient = new SESClient({
 
 const fromEmail = process.env.SES_FROM_EMAIL;
 
+// Use display name format if SES_SANDBOX_MODE is not set to 'true'
+// In sandbox mode, use just the email to avoid verification issues
+const useDisplayName = process.env.SES_SANDBOX_MODE !== 'true';
+const sourceEmail = useDisplayName ? `${senderName} <${fromEmail}>` : fromEmail;
+
 
 /**
  * Sends a reset password link to a user
@@ -37,7 +42,7 @@ const emailResetPasswordLink = async (email: string, token: string) => {
     `<p>— The ${senderName}</p>`;
 
   const command = new SendEmailCommand({
-    Source: `${senderName} <${fromEmail}>`,
+    Source: sourceEmail,
     Destination: {
       ToAddresses: [email],
     },
@@ -74,7 +79,7 @@ const emailVerificationLink = async (email: string, token: string) => {
     `please ignore this message.</p>`;
 
   const command = new SendEmailCommand({
-    Source: `${senderName} <${fromEmail}>`,
+    Source: sourceEmail,
     Destination: {
       ToAddresses: [email],
     },
@@ -111,7 +116,7 @@ const emailInviteLink = async (email: string, token: string) => {
     `please ignore this message.</p>`;
 
   const command = new SendEmailCommand({
-    Source: `${senderName} <${fromEmail}>`,
+    Source: sourceEmail,
     Destination: {
       ToAddresses: [email],
     },
