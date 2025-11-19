@@ -23,6 +23,7 @@ import {
 import { IInvite } from "../models/invite.model";
 import { emailInviteLink, emailResetPasswordLink } from "../services/mail.service";
 import { deleteTeacher } from "../services/teacher.service";
+import { logError } from "../util/logger";
 import { deleteSpeaker, getSpeakerByUserId, createSpeaker, getAllSpeakersForAdmin } from "../services/speaker.service";
 import { deleteRequestsBySpeakerId, deleteRequestsByTeacherId } from "../services/request.service";
 
@@ -118,7 +119,7 @@ const deleteUser = async (
     await deleteUserById(user._id);
     res.sendStatus(StatusCode.OK);
   } catch (error) {
-    console.error("Error deleting user:", error);
+    logError("Error deleting user:", error);
     next(ApiError.internal("Failed to delete user."));
   }
 };
@@ -437,7 +438,7 @@ const exportSpeakersToCSV = async (
     console.log('Sending response:', JSON.stringify(response, null, 2));
     res.status(StatusCode.OK).json(response);
   } catch (error) {
-    console.error('Error exporting speakers:', error);
+    logError('Error exporting speakers:', error);
     next(ApiError.internal("Failed to export speakers data"));
   }
 };

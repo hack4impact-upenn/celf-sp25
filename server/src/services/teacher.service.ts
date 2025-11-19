@@ -13,7 +13,7 @@ const createTeacher = async (
   school: string,
   gradeLevel: string,
   city: string,
-  state: string,
+  state: string | undefined,
   subjects: string[],
   bio: string,
   country?: string
@@ -23,9 +23,9 @@ const createTeacher = async (
     school,
     gradeLevel,
     city,
-    state,
     subjects,
     bio,
+    ...(state && { state }),
     ...(country && { country }),
   });
   const teacher = await newTeacher.save();
