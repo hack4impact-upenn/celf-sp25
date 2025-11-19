@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import {
   Box,
   TextField,
@@ -138,6 +138,7 @@ function AdminUsersPage() {
 
   // Store the current location to detect changes
   const currentLocationRef = useRef(location.pathname);
+  const isBlockingRef = useRef(false);
 
   // Intercept navigation attempts via links and buttons
   useEffect(() => {
@@ -159,9 +160,10 @@ function AdminUsersPage() {
         }
       }
 
-      // For sidebar buttons and other programmatic navigation,
-      // we'll let the navigation happen and catch it in the location change handler
-      // This is because we can't easily determine the target path from the button
+      // For sidebar buttons, we can't easily prevent the navigation
+      // because they use navigate() directly. Instead, we'll let the
+      // navigation happen and catch it in useLayoutEffect which runs
+      // synchronously before the browser paints.
     };
 
     document.addEventListener('click', handleClick, true);
@@ -171,29 +173,46 @@ function AdminUsersPage() {
   }, [formState, location.pathname]);
 
   // Detect location changes and block if needed
-  useEffect(() => {
+  // Use useLayoutEffect to catch navigation synchronously, before browser paint
+  useLayoutEffect(() => {
     const newPath = location.pathname;
     const oldPath = currentLocationRef.current;
     
-    if (newPath !== oldPath) {
+    // Only process if path actually changed and we're not currently blocking
+    if (newPath !== oldPath && !isBlockingRef.current) {
       // Location changed
       if (hasUnsavedChanges() && !isNavigatingAway.current) {
+        // Mark that we're blocking to prevent infinite loops
+        isBlockingRef.current = true;
+        
         // Store the intended destination
         const intendedPath = newPath;
         
-        // Immediately block the navigation by navigating back
-        // Use replace to avoid adding to history
-        navigate(oldPath, { replace: true });
+        // Immediately change the URL back using history API (synchronous)
+        // This prevents the navigation from appearing to complete
+        window.history.replaceState(window.history.state, '', oldPath);
         
-        // Show the dialog
+        // Force React Router to stay on current page
+        // Use requestAnimationFrame to ensure this happens in the next frame
+        requestAnimationFrame(() => {
+          navigate(oldPath, { replace: true });
+        });
+        
+        // Show the dialog immediately
         setPendingNavigation(intendedPath);
         setShowLeaveDialog(true);
         
         // Don't update currentLocationRef yet - wait for confirmation
+        // The blocking ref will be reset when user confirms or cancels
       } else {
         // No unsaved changes or intentionally navigating - allow it
         currentLocationRef.current = newPath;
+        isBlockingRef.current = false;
       }
+    } else if (newPath === oldPath && isBlockingRef.current) {
+      // We've successfully navigated back - the blocking worked
+      // Keep isBlockingRef.current = true to prevent re-triggering
+      // It will be reset when user confirms or cancels
     }
   }, [location.pathname, formState, navigate]);
 
@@ -246,6 +265,10 @@ function AdminUsersPage() {
   const handleCancelLeave = () => {
     setShowLeaveDialog(false);
     setPendingNavigation(null);
+    isBlockingRef.current = false;
+    // Ensure location ref is synced with current location after canceling
+    currentLocationRef.current = location.pathname;
+    isBlockingRef.current = false;
   };
 
   // Update text/textarea fields
