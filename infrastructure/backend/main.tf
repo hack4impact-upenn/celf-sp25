@@ -56,8 +56,10 @@ resource "aws_ecs_task_definition" "app" {
         { "name" : "FRONTEND_URL", "value" : var.frontend_url },
         { "name" : "ATLAS_URI", "value" : var.atlas_uri },
         { "name" : "COOKIE_SECRET", "value" : var.cookie_secret },
-        { "name" : "SENDGRID_API_KEY", "value" : var.sendgrid_api_key },
-        { "name" : "SENDGRID_EMAIL_ADDRESS", "value" : var.sendgrid_email_address },
+        { "name" : "AWS_REGION", "value" : var.aws_region },
+        { "name" : "AWS_ACCESS_KEY_ID", "value" : var.aws_access_key_id },
+        { "name" : "AWS_SECRET_ACCESS_KEY", "value" : var.aws_secret_access_key },
+        { "name" : "SES_FROM_EMAIL", "value" : var.ses_from_email },
         { "name" : "MIXPANEL_TOKEN", "value" : var.mixpanel_token },
       ],
       logConfiguration = {

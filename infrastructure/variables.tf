@@ -44,10 +44,25 @@ variable "cookie_secret" {
   type = string
 }
 
-variable "sendgrid_api_key" {
-  type = string
+variable "aws_region" {
+  type        = string
+  description = "AWS region for SES (e.g., us-east-1)"
+  default     = "us-east-1"
 }
 
-variable "sendgrid_email_address" {
-  type = string
+variable "aws_access_key_id" {
+  type        = string
+  description = "AWS Access Key ID for SES"
+  sensitive   = true
+}
+
+variable "aws_secret_access_key" {
+  type        = string
+  description = "AWS Secret Access Key for SES"
+  sensitive   = true
+}
+
+variable "ses_from_email" {
+  type        = string
+  description = "Email address to send emails from (must be verified in SES)"
 }

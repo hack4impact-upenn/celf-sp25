@@ -1,16 +1,25 @@
 /**
- * All the functions related to sending emails with SendGrid
+ * All the functions related to sending emails with AWS SES
  */
 import "dotenv/config";
-import SGmail, { MailDataRequired } from "@sendgrid/mail";
-
+import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
 const appName = "CELF Speaker Portal"; 
 const senderName = "CELF Team"; 
 const baseUrl = process.env.FRONTEND_URL || "http://localhost:3000";
 
-// eslint-disable-next-line no-useless-concat
-SGmail.setApiKey(`${process.env.SENDGRID_API_KEY}`);
+// Initialize AWS SES client
+const sesClient = new SESClient({
+  region: process.env.AWS_REGION || "us-east-1",
+  credentials: process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
+    ? {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      }
+    : undefined, // Will use IAM role if running on AWS
+});
+
+const fromEmail = process.env.SES_FROM_EMAIL;
 
 
 /**
@@ -20,22 +29,34 @@ SGmail.setApiKey(`${process.env.SENDGRID_API_KEY}`);
  */
 const emailResetPasswordLink = async (email: string, token: string) => {
   const resetLink = `${baseUrl}/reset-password/${token}`;
-  const mailSettings: MailDataRequired = {
-    from: {
-      email: process.env.SENDGRID_EMAIL_ADDRESS || "missing@mail.com",
-      name: senderName,
+  const htmlContent =
+    `<p>Hello,</p> `+
+    `<p>We received a request to reset your password for the ${appName}.</p> `+
+    `<p><a href="${resetLink}">Click here to set a new password</a>.</p> `+
+    `<p>If you didn't request this change, you can safely ignore this email—your account will remain secure.</p> `+
+    `<p>— The ${senderName}</p>`;
+
+  const command = new SendEmailCommand({
+    Source: `${senderName} <${fromEmail}>`,
+    Destination: {
+      ToAddresses: [email],
     },
-    to: email,
-    subject: "Link to Reset Password",
-    html:
-      `<p>Hello,</p> `+
-      `<p>We received a request to reset your password for the ${appName}.</p> `+
-      `<p><a href="${resetLink}">Click here to set a new password</a>.</p> `+
-      `<p>If you didn’t request this change, you can safely ignore this email—your account will remain secure.</p> `+
-      `<p>— The ${senderName}</p>`,
-    };
-    // Send the email and propogate the error up if one exists
-    await SGmail.send(mailSettings);
+    Message: {
+      Subject: {
+        Data: "Link to Reset Password",
+        Charset: "UTF-8",
+      },
+      Body: {
+        Html: {
+          Data: htmlContent,
+          Charset: "UTF-8",
+        },
+      },
+    },
+  });
+
+  // Send the email and propogate the error up if one exists
+  await sesClient.send(command);
 };
 
 /**
@@ -45,23 +66,34 @@ const emailResetPasswordLink = async (email: string, token: string) => {
  */
 const emailVerificationLink = async (email: string, token: string) => {
   const resetLink = `${baseUrl}/verify-account/${token}`;
-  const mailSettings: MailDataRequired = {
-    from: {
-      email: process.env.SENDGRID_EMAIL_ADDRESS || "missing@mail.com",
-      name: senderName,
+  const htmlContent =
+    `<p> Please visit the following ` +
+    `<a href=${resetLink}>link</a> ` +
+    `to verify your account for ${appName} and complete registration</p>` +
+    `<p>If you did not attempt to register an account with this email address, ` +
+    `please ignore this message.</p>`;
+
+  const command = new SendEmailCommand({
+    Source: `${senderName} <${fromEmail}>`,
+    Destination: {
+      ToAddresses: [email],
     },
-    to: email,
-    subject: "Verify account",
-    html:
-      `<p> Please visit the following ` +
-      `<a href=${resetLink}>link</a> ` +
-      `to verify your account for ${appName} and complete registration</p>` +
-      `<p><strong>Important:</strong> If you are currently logged into any account, please log out first before clicking the verification link, otherwise the verification will not work properly.</p>` +
-      `<p>If you did not attempt to register an account with this email address, ` +
-      `please ignore this message.</p>`,
-  };
+    Message: {
+      Subject: {
+        Data: "Verify account",
+        Charset: "UTF-8",
+      },
+      Body: {
+        Html: {
+          Data: htmlContent,
+          Charset: "UTF-8",
+        },
+      },
+    },
+  });
+
   // Send the email and propogate the error up if one exists
-  await SGmail.send(mailSettings);
+  await sesClient.send(command);
 };
 
 /**
@@ -71,23 +103,34 @@ const emailVerificationLink = async (email: string, token: string) => {
  */
 const emailInviteLink = async (email: string, token: string) => {
   const resetLink = `${baseUrl}/invite/${token}`;
-  const mailSettings: MailDataRequired = {
-    from: {
-      email: process.env.SENDGRID_EMAIL_ADDRESS || "missing@mail.com",
-      name: senderName,
+  const htmlContent =
+    `<p> Please visit the following ` +
+    `<a href=${resetLink}>link</a> ` +
+    `to create your account for ${appName} and complete registration</p>` +
+    `<p>If you did not attempt to register an account with this email address, ` +
+    `please ignore this message.</p>`;
+
+  const command = new SendEmailCommand({
+    Source: `${senderName} <${fromEmail}>`,
+    Destination: {
+      ToAddresses: [email],
     },
-    to: email,
-    subject: "Verify account",
-    html:
-      `<p> Please visit the following ` +
-      `<a href=${resetLink}>link</a> ` +
-      `to create your account for ${appName} and complete registration</p>` +
-      `<p><strong>Important:</strong> If you are currently logged into any account, please log out first before clicking the invite link, otherwise the registration will not work properly.</p>` +
-      `<p>If you did not attempt to register an account with this email address, ` +
-      `please ignore this message.</p>`,
-  };
+    Message: {
+      Subject: {
+        Data: "Verify account",
+        Charset: "UTF-8",
+      },
+      Body: {
+        Html: {
+          Data: htmlContent,
+          Charset: "UTF-8",
+        },
+      },
+    },
+  });
+
   // Send the email and propogate the error up if one exists
-  await SGmail.send(mailSettings);
+  await sesClient.send(command);
 };
 
 export { emailVerificationLink, emailResetPasswordLink, emailInviteLink };

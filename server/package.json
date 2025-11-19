@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.8.1",
-    "@sendgrid/mail": "^7.7.0",
+    "@aws-sdk/client-ses": "^3.0.0",
     "bcrypt": "^5.0.1",
     "client": "1.0.0",
     "connect-mongo": "^4.6.0",

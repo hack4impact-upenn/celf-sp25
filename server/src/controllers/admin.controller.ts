@@ -352,7 +352,7 @@ const createSpeakerDirectly = async (
     await user.save();
     
     // Send password reset email
-    if (process.env.SENDGRID_API_KEY && process.env.SENDGRID_API_KEY !== '') {
+    if ((process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) || process.env.AWS_REGION) {
       try {
         await emailResetPasswordLink(lowercaseEmail, resetToken);
       } catch (emailError) {
@@ -360,7 +360,7 @@ const createSpeakerDirectly = async (
         // Continue even if email fails
       }
     } else {
-      console.log('SendGrid not configured - skipping password reset email');
+      console.log('AWS SES not configured - skipping password reset email');
     }
     
     res.status(StatusCode.CREATED).json({

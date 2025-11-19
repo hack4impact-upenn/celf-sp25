@@ -88,8 +88,10 @@ resource "aws_ecs_task_definition" "app" {
         { "name" : "FRONTEND_URL", "value" : "http://${aws_lb.app.dns_name}/" },
         { "name" : "ATLAS_URI", "value" : var.atlas_uri },
         { "name" : "COOKIE_SECRET", "value" : var.cookie_secret },
-        { "name" : "SENDGRID_API_KEY", "value" : var.sendgrid_api_key },
-        { "name" : "SENDGRID_EMAIL_ADDRESS", "value" : var.sendgrid_email_address }
+        { "name" : "AWS_REGION", "value" : var.aws_region },
+        { "name" : "AWS_ACCESS_KEY_ID", "value" : var.aws_access_key_id },
+        { "name" : "AWS_SECRET_ACCESS_KEY", "value" : var.aws_secret_access_key },
+        { "name" : "SES_FROM_EMAIL", "value" : var.ses_from_email }
       ],
       logConfiguration = {
         logDriver = "awslogs"
@@ -529,8 +531,10 @@ resource "aws_route53_record" "main" {
 #       environment = [
 #         { "name" : "ATLAS_URI", "value" : var.atlas_uri },
 #         { "name" : "COOKIE_SECRET", "value" : "any-string" },
-#         { "name" : "SENDGRID_API_KEY", "value" : "SG.sendgrid-api-key-from-above" },
-#         { "name" : "SENDGRID_EMAIL_ADDRESS", "value" : "sendgrid-sender-identity-email-from-above" }
+#         { "name" : "AWS_REGION", "value" : "us-east-1" },
+#         { "name" : "AWS_ACCESS_KEY_ID", "value" : "aws-access-key-id-from-above" },
+#         { "name" : "AWS_SECRET_ACCESS_KEY", "value" : "aws-secret-access-key-from-above" },
+#         { "name" : "SES_FROM_EMAIL", "value" : "ses-verified-email-from-above" }
 #       ],
 #       logConfiguration = {
 #         logDriver = "awslogs"

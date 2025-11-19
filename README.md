@@ -5,7 +5,7 @@ Speaker management system to manage green careers speakers for the Children's En
 ## Features
 
 - Session based authentication with [Passport](https://www.passportjs.org)
-- Emailing for account verification and resetting password with [SendGrid](https://sendgrid.com)
+- Emailing for account verification and resetting password with [AWS SES](https://aws.amazon.com/ses/)
 - Admin functionality for viewing/deleting/promoting other users
 - Clean authentication pages built with [Material UI](https://mui.com)
 - In memory database testing with [Jest](https://jestjs.io) and [Supertest](https://www.npmjs.com/package/supertest)
@@ -38,13 +38,16 @@ The boilerplate uses [MongoDB](https://www.mongodb.com) as the database to store
 
 Recommend downloading [MongoDB Compass](https://www.mongodb.com/docs/compass/current/) for easy viewing and management of data.
 
-### SendGrid
+### AWS SES (Simple Email Service)
 
-The boilerplate uses [SendGrid](https://sendgrid.com) to send emails to users in order to verify their account, and also to reset their passwords. To have email functionality available for use, the PM/TL should do the following
+The boilerplate uses [AWS SES](https://aws.amazon.com/ses/) to send emails to users in order to verify their account, and also to reset their passwords. To have email functionality available for use, the PM/TL should do the following
 
-- Create a SendGrid Account
-- Register a [Sender Identity](https://docs.sendgrid.com/for-developers/sending-email/sender-identity) (Single Sender recommended for most)
-- Create an [API Key](https://docs.sendgrid.com/ui/account-and-settings/api-keys#creating-an-api-key)
+- Create an AWS Account (if you don't have one)
+- Navigate to [AWS SES Console](https://console.aws.amazon.com/ses/)
+- Verify your sender email address or domain in SES
+- Create an IAM user with SES sending permissions, or use IAM roles if running on AWS infrastructure
+- Get your AWS Access Key ID and Secret Access Key (if using IAM user)
+- Note your AWS region (e.g., us-east-1)
 
 ### Mixpanel
 
@@ -63,8 +66,10 @@ Create a file named `.env` in the root of the `server` folder and add the follow
 ```
 ATLAS_URI=mongodb-connection-uri-from-above
 COOKIE_SECRET=any-string
-SENDGRID_API_KEY=sendgrid-api-key-from-above
-SENDGRID_EMAIL_ADDRESS=sendgrid-sender-identity-email-from-above
+AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=aws-access-key-id-from-above
+AWS_SECRET_ACCESS_KEY=aws-secret-access-key-from-above
+SES_FROM_EMAIL=ses-verified-email-from-above
 MIXPANEL_TOKEN=mixpanel-token-from-above
 ```
 
@@ -144,9 +149,13 @@ ATLAS_URI=your-mongodb-uri
 
 COOKIE_SECRET=your-secret
 
-SENDGRID_API_KEY=your-sendgrid-key
+AWS_REGION=us-east-1
 
-SENDGRID_EMAIL_ADDRESS=your-sender-email
+AWS_ACCESS_KEY_ID=your-aws-access-key-id
+
+AWS_SECRET_ACCESS_KEY=your-aws-secret-access-key
+
+SES_FROM_EMAIL=your-verified-ses-email
 
 MIXPANEL_TOKEN=your-mixpanel-token
 
