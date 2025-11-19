@@ -73,6 +73,7 @@ export interface Request {
   goals: string;
   budget?: string;
   engagementFormat: string;
+  adminNotes?: string;
   
   createdAt: string;
   updatedAt: string;
@@ -134,6 +135,28 @@ export async function updateRequestStatus(
     return response.data;
   } catch (error) {
     console.error('Error updating request status:', error);
+    throw error;
+  }
+}
+
+/**
+ * Updates the admin notes for a specific request (admin only)
+ * @param requestId - The ID of the request to update
+ * @param adminNotes - The admin notes to set
+ * @returns Promise<Request> - The updated request
+ */
+export async function updateAdminNotes(
+  requestId: string,
+  adminNotes: string
+): Promise<Request> {
+  try {
+    const response = await putData(`request/${requestId}/admin-notes`, { adminNotes });
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    return response.data;
+  } catch (error) {
+    console.error('Error updating admin notes:', error);
     throw error;
   }
 } 

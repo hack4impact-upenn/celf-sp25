@@ -16,7 +16,7 @@ import FormRow from '../components/form/FormRow';
 import FormGrid from '../components/form/FormGrid';
 import COLORS from '../assets/colors';
 
-const gradeOptions = ['Elementary', 'Middle School', 'High School'];
+const gradeOptions = ['Elementary School', 'Middle School', 'High School'];
 const subjectOptions = [
   'Mathematics',
   'Science',

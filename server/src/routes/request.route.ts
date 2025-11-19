@@ -10,6 +10,7 @@ import {
   createRequestHandler,
   updateRequestStatusHandler,
   updateOwnRequestStatusHandler,
+  updateAdminNotesHandler,
   deleteRequestHandler,
 } from "../controllers/request.controller";
 
@@ -28,6 +29,7 @@ router.put("/:requestId/status/own", isAuthenticated, updateOwnRequestStatusHand
 
 // Admin-only routes
 router.put("/:requestId/status", isAuthenticated, isAdmin, updateRequestStatusHandler);
+router.put("/:requestId/admin-notes", isAuthenticated, isAdmin, updateAdminNotesHandler);
 router.delete("/:requestId", isAuthenticated, isAdmin, deleteRequestHandler);
 
 export default router; 

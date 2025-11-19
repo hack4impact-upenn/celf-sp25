@@ -162,7 +162,7 @@ const getUserIdString = (userId: Speaker['userId']): string | null => {
   return null;
 };
 
-const gradeOptions = ['Elementary', 'Middle School', 'High School'];
+const gradeOptions = ['Elementary School', 'Middle School', 'High School'];
 
 function AdminAllSpeakerPage() {
   const [speakers, setSpeakers] = useState<Speaker[]>([]);

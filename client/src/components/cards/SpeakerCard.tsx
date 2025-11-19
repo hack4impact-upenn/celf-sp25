@@ -53,21 +53,23 @@ function SpeakerCard({
       }}
     >
       <CardMedia
+        component="img"
         sx={{
           height: 200,
           borderTopLeftRadius: '16px',
           borderTopRightRadius: '16px',
           objectFit: 'cover',
+          backgroundColor: '#f0f0f0',
         }}
-        image={imageUrl || DEFAULT_IMAGE}
-        title={name}
+        src={imageUrl && imageUrl.trim() !== '' ? imageUrl : DEFAULT_IMAGE}
+        alt={name}
         onError={(e) => {
           const target = e.target as HTMLImageElement;
           target.src = DEFAULT_IMAGE;
           target.onerror = null;
         }}
       />
-      <CardContent sx={{ flexGrow: 1, p: 2, pt: 3 }}>
+      <CardContent sx={{ flexGrow: 1, p: 2, pt: 3, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <Typography
           gutterBottom
           variant="h6"
@@ -79,7 +81,18 @@ function SpeakerCard({
         <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
           {organization} • {locationDisplay}
         </Typography>
-        <Typography variant="body2" sx={{ mt: 1 }}>
+        <Typography 
+          variant="body2" 
+          sx={{ 
+            mt: 1,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            display: '-webkit-box',
+            WebkitLineClamp: 4,
+            WebkitBoxOrient: 'vertical',
+            flexGrow: 1,
+          }}
+        >
           {bio}
         </Typography>
       </CardContent>

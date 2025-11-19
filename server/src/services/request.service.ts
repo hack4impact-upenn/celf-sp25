@@ -23,9 +23,11 @@ const getAllRequests = async () => {
 
 /**
  * Get requests by teacher ID with populated speaker data
+ * Note: adminNotes are excluded for non-admin users
  */
 const getRequestsByTeacherId = async (teacherId: string) => {
   const requests = await Request.find({ teacherId })
+    .select('-adminNotes')
     .populate({
       path: 'speakerId',
       populate: {
@@ -43,9 +45,11 @@ const getRequestsByTeacherId = async (teacherId: string) => {
 
 /**
  * Get requests by speaker ID with populated teacher data
+ * Note: adminNotes are excluded for non-admin users
  */
 const getRequestsBySpeakerId = async (speakerId: string) => {
   const requests = await Request.find({ speakerId })
+    .select('-adminNotes')
     .populate({
       path: 'speakerId',
       populate: {
@@ -170,6 +174,30 @@ const updateRequestStatus = async (requestId: string, status: IRequest["status"]
 };
 
 /**
+ * Update admin notes for a request (admin only)
+ */
+const updateAdminNotes = async (requestId: string, adminNotes: string) => {
+  const request = await Request.findByIdAndUpdate(
+    requestId,
+    { adminNotes },
+    { new: true }
+  )
+    .populate({
+      path: 'speakerId',
+      populate: {
+        path: 'userId',
+        select: 'firstName lastName email'
+      }
+    })
+    .populate({
+      path: 'teacherId',
+      select: 'firstName lastName email'
+    })
+    .exec();
+  return request;
+};
+
+/**
  * Delete a request
  */
 const deleteRequest = async (requestId: string) => {
@@ -204,6 +232,7 @@ export {
   getRequestById,
   createRequest,
   updateRequestStatus,
+  updateAdminNotes,
   deleteRequest,
   deleteRequestsBySpeakerId,
   deleteRequestsByTeacherId,

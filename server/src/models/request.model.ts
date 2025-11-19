@@ -29,6 +29,7 @@ export interface IRequest extends mongoose.Document {
   goals: string;
   budget?: string;
   engagementFormat: string;
+  adminNotes?: string;
   
   createdAt: Date;
   updatedAt: Date;
@@ -57,7 +58,7 @@ const RequestSchema = new mongoose.Schema(
     gradeLevels: [{
       type: String,
       required: true,
-      enum: ['Elementary', 'Middle School', 'High School', 'K-5', '6-8', '9-12', 'K-12']
+      enum: ['Elementary School', 'Middle School', 'High School', 'K-5', '6-8', '9-12', 'K-12']
     }],
     subjects: [{
       type: String,
@@ -133,6 +134,10 @@ const RequestSchema = new mongoose.Schema(
     engagementFormat: {
       type: String,
       required: true,
+    },
+    adminNotes: {
+      type: String,
+      required: false,
     },
   },
   {

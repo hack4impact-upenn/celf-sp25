@@ -114,7 +114,7 @@ function SpeakerRequestCard({ id, speaker, teacher, status, onArchive, onUnarchi
     ? [speaker.city, speaker.state, speaker.country].filter(Boolean).join(', ')
     : 'Unknown Location';
   const jobTitle = speaker?.jobTitle || '';
-  const imageUrl = speaker?.imageUrl || DEFAULT_IMAGE;
+  const imageUrl = speaker?.imageUrl && speaker.imageUrl.trim() !== '' ? speaker.imageUrl : DEFAULT_IMAGE;
   const bio = speaker?.bio || 'Speaker bio not available';
 
   return (
@@ -134,21 +134,23 @@ function SpeakerRequestCard({ id, speaker, teacher, status, onArchive, onUnarchi
       }}
     >
       <CardMedia
+        component="img"
         sx={{
           height: 200,
           borderTopLeftRadius: '16px',
           borderTopRightRadius: '16px',
           objectFit: 'cover',
+          backgroundColor: '#f0f0f0',
         }}
-        image={imageUrl}
-        title={speakerName}
+        src={imageUrl}
+        alt={speakerName}
         onError={(e) => {
           const target = e.target as HTMLImageElement;
           target.src = DEFAULT_IMAGE;
           target.onerror = null;
         }}
       />
-      <CardContent sx={{ flexGrow: 1, p: 2, pt: 3 }}>
+      <CardContent sx={{ flexGrow: 1, p: 2, pt: 3, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <Typography
           gutterBottom
           variant="h6"
@@ -228,8 +230,20 @@ function SpeakerRequestCard({ id, speaker, teacher, status, onArchive, onUnarchi
           sx={{ mb: 1 }}
         />
 
-        <Typography variant="body2" sx={{ mt: 1, fontSize: '0.875rem' }}>
-          {bio.length > 100 ? `${bio.substring(0, 100)}...` : bio}
+        <Typography 
+          variant="body2" 
+          sx={{ 
+            mt: 1, 
+            fontSize: '0.875rem',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            display: '-webkit-box',
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical',
+            flexGrow: 1,
+          }}
+        >
+          {bio}
         </Typography>
 
         {/* Archive/Unarchive buttons */}

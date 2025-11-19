@@ -707,7 +707,7 @@ function TeacherSearchSpeakerPage() {
                           }}
                           label="Grade Level(s)"
                         >
-                          <MenuItem value="Elementary">Elementary</MenuItem>
+                          <MenuItem value="Elementary School">Elementary School</MenuItem>
                           <MenuItem value="Middle School">
                             Middle School
                           </MenuItem>

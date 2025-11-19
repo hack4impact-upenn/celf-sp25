@@ -9,6 +9,7 @@ import {
   getRequestById,
   createRequest,
   updateRequestStatus,
+  updateAdminNotes,
   deleteRequest,
 } from "../services/request.service";
 import Request from "../models/request.model";
@@ -53,6 +54,7 @@ const getRequestsByTeacherIdHandler = async (
 
 /**
  * Get requests for the current authenticated user
+ * Note: adminNotes are excluded for non-admin users
  */
 const getCurrentUserRequestsHandler = async (
   req: express.Request,
@@ -290,6 +292,34 @@ const updateOwnRequestStatusHandler = async (
 };
 
 /**
+ * Update admin notes for a request (admin only)
+ */
+const updateAdminNotesHandler = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const { requestId } = req.params;
+  const { adminNotes } = req.body;
+  
+  if (!requestId) {
+    next(ApiError.missingFields(["requestId"]));
+    return;
+  }
+
+  try {
+    const request = await updateAdminNotes(requestId, adminNotes || '');
+    if (!request) {
+      next(ApiError.notFound("Request not found"));
+      return;
+    }
+    res.status(StatusCode.OK).json(request);
+  } catch (error) {
+    next(ApiError.internal("Unable to update admin notes"));
+  }
+};
+
+/**
  * Delete a request
  */
 const deleteRequestHandler = async (
@@ -324,5 +354,6 @@ export {
   createRequestHandler,
   updateRequestStatusHandler,
   updateOwnRequestStatusHandler,
+  updateAdminNotesHandler,
   deleteRequestHandler,
 }; 

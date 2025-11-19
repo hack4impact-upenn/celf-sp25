@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { getIndustryFocuses, IndustryFocus } from '../util/industryFocusApi';
 
-const gradeOptions = ['Elementary', 'Middle School', 'High School'];
+const gradeOptions = ['Elementary School', 'Middle School', 'High School'];
 const languageOptions = ['English', 'Spanish', 'Mandarin', 'French', 'Other'];
 
 export interface FilterState {
