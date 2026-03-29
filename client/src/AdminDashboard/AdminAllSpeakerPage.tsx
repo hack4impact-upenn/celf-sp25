@@ -72,6 +72,7 @@ interface Speaker {
   industry: string[];
   grades: string[];
   jobTitle?: string;
+  website?: string;
   coordinates?: {
     lat: number;
     lng: number;
@@ -408,8 +409,8 @@ function AdminAllSpeakerPage() {
       industry: speaker.industry || [],
       grades: speaker.grades || [],
       languages: speaker.languages || ['English'],
-      jobTitle: (speaker as any).jobTitle || '',
-      website: (speaker as any).website || '',
+      jobTitle: speaker.jobTitle || '',
+      website: speaker.website || '',
     });
     setEditOpen(true);
   };
