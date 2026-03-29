@@ -538,6 +538,7 @@ function AdminAllSpeakerPage() {
           country: editFormState.country,
           inperson: editFormState.inperson,
           jobTitle: editFormState.jobTitle,
+          website: editFormState.website,
           virtual: editFormState.virtual,
           imageUrl: editFormState.imageUrl,
           industry: editFormState.industry,
