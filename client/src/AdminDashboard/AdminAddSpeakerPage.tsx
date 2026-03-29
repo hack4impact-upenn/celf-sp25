@@ -204,6 +204,7 @@ function AdminUsersPage() {
         industry: formState.industryFocuses,
         grades: formState.gradeSpecialties,
         languages: formState.languages.length > 0 ? formState.languages : ['English'],
+        website: formState.website,
       };
 
       console.log('Creating speaker with payload:', speakerPayload);

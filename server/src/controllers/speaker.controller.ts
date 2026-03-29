@@ -266,7 +266,8 @@ const submitSpeakerProfile = async (
       grades,
       undefined, // coordinates
       languages || ['English'],
-      true // visible - complete profile submission
+      true, // visible - complete profile submission
+      personalSite || ''
     );
     res.status(StatusCode.CREATED).json(speaker);
   } catch (error) {
