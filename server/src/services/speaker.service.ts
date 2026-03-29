@@ -33,7 +33,8 @@ const createSpeaker = async (
   grades: string[],
   coordinates: { lat: number; lng: number } | undefined,
   languages: string[],
-  visible: boolean = false
+  visible: boolean = false,
+  website: string = ''
 ) => {
   const newSpeaker = new Speaker({
     userId,
@@ -49,7 +50,8 @@ const createSpeaker = async (
     grades,
     coordinates,
     languages,
-    visible
+    visible,
+    website
   });
   const speaker = await newSpeaker.save();
   return speaker;

@@ -52,6 +52,11 @@ const SpeakerSchema = new mongoose.Schema({
     type: String,
     required: false
   },
+  website: {
+    type: String,
+    required: false,
+    default: ''
+  },
   grades: [{
     type: String,
     required: false,
@@ -91,6 +96,7 @@ interface ISpeaker extends mongoose.Document {
   imageUrl?: string;
   industry: string[];
   jobTitle?: string;
+  website?: string;
   grades: string[];
   coordinates?: {
     lat: number;

@@ -288,7 +288,7 @@ const createSpeakerDirectly = async (
   res: express.Response,
   next: express.NextFunction
 ) => {
-  const { email, firstName, lastName, organization, bio, city, state, country, industry, grades, languages } = req.body;
+  const { email, firstName, lastName, organization, bio, city, state, country, industry, grades, languages, website } = req.body;
   
   if (!email || !firstName || !lastName || !organization || !bio || !city) {
     next(ApiError.missingFields(["email", "firstName", "lastName", "organization", "bio", "city"]));
@@ -342,7 +342,8 @@ const createSpeakerDirectly = async (
       grades || [],
       undefined, // coordinates
       languages || ['English'],
-      true // visible = true for admin-created speakers
+      true, // visible = true for admin-created speakers
+      website || ''
     );
     
     // Send password reset email
